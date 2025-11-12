@@ -1,0 +1,21 @@
+generate_config:
+  generate_mode: table
+  database_name: <database_name>
+  host: localhost
+  port: 3306
+  username: root
+  password: <PASSWORD>
+  all_tables: false
+  table_names:
+    - t_user
+    - t_score
+
+generate_option:
+  output_path: ~/dev/model_infrax/output
+  crud_only_idx: false
+  package_name:
+    entity: entity
+    dto: dto
+    vo: vo
+    tool: tool
+    mapper: mapper
