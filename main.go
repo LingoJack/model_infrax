@@ -4,6 +4,7 @@ import (
 	"log"
 	"model_infrax/config"
 	"model_infrax/parser"
+	"model_infrax/tool"
 )
 
 type App struct {
@@ -22,6 +23,18 @@ func NewApp(cfg *config.Configger, p *parser.Parser) *App {
 func (a *App) Run() error {
 
 	// TODO gougouwen
+	schemas, err := a.Parser.AllTables()
+	if err != nil {
+		return err
+	}
+
+	log.Println(tool.JsonifyIndent(schemas))
+
+	log.Println("================ filter ==================")
+
+	schemas = a.Parser.FilterTables(schemas)
+
+	log.Println(tool.JsonifyIndent(schemas))
 
 	return nil
 }

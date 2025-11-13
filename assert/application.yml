@@ -7,8 +7,7 @@ generate_config:
   password: 200487
   all_tables: false
   table_names:
-    - t_user
-    - t_score
+    - t_artifact
 
 generate_option:
   output_path: ~/dev/model_infrax/output
