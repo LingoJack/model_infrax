@@ -21,8 +21,6 @@ func NewApp(cfg *config.Configger, p *parser.Parser) *App {
 
 // Run 运行应用程序
 func (a *App) Run() error {
-
-	// TODO gougouwen
 	schemas, err := a.Parser.AllTables()
 	if err != nil {
 		return err

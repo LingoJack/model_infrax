@@ -55,8 +55,3 @@ func NewConfigger(configPath string) (*Configger, error) {
 
 	return &config, nil
 }
-
-// Load 保留原有的Load函数以保持向后兼容
-func Load(configPath string) (*Configger, error) {
-	return NewConfigger(configPath)
-}
