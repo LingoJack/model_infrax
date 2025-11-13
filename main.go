@@ -3,36 +3,50 @@ package main
 import (
 	"log"
 	"model_infrax/config"
+	"model_infrax/generator"
 	"model_infrax/parser"
 	"model_infrax/tool"
 )
 
 type App struct {
-	Config *config.Configger
-	Parser *parser.Parser
+	Config    *config.Configger
+	Parser    *parser.Parser
+	Generator *generator.Generator
 }
 
-func NewApp(cfg *config.Configger, p *parser.Parser) *App {
+func NewApp(cfg *config.Configger, p *parser.Parser, g *generator.Generator) *App {
 	return &App{
-		Config: cfg,
-		Parser: p,
+		Config:    cfg,
+		Parser:    p,
+		Generator: g,
 	}
 }
 
 // Run 运行应用程序
 func (a *App) Run() error {
+	// 获取所有表结构
 	schemas, err := a.Parser.AllTables()
 	if err != nil {
 		return err
 	}
 
+	log.Println("================ 所有表 ==================")
 	log.Println(tool.JsonifyIndent(schemas))
 
-	log.Println("================ filter ==================")
+	log.Println("================ 过滤后的表 ==================")
 
+	// 根据配置过滤表
 	schemas = a.Parser.FilterTables(schemas)
-
 	log.Println(tool.JsonifyIndent(schemas))
+
+	log.Println("================ 开始生成代码 ==================")
+
+	// 生成代码
+	if err = a.Generator.Generate(schemas); err != nil {
+		return err
+	}
+
+	log.Println("================ 代码生成完成 ==================")
 
 	return nil
 }

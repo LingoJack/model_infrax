@@ -1,0 +1,21 @@
+{{- /* 生成 GORM 模型结构体的模板 */ -}}
+package model
+
+import (
+	"time"
+)
+
+{{- range . }}
+
+// {{ .Name | ToPascalCase }} {{ .Comment }}
+type {{ .Name | ToPascalCase }} struct {
+{{- range .Columns }}
+	{{ .ColumnName | ToPascalCase }} {{ . | GetGoType }} `gorm:"column:{{ .ColumnName }};type:{{ . | GetMySQLType }};{{ if .IsAutoIncrement }}primaryKey;autoIncrement;{{ end }}comment:{{ .Comment }};{{ if not .IsNullable }}not null{{ end }}" json:"{{ .ColumnName }}"`
+{{- end }}
+}
+
+// TableName 返回表名
+func (t *{{ .Name | ToPascalCase }}) TableName() string {
+	return "{{ .Name }}"
+}
+{{- end }}

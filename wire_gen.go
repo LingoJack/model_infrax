@@ -8,7 +8,9 @@ package main
 
 import (
 	"model_infrax/config"
+	"model_infrax/generator"
 	"model_infrax/parser"
+	"model_infrax/tool"
 )
 
 // Injectors from wire.go:
@@ -23,7 +25,8 @@ func InitializeApp(configPath string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	app := NewApp(configger, parserParser)
+	generator := ProvideGenerator(configger)
+	app := NewApp(configger, parserParser, generator)
 	return app, nil
 }
 
@@ -38,4 +41,14 @@ func InitializeParser(configPath string) (*parser.Parser, error) {
 		return nil, err
 	}
 	return parserParser, nil
+}
+
+// wire.go:
+
+// ProvideGenerator 提供 Generator 实例
+func ProvideGenerator(cfg *config.Configger) *generator.Generator {
+	templatePath := "./assert/template/model.template"
+
+	outputPath := tool.EscapeHomeDir(cfg.GenerateOption.OutputPath)
+	return generator.NewGenerator(templatePath, outputPath)
 }
