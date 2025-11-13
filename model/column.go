@@ -10,6 +10,7 @@ type Column struct {
 	Collate         string
 	Comment         string
 	IsAutoIncrement bool
+	IsNullable      bool
 }
 
 func (f Column) Json() string {

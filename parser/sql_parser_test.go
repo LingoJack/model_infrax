@@ -32,3 +32,75 @@ func TestParser_AllTables(t *testing.T) {
 	}
 	fmt.Println(tool.JsonifyIndent(tables))
 }
+
+func TestSql1(t *testing.T) {
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	if err != nil {
+		panic(err)
+	}
+	parser, err := NewParser(configger)
+	if err != nil {
+		panic(err)
+	}
+	var tables []mysqlTable
+	err = parser.db.Raw("show table status").Scan(&tables).Error
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(tool.JsonifyIndent(tables))
+}
+
+func TestSql2(t *testing.T) {
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	if err != nil {
+		panic(err)
+	}
+	parser, err := NewParser(configger)
+	if err != nil {
+		panic(err)
+	}
+	var table map[string]interface{}
+	err = parser.db.Raw(fmt.Sprintf("show table status like '%s'", "t_artifact")).Scan(&table).Error
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(tool.JsonifyIndent(table))
+}
+
+func TestSql3(t *testing.T) {
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	if err != nil {
+		panic(err)
+	}
+	parser, err := NewParser(configger)
+	if err != nil {
+		panic(err)
+	}
+	var table []map[string]interface{}
+	err = parser.db.Raw(fmt.Sprintf("show full fields from %s", "t_artifact")).Scan(&table).Error
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(tool.JsonifyIndent(table))
+}
+
+func TestSql4(t *testing.T) {
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	if err != nil {
+		panic(err)
+	}
+	parser, err := NewParser(configger)
+	if err != nil {
+		panic(err)
+	}
+	var table []map[string]interface{}
+	err = parser.db.Raw(fmt.Sprintf("show index from %s", "t_artifact")).Scan(&table).Error
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(tool.JsonifyIndent(table))
+}

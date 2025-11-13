@@ -21,7 +21,7 @@ type GenerateConfig struct {
 	URLTemplate  string   `yaml:"url_template"`  // URL模板
 	Username     string   `yaml:"username"`      // 数据库用户名
 	Password     string   `yaml:"password"`      // 数据库密码
-	AllTables    string   `yaml:"all_tables"`
+	AllTables    bool     `yaml:"all_tables"`
 	TableNames   []string `yaml:"table_names"`
 }
 
