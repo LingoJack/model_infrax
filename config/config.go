@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
+type Configger struct {
 	GenerateConfig GenerateConfig `yaml:"generate_config"`
 	GenerateOption GenerateOption `yaml:"generate_option"`
 }
@@ -40,7 +40,7 @@ type PackageConfig struct {
 	Mapper string `yaml:"mapper"`
 }
 
-func Load(configPath string) (*Config, error) {
+func NewConfigger(configPath string) (*Configger, error) {
 	path := tool.EscapeHomeDir(configPath)
 
 	data, err := os.ReadFile(path)
@@ -48,10 +48,15 @@ func Load(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("读取配置文件失败: %w", err)
 	}
 
-	var config Config
+	var config Configger
 	if err = yaml.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("解析YAML配置失败: %w", err)
 	}
 
 	return &config, nil
+}
+
+// Load 保留原有的Load函数以保持向后兼容
+func Load(configPath string) (*Configger, error) {
+	return NewConfigger(configPath)
 }

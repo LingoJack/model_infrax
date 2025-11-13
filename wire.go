@@ -1,0 +1,26 @@
+//go:build wireinject
+// +build wireinject
+
+package main
+
+import (
+	"model_infrax/config"
+	"model_infrax/parser"
+
+	"github.com/google/wire"
+)
+
+// InitializeApp 初始化应用程序，Wire会自动生成依赖注入代码
+func InitializeApp(configPath string) (*App, error) {
+	wire.Build(
+		// 配置层
+		config.NewConfigger,
+		
+		// 解析器层
+		parser.NewParser,
+		
+		// 应用层
+		NewApp,
+	)
+	return &App{}, nil
+}
