@@ -29,13 +29,15 @@ type GenerateOption struct {
 	OutputPath            string        `yaml:"output_path"`              // 输出路径
 	IgnoreTableNamePrefix bool          `yaml:"ignore_table_name_prefix"` // 是否忽略表名前缀
 	CrudOnlyIdx           bool          `yaml:"crud_only_idx"`            // 是否仅CRUD索引
-	Package               PackageConfig `yaml:"package"`                  // 包配置
+	Package               PackageConfig `yaml:"package_name"`             // 包配置
 	ModelAllInOneFile     bool          `yaml:"all_model_in_one_file"`    // 是否将所有模型放在一个文件中
 	ModelAllInOneFileName string        `yaml:"all_model_in_one_file_name"`
 }
 
 type PackageConfig struct {
 	ModelPackage string `yaml:"model_package"`
+	DaoPackage   string `yaml:"dao_package"`
+	ToolPackage  string `yaml:"tool_package"`
 }
 
 func NewConfigger(configPath string) (*Configger, error) {

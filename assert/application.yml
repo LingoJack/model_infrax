@@ -27,3 +27,4 @@ generate_option:
   package_name:
     model_package: model
     dao_package: dao
+    tool_package: tool
