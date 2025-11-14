@@ -35,9 +35,11 @@ type GenerateOption struct {
 }
 
 type PackageConfig struct {
-	ModelPackage string `yaml:"model_package"`
-	DaoPackage   string `yaml:"dao_package"`
-	ToolPackage  string `yaml:"tool_package"`
+	PoPackage   string `yaml:"po_package"`
+	DtoPackage  string `yaml:"dto_package"`
+	VoPackage   string `yaml:"vo_package"`
+	DaoPackage  string `yaml:"dao_package"`
+	ToolPackage string `yaml:"tool_package"`
 }
 
 func NewConfigger(configPath string) (*Configger, error) {

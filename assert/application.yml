@@ -25,6 +25,8 @@ generate_option:
 
   # go 的 package 映射
   package_name:
-    model_package: model
+    po_package: model/entity
+    dto_package: model/query
+    vo_package: model/view
     dao_package: dao
     tool_package: tool
