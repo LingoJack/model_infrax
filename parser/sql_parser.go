@@ -51,7 +51,7 @@ func NewParser(cfg *config.Configger) (*Parser, error) {
 }
 
 type mysqlTable struct {
-	Name          string  `json:"Name"`            // 表名
+	Name          string  `json:"ColumnName"`            // 表名
 	Engine        string  `json:"Engine"`          // 存储引擎
 	Version       int     `json:"Version"`         // 版本号
 	RowFormat     string  `json:"Row_format"`      // 行格式

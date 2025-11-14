@@ -1,12 +1,13 @@
 generate_config:
   generate_mode: database
-  database_name: earner_db
+  database_name: test_db
   host: localhost
   port: 3306
   username: root
   password: 200487
-  all_tables: true
+  all_tables: false
   table_names:
+    - t_feedback_task
     - t_artifact
 
 generate_option:
@@ -14,7 +15,7 @@ generate_option:
   output_path: ~/dev/model_infrax/output
 
   # 是否将所有模型放在一个文件中
-  all_model_in_one_file: true
+  all_model_in_one_file: false
 
   # 所有模型放在一个文件中的文件名
   all_model_in_one_file_name: model.go

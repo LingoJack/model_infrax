@@ -158,3 +158,46 @@ func GetGoType(col model.Column) string {
 func ToPascalCase(s string) string {
 	return tool.ToPascalCase(s)
 }
+
+// ToCamelCase 将字符串转换为 camelCase（小驼峰）
+// 用于模板中生成参数名等需要小驼峰格式的场景
+func ToCamelCase(s string) string {
+	return tool.ToCamelCase(s)
+}
+
+// ToSafeParamName 将字符串转换为安全的参数名（避免 Go 关键字冲突）
+// 用于模板中生成函数参数名，如果是 Go 关键字则添加后缀
+func ToSafeParamName(s string) string {
+	return tool.ToSafeParamName(s)
+}
+
+// TrimPrefix 去除字符串的前缀
+// 用于模板中去除类型前面的指针符号等
+// 参数:
+//   - s: 原始字符串
+//   - prefix: 要去除的前缀
+//
+// 返回:
+//   - string: 去除前缀后的字符串
+//
+// 示例:
+//   - TrimPrefix("*string", "*") -> "string"
+func TrimPrefix(s, prefix string) string {
+	return tool.TrimPrefix(s, prefix)
+}
+
+// TrimPointer 去除类型前面的指针符号 *
+// 专门用于模板中将指针类型转换为值类型
+// 参数:
+//   - s: 原始类型字符串（如 "*string", "*int64"）
+//
+// 返回:
+//   - string: 去除指针符号后的类型（如 "string", "int64"）
+//
+// 示例:
+//   - TrimPointer("*string") -> "string"
+//   - TrimPointer("*int64") -> "int64"
+//   - TrimPointer("string") -> "string" (如果没有指针符号，返回原值)
+func TrimPointer(s string) string {
+	return tool.TrimPrefix(s, "*")
+}
