@@ -24,13 +24,15 @@ func NewApp(cfg *config.Configger, p *parser.Parser, g *generator.Generator) *Ap
 
 // Run 运行应用程序
 func (a *App) Run() error {
-	// 获取所有表结构
+	log.Println("================ 开始解析数据库 ==================")
+
 	schemas, err := a.Parser.AllTables()
 	if err != nil {
 		return err
 	}
 
-	log.Println("================ 所有表 ==================")
+	log.Println("================ 解析结果 ==================")
+
 	log.Println(tool.JsonifyIndent(schemas))
 
 	log.Println("================ 过滤后的表 ==================")
@@ -39,9 +41,9 @@ func (a *App) Run() error {
 	schemas = a.Parser.FilterTables(schemas)
 	log.Println(tool.JsonifyIndent(schemas))
 
-	log.Println("================ 开始生成代码 ==================")
+	log.Println("================ 开始生成 Model 代码 ==================")
 
-	// 生成代码
+	// 生成 Model 代码
 	if a.Config.GenerateOption.ModelAllInOneFile {
 		err = a.Generator.GenerateModel(schemas, a.Config.GenerateOption.ModelAllInOneFileName)
 	} else {
@@ -51,7 +53,17 @@ func (a *App) Run() error {
 		return err
 	}
 
-	log.Println("================ 代码生成完成 ==================")
+	log.Println("================ Model 代码生成完成 ==================")
+
+	log.Println("================ 开始生成 Tool 代码 ==================")
+
+	// 生成 Tool 工具代码
+	err = a.Generator.GenerateAllTools()
+	if err != nil {
+		return err
+	}
+
+	log.Println("================ Tool 代码生成完成 ==================")
 
 	return nil
 }
