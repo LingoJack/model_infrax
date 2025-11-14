@@ -43,9 +43,9 @@ func (a *App) Run() error {
 
 	// 生成代码
 	if a.Config.GenerateOption.ModelAllInOneFile {
-		err = a.Generator.Generate(schemas, a.Config.GenerateOption.ModelAllInOneFileName)
+		err = a.Generator.GenerateModel(schemas, a.Config.GenerateOption.ModelAllInOneFileName)
 	} else {
-		err = a.Generator.GenerateOneByOne(schemas)
+		err = a.Generator.GenerateModelOneByOne(schemas)
 	}
 	if err != nil {
 		return err

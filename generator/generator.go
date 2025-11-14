@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/format"
 	"log"
+	"model_infrax/config"
 	"model_infrax/model"
 	"os"
 	"path/filepath"
@@ -13,23 +14,33 @@ import (
 
 // Generator 代码生成器
 type Generator struct {
-	templatePath string // 模板文件路径
-	outputPath   string // 输出路径
+	modelTemplatePath string            // 模板文件路径
+	configger         *config.Configger // 配置对象
 }
 
 // NewGenerator 创建新的生成器实例
-func NewGenerator(templatePath, outputPath string) *Generator {
+// 参数:
+//   - cfg: 配置对象，用于获取模板路径和输出路径等配置信息
+//
+// 返回:
+//   - *Generator: 生成器实例
+func NewGenerator(cfg *config.Configger) *Generator {
 	return &Generator{
-		templatePath: templatePath,
-		outputPath:   outputPath,
+		modelTemplatePath: "./assert/template/model.template",
+		configger:         cfg,
 	}
 }
 
-// GenerateOneByOne 根据模板生成代码
-func (g *Generator) GenerateOneByOne(schemas []model.Schema) (err error) {
+// GenerateModelOneByOne 根据模板生成代码，每个表生成一个文件
+// 参数:
+//   - schemas: 表结构列表
+//
+// 返回:
+//   - error: 生成过程中的错误
+func (g *Generator) GenerateModelOneByOne(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s.go", schema.Name)
-		err = g.Generate([]model.Schema{schema}, fileName)
+		err = g.GenerateModel([]model.Schema{schema}, fileName)
 		if err != nil {
 			return err
 		}
@@ -37,10 +48,16 @@ func (g *Generator) GenerateOneByOne(schemas []model.Schema) (err error) {
 	return nil
 }
 
-// Generate 生成所有表到一个文件
-func (g *Generator) Generate(schemas []model.Schema, outputFileName string) (err error) {
+// GenerateModel 生成所有表到一个文件
+// 参数:
+//   - schemas: 表结构列表
+//   - outputFileName: 输出文件名
+//
+// 返回:
+//   - error: 生成过程中的错误
+func (g *Generator) GenerateModel(schemas []model.Schema, outputFileName string) (err error) {
 	// 读取模板文件
-	tmplContent, err := os.ReadFile(g.templatePath)
+	tmplContent, err := os.ReadFile(g.modelTemplatePath)
 	if err != nil {
 		return fmt.Errorf("读取模板文件失败: %w", err)
 	}
@@ -57,13 +74,16 @@ func (g *Generator) Generate(schemas []model.Schema, outputFileName string) (err
 		return fmt.Errorf("解析模板失败: %w", err)
 	}
 
+	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
+	outputPath := g.configger.GenerateOption.OutputPath
+
 	// 确保输出目录存在
-	if err = os.MkdirAll(g.outputPath, 0755); err != nil {
+	if err = os.MkdirAll(outputPath, 0755); err != nil {
 		return fmt.Errorf("创建输出目录失败: %w", err)
 	}
 
 	// 生成文件路径
-	filePath := filepath.Join(g.outputPath, outputFileName)
+	filePath := filepath.Join(outputPath, outputFileName)
 
 	// 先将模板执行结果写入缓冲区
 	var buf bytes.Buffer
