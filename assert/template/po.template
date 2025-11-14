@@ -1,12 +1,12 @@
 {{- /* 生成 GORM 模型结构体的模板 */ -}}
-package model
+package {{ .PackageName }}
 
 import (
 	"encoding/json"
 	"time"
 )
 
-{{- range $schema := . }}
+{{- range $schema := .Schemas }}
 
 // {{ $schema.Name | ToPascalCase }} {{ $schema.Comment }}
 type {{ $schema.Name | ToPascalCase }} struct {

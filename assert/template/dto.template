@@ -1,0 +1,172 @@
+{{- /* 生成 DTO 结构体的模板 */ -}}
+package {{ .PackageName }}
+
+import (
+	"encoding/json"
+	"time"
+)
+
+{{- range $schema := .Schemas }}
+
+// {{ $schema.Name | ToPascalCase }}DTO {{ $schema.Comment }} 数据传输对象
+type {{ $schema.Name | ToPascalCase }}DTO struct {
+{{- range $schema.Columns }}
+	{{ .ColumnName | ToPascalCase }} {{ . | GetGoType }} `json:"{{ .ColumnName }}"`
+{{- end }}
+{{- range $schema.Columns }}
+{{- if eq (. | GetGoType) "time.Time" }}
+	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ .ColumnName }}_start"` // {{ .Comment }} 开始时间
+	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ .ColumnName }}_end"` // {{ .Comment }} 结束时间
+{{- else if eq (. | GetGoType) "string" }}
+	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ .ColumnName }}_fuzzy"` // {{ .Comment }} 模糊查询
+{{- else if eq (. | GetGoType) "*time.Time" }}
+	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ .ColumnName }}_start"` // {{ .Comment }} 开始时间
+	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ .ColumnName }}_end"` // {{ .Comment }} 结束时间
+{{- else if eq (. | GetGoType) "*string" }}
+	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ .ColumnName }}_fuzzy"` // {{ .Comment }} 模糊查询
+{{- end }}
+{{- end }}
+}
+
+// Jsonify 将结构体序列化为 JSON 字符串（紧凑格式）
+// 返回:
+//   - string: JSON 字符串，如果序列化失败则返回错误信息的 JSON
+func (t *{{ $schema.Name | ToPascalCase }}DTO) Jsonify() string {
+	byts, err := json.Marshal(t)
+	if err != nil {
+		return `{"error": "` + err.Error() + `"}`
+	}
+	return string(byts)
+}
+
+// JsonifyIndent 将结构体序列化为格式化的 JSON 字符串（带缩进）
+// 返回:
+//   - string: 格式化的 JSON 字符串，如果序列化失败则返回错误信息的 JSON
+func (t *{{ $schema.Name | ToPascalCase }}DTO) JsonifyIndent() string {
+	byts, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		return `{"error": "` + err.Error() + `"}`
+	}
+	return string(byts)
+}
+
+
+// {{ $schema.Name | ToPascalCase }}DTOBuilder 用于构建 {{ $schema.Name | ToPascalCase }}DTO 实例的 Builder
+type {{ $schema.Name | ToPascalCase }}DTOBuilder struct {
+	instance *{{ $schema.Name | ToPascalCase }}DTO
+}
+
+// New{{ $schema.Name | ToPascalCase }}DTOBuilder 创建一个新的 {{ $schema.Name | ToPascalCase }}DTOBuilder 实例
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: Builder 实例，用于链式调用
+func New{{ $schema.Name | ToPascalCase }}DTOBuilder() *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	return &{{ $schema.Name | ToPascalCase }}DTOBuilder{
+		instance: &{{ $schema.Name | ToPascalCase }}DTO{},
+	}
+}
+
+{{- range $column := $schema.Columns }}
+{{- if not $column.IsAutoIncrement }}
+
+// With{{ $column.ColumnName | ToPascalCase }} 设置 {{ $column.ColumnName }} 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}: {{ $column.Comment }}
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName | ToPascalCase }}({{ $column.ColumnName | ToSafeParamName }} {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }} = {{ $column.ColumnName | ToSafeParamName }}
+	return b
+}
+{{- if $column.IsNullable }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Value 设置 {{ $column.ColumnName }} 字段（便捷方法，自动转换为指针）
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}: {{ $column.Comment }}
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName | ToPascalCase }}Value({{ $column.ColumnName | ToSafeParamName }} {{ $column | GetGoType | TrimPointer }}) *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }} = &{{ $column.ColumnName | ToSafeParamName }}
+	return b
+}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- range $column := $schema.Columns }}
+{{- if not $column.IsAutoIncrement }}
+{{- if eq ($column | GetGoType) "time.Time" }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Start 设置 {{ $column.ColumnName }}_start 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}Start: {{ $column.Comment }} 开始时间
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName | ToPascalCase }}Start({{ $column.ColumnName | ToSafeParamName }}Start {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}Start = {{ $column.ColumnName | ToSafeParamName }}Start
+	return b
+}
+
+// With{{ $column.ColumnName | ToPascalCase }}End 设置 {{ $column.ColumnName }}_end 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}End: {{ $column.Comment }} 结束时间
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName | ToPascalCase }}End({{ $column.ColumnName | ToSafeParamName }}End {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}End = {{ $column.ColumnName | ToSafeParamName }}End
+	return b
+}
+{{- else if eq ($column | GetGoType) "string" }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Fuzzy 设置 {{ $column.ColumnName }}_fuzzy 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}Fuzzy: {{ $column.Comment }} 模糊查询
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName | ToPascalCase }}Fuzzy({{ $column.ColumnName | ToSafeParamName }}Fuzzy {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}Fuzzy = {{ $column.ColumnName | ToSafeParamName }}Fuzzy
+	return b
+}
+{{- else if eq ($column | GetGoType) "*time.Time" }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Start 设置 {{ $column.ColumnName }}_start 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}Start: {{ $column.Comment }} 开始时间
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName | ToPascalCase }}Start({{ $column.ColumnName | ToSafeParamName }}Start {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}Start = {{ $column.ColumnName | ToSafeParamName }}Start
+	return b
+}
+
+// With{{ $column.ColumnName | ToPascalCase }}End 设置 {{ $column.ColumnName }}_end 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}End: {{ $column.Comment }} 结束时间
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName | ToPascalCase }}End({{ $column.ColumnName | ToSafeParamName }}End {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}End = {{ $column.ColumnName | ToSafeParamName }}End
+	return b
+}
+{{- else if eq ($column | GetGoType) "*string" }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Fuzzy 设置 {{ $column.ColumnName }}_fuzzy 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}Fuzzy: {{ $column.Comment }} 模糊查询
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName | ToPascalCase }}Fuzzy({{ $column.ColumnName | ToSafeParamName }}Fuzzy {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}Fuzzy = {{ $column.ColumnName | ToSafeParamName }}Fuzzy
+	return b
+}
+{{- end }}
+{{- end }}
+{{- end }}
+
+// Build 构建并返回 {{ $schema.Name | ToPascalCase }}DTO 实例
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTO: 构建完成的实例
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) Build() *{{ $schema.Name | ToPascalCase }}DTO {
+	return b.instance
+}
+
+{{- end }}
