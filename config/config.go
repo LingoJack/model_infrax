@@ -51,5 +51,8 @@ func NewConfigger(configPath string) (*Configger, error) {
 		return nil, fmt.Errorf("解析YAML配置失败: %w", err)
 	}
 
+	// 展开输出路径中的 ~ 符号
+	config.GenerateOption.OutputPath = tool.EscapeHomeDir(config.GenerateOption.OutputPath)
+
 	return &config, nil
 }
