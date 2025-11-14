@@ -5,12 +5,14 @@ import (
 	"time"
 )
 
+
+
 {{- range . }}
 
 // {{ .Name | ToPascalCase }} {{ .Comment }}
 type {{ .Name | ToPascalCase }} struct {
 {{- range .Columns }}
-	{{ .ColumnName | ToPascalCase }} {{ . | GetGoType }} `gorm:"column:{{ .ColumnName }};type:{{ . | GetMySQLType }};{{ if .IsAutoIncrement }}primaryKey;autoIncrement;{{ end }}comment:{{ .Comment }};{{ if not .IsNullable }}not null{{ end }}" json:"{{ .ColumnName }}"`
+	{{ .ColumnName | ToPascalCase }} {{ . | GetGoType }} `gorm:"column:{{ .ColumnName }};type:{{ .Type }};{{ if .IsAutoIncrement }}primaryKey;autoIncrement;{{ end }}comment:{{ .Comment }};{{ if not .IsNullable }}not null{{ end }}" json:"{{ .ColumnName }}"`
 {{- end }}
 }
 
@@ -18,4 +20,5 @@ type {{ .Name | ToPascalCase }} struct {
 func (t *{{ .Name | ToPascalCase }}) TableName() string {
 	return "{{ .Name }}"
 }
+
 {{- end }}

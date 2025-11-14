@@ -130,6 +130,7 @@ func (p *Parser) AllTables() (schemas []model.Schema, err error) {
 				ColumnName:      field.Field,
 				Collate:         tool.Stringify(field.Collation), // Stringify 已经处理了 nil 指针
 				Comment:         field.Comment,
+				Type:            field.Type,
 				IsAutoIncrement: strings.Contains(field.Extra, "auto_increment"),
 				IsNullable:      field.Null == "YES",
 			}
@@ -179,7 +180,7 @@ func (p *Parser) AllTables() (schemas []model.Schema, err error) {
 		})
 
 		// 构建 Schema 对象
-		schema := model.Schema{
+		return model.Schema{
 			Name:        tableName,
 			Comment:     tableComment,
 			Columns:     columns,
@@ -187,13 +188,12 @@ func (p *Parser) AllTables() (schemas []model.Schema, err error) {
 			Indexes:     indexes,
 			UniqueIndex: uniqueIndexes,
 		}
-
-		return schema
 	})
 
 	return
 }
 
+// FilterTables 根据配置文件过滤表
 func (p *Parser) FilterTables(schemas []model.Schema) (filtered []model.Schema) {
 	if p.configger.GenerateConfig.AllTables {
 		filtered = schemas

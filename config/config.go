@@ -21,8 +21,8 @@ type GenerateConfig struct {
 	URLTemplate  string   `yaml:"url_template"`  // URL模板
 	Username     string   `yaml:"username"`      // 数据库用户名
 	Password     string   `yaml:"password"`      // 数据库密码
-	AllTables    bool     `yaml:"all_tables"`
-	TableNames   []string `yaml:"table_names"`
+	AllTables    bool     `yaml:"all_tables"`    // 是否生成所有表
+	TableNames   []string `yaml:"table_names"`   // 表名列表
 }
 
 type GenerateOption struct {
@@ -30,14 +30,12 @@ type GenerateOption struct {
 	IgnoreTableNamePrefix bool          `yaml:"ignore_table_name_prefix"` // 是否忽略表名前缀
 	CrudOnlyIdx           bool          `yaml:"crud_only_idx"`            // 是否仅CRUD索引
 	Package               PackageConfig `yaml:"package"`                  // 包配置
+	ModelAllInOneFile     bool          `yaml:"all_model_in_one_file"`    // 是否将所有模型放在一个文件中
+	ModelAllInOneFileName string        `yaml:"all_model_in_one_file_name"`
 }
 
 type PackageConfig struct {
-	Model  string `yaml:"model"`
-	DTO    string `yaml:"dto"`
-	VO     string `yaml:"vo"`
-	Tool   string `yaml:"tool"`
-	Mapper string `yaml:"mapper"`
+	ModelPackage string `yaml:"model_package"`
 }
 
 func NewConfigger(configPath string) (*Configger, error) {

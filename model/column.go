@@ -9,6 +9,7 @@ type Column struct {
 	ColumnName      string
 	Collate         string
 	Comment         string
+	Type            string
 	IsAutoIncrement bool
 	IsNullable      bool
 }

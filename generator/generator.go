@@ -34,7 +34,6 @@ func (g *Generator) Generate(schemas []model.Schema) error {
 	tmpl, err := template.New("model").Funcs(template.FuncMap{
 		"ToPascalCase": ToPascalCase,
 		"GetGoType":    GetGoType,
-		"GetMySQLType": GetMySQLType,
 	}).Parse(string(tmplContent))
 	if err != nil {
 		return fmt.Errorf("解析模板失败: %w", err)
@@ -83,7 +82,6 @@ func (g *Generator) GenerateAll(schemas []model.Schema, outputFileName string) e
 	tmpl, err := template.New("model").Funcs(template.FuncMap{
 		"ToPascalCase": ToPascalCase,
 		"GetGoType":    GetGoType,
-		"GetMySQLType": GetMySQLType,
 	}).Parse(string(tmplContent))
 	if err != nil {
 		return fmt.Errorf("解析模板失败: %w", err)

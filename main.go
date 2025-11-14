@@ -42,7 +42,12 @@ func (a *App) Run() error {
 	log.Println("================ 开始生成代码 ==================")
 
 	// 生成代码
-	if err = a.Generator.Generate(schemas); err != nil {
+	if a.Config.GenerateOption.ModelAllInOneFile {
+		err = a.Generator.GenerateAll(schemas, a.Config.GenerateOption.ModelAllInOneFileName)
+	} else {
+		err = a.Generator.Generate(schemas)
+	}
+	if err != nil {
 		return err
 	}
 
