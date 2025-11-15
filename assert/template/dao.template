@@ -3,8 +3,7 @@ package {{ .DaoPackageName }}
 
 import (
 	"fmt"
-	"{{ .PoPackageName }}"
-	"{{ .DtoPackageName }}"
+	
 	"strings"
 
 	"gorm.io/gorm"
