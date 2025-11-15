@@ -7,7 +7,6 @@ generate_config:
   password: 200487
   all_tables: false
   table_names:
-    - t_feedback_task
     - t_artifact
 
 generate_option:

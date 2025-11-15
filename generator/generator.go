@@ -162,12 +162,11 @@ func (g *Generator) GenerateDTO(schemas []model.Schema, outputFileName string) (
 
 	// 创建模板并注册函数
 	tmpl, err := template.New("dto").Funcs(template.FuncMap{
-		"ToPascalCase":      ToPascalCase,
-		"ToCamelCase":       ToCamelCase,
-		"ToSafeParamName":   ToSafeParamName,
-		"TrimPointer":       TrimPointer,
-		"GetGoType":         GetGoType,
-		"IsIndexedColumn":   IsIndexedColumn,
+		"ToPascalCase":    ToPascalCase,
+		"ToCamelCase":     ToCamelCase,
+		"ToSafeParamName": ToSafeParamName,
+		"TrimPointer":     TrimPointer,
+		"GetGoType":       GetGoType,
 	}).Parse(string(tmplContent))
 	if err != nil {
 		return fmt.Errorf("解析 DTO 模板失败: %w", err)
@@ -234,12 +233,11 @@ func (g *Generator) GenerateTool(templateFileName, outputFileName string) (err e
 
 	// 创建模板并注册函数
 	tmpl, err := template.New("dto").Funcs(template.FuncMap{
-		"ToPascalCase":      ToPascalCase,
-		"ToCamelCase":       ToCamelCase,
-		"ToSafeParamName":   ToSafeParamName,
-		"TrimPointer":       TrimPointer,
-		"GetGoType":         GetGoType,
-		"IsIndexedColumn":   IsIndexedColumn,
+		"ToPascalCase":    ToPascalCase,
+		"ToCamelCase":     ToCamelCase,
+		"ToSafeParamName": ToSafeParamName,
+		"TrimPointer":     TrimPointer,
+		"GetGoType":       GetGoType,
 	}).Parse(string(tmplContent))
 	if err != nil {
 		return fmt.Errorf("解析工具模板失败: %w", err)
