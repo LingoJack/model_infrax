@@ -160,7 +160,7 @@ func (p *Parser) AllTables() (schemas []model.Schema, err error) {
 		// 将 map 转换为 Index 切片
 		indexes = lo.MapToSlice(indexName2Columns, func(key string, value []model.Column) model.Index {
 			idx := model.Index{
-				IndexName: model.IndexName(key),
+				IndexName: key,
 				Columns:   value,
 			}
 			// 识别主键
@@ -200,7 +200,7 @@ func (p *Parser) AllTables() (schemas []model.Schema, err error) {
 		// 标记索引列：直接在 columns 切片中更新
 		for i := range columns {
 			columnName := columns[i].ColumnName
-			
+
 			// 检查是否为索引列
 			for _, indexedCol := range indexedColumns {
 				if indexedCol.ColumnName == columnName {
@@ -208,7 +208,7 @@ func (p *Parser) AllTables() (schemas []model.Schema, err error) {
 					break
 				}
 			}
-			
+
 			// 检查是否为唯一索引列
 			for _, uniqueCol := range uniqueIndexedColumns {
 				if uniqueCol.ColumnName == columnName {
@@ -216,7 +216,7 @@ func (p *Parser) AllTables() (schemas []model.Schema, err error) {
 					break
 				}
 			}
-			
+
 			// 检查是否为主键列
 			for _, pkCol := range primaryKeyColumns {
 				if pkCol.ColumnName == columnName {

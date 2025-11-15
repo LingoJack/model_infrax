@@ -69,6 +69,20 @@ func (a *App) Run() error {
 
 	log.Println("================ DTO 代码生成完成 ==================")
 
+	log.Println("================ 开始生成 DAO 代码 ==================")
+
+	// 生成 DAO 代码
+	if a.Config.GenerateOption.ModelAllInOneFile {
+		err = a.Generator.GenerateDAO(schemas, a.Config.GenerateOption.ModelAllInOneFileName)
+	} else {
+		err = a.Generator.GenerateDAOOneByOne(schemas)
+	}
+	if err != nil {
+		return err
+	}
+
+	log.Println("================ DAO 代码生成完成 ==================")
+
 	log.Println("================ 开始生成 Tool 代码 ==================")
 
 	// 生成 Tool 工具代码

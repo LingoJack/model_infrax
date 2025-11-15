@@ -19,8 +19,8 @@ func NewTArtifactDAO(db *gorm.DB) *TArtifactDAO {
 	return &TArtifactDAO{db: db}
 }
 
-// buildQueryCondition 构建查询条件
-func (dao *TArtifactDAO) buildQueryCondition(db *gorm.DB, dto *query.TArtifactDTO) *gorm.DB {
+// buildTArtifactQueryCondition 构建查询条件
+func (dao *TArtifactDAO) buildTArtifactQueryCondition(db *gorm.DB, dto *query.TArtifactDTO) *gorm.DB {
 	if dto == nil {
 		return db
 	}
@@ -115,7 +115,7 @@ func (dao *TArtifactDAO) SelectList(dto *query.TArtifactDTO) ([]*entity.TArtifac
 	db := dao.db.Model(&entity.TArtifact{})
 
 	// 应用查询条件
-	db = dao.buildQueryCondition(db, dto)
+	db = dao.buildTArtifactQueryCondition(db, dto)
 
 	// 排序
 	if dto != nil && dto.OrderBy != "" {
@@ -127,7 +127,7 @@ func (dao *TArtifactDAO) SelectList(dto *query.TArtifactDTO) ([]*entity.TArtifac
 
 	// 分页（使用扁平化字段）
 	if dto != nil && dto.PageSize > 0 {
-		db = db.Offset(dto.Offset).Limit(dto.PageSize)
+		db = db.Offset(dto.PageOffset).Limit(dto.PageSize)
 	}
 
 	err := db.Find(&result).Error
@@ -140,7 +140,7 @@ func (dao *TArtifactDAO) SelectCount(dto *query.TArtifactDTO) (int64, error) {
 	db := dao.db.Model(&entity.TArtifact{})
 
 	// 应用查询条件
-	db = dao.buildQueryCondition(db, dto)
+	db = dao.buildTArtifactQueryCondition(db, dto)
 
 	err := db.Count(&count).Error
 	return count, err
@@ -539,7 +539,7 @@ func (dao *TArtifactDAO) SelectListWithPage(dto *query.TArtifactDTO, page, pageS
 	var total int64
 
 	db := dao.db.Model(&entity.TArtifact{})
-	db = dao.buildQueryCondition(db, dto)
+	db = dao.buildTArtifactQueryCondition(db, dto)
 
 	// 先查询总数
 	if err := db.Count(&total).Error; err != nil {
@@ -603,7 +603,7 @@ func (dao *TArtifactDAO) SelectListWithOrder(dto *query.TArtifactDTO, orderBy st
 	db := dao.db.Model(&entity.TArtifact{})
 
 	// 应用查询条件
-	db = dao.buildQueryCondition(db, dto)
+	db = dao.buildTArtifactQueryCondition(db, dto)
 
 	// 应用排序
 	if orderBy != "" {

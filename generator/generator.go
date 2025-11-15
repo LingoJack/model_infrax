@@ -22,10 +22,12 @@ type Generator struct {
 	configger         *config.Configger // 配置对象
 }
 
-// ModelTemplateData 传递给模板的数据结构
-type ModelTemplateData struct {
-	PackageName string         // 包名（从路径最后一段提取）
-	Schemas     []model.Schema // 表结构列表
+// TemplateData 传递给模板的数据结构
+type TemplateData struct {
+	PoPackageName  string         // po 包名（从路径最后一段提取）
+	DtoPackageName string         // dto 包名（从路径最后一段提取）
+	DaoPackageName string         // dao 包名（从路径最后一段提取）
+	Schemas        []model.Schema // 表结构列表
 }
 
 // NewGenerator 创建新的生成器实例
@@ -99,9 +101,11 @@ func (g *Generator) GenerateModel(schemas []model.Schema, outputFileName string)
 	filePath := filepath.Join(outputPath, outputFileName)
 
 	// 准备模板数据，包含包名和表结构
-	templateData := ModelTemplateData{
-		PackageName: getPackageName(g.configger.GenerateOption.Package.PoPackage),
-		Schemas:     schemas,
+	templateData := TemplateData{
+		DaoPackageName: getPackageName(g.configger.GenerateOption.Package.DaoPackage),
+		PoPackageName:  getPackageName(g.configger.GenerateOption.Package.PoPackage),
+		DtoPackageName: getPackageName(g.configger.GenerateOption.Package.DtoPackage),
+		Schemas:        schemas,
 	}
 
 	// 先将模板执行结果写入缓冲区
@@ -184,9 +188,11 @@ func (g *Generator) GenerateDTO(schemas []model.Schema, outputFileName string) (
 	filePath := filepath.Join(outputPath, outputFileName)
 
 	// 准备模板数据，包含包名和表结构
-	templateData := ModelTemplateData{
-		PackageName: getPackageName(g.configger.GenerateOption.Package.DtoPackage),
-		Schemas:     schemas,
+	templateData := TemplateData{
+		DaoPackageName: getPackageName(g.configger.GenerateOption.Package.DaoPackage),
+		PoPackageName:  getPackageName(g.configger.GenerateOption.Package.PoPackage),
+		DtoPackageName: getPackageName(g.configger.GenerateOption.Package.DtoPackage),
+		Schemas:        schemas,
 	}
 
 	// 先将模板执行结果写入缓冲区
@@ -276,6 +282,93 @@ func (g *Generator) GenerateTool(templateFileName, outputFileName string) (err e
 	}
 
 	log.Printf("成功生成工具文件: %s\n", filePath)
+	return nil
+}
+
+// GenerateDAOOneByOne 根据模板生成 DAO 代码，每个表生成一个文件
+// 参数:
+//   - schemas: 表结构列表
+//
+// 返回:
+//   - error: 生成过程中的错误
+func (g *Generator) GenerateDAOOneByOne(schemas []model.Schema) (err error) {
+	for _, schema := range schemas {
+		fileName := fmt.Sprintf("%s_dao.go", schema.Name)
+		err = g.GenerateDAO([]model.Schema{schema}, fileName)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// GenerateDAO 生成 DAO 文件
+// 参数:
+//   - schemas: 表结构列表
+//   - outputFileName: 输出文件名
+//
+// 返回:
+//   - error: 生成过程中的错误
+func (g *Generator) GenerateDAO(schemas []model.Schema, outputFileName string) (err error) {
+	// 读取 DAO 模板文件
+	tmplContent, err := os.ReadFile(g.daoTemplatePath)
+	if err != nil {
+		return fmt.Errorf("读取 DAO 模板文件失败: %w", err)
+	}
+
+	// 创建模板并注册函数
+	tmpl, err := template.New("dao").Funcs(template.FuncMap{
+		"ToPascalCase":    ToPascalCase,
+		"ToCamelCase":     ToCamelCase,
+		"ToSafeParamName": ToSafeParamName,
+		"TrimPointer":     TrimPointer,
+		"GetGoType":       GetGoType,
+	}).Parse(string(tmplContent))
+	if err != nil {
+		return fmt.Errorf("解析 DAO 模板失败: %w", err)
+	}
+
+	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
+	outputPath := filepath.Join(g.configger.GenerateOption.OutputPath, g.configger.GenerateOption.Package.DaoPackage)
+
+	// 确保输出目录存在
+	if err = os.MkdirAll(outputPath, 0755); err != nil {
+		return fmt.Errorf("创建 DAO 输出目录失败: %w", err)
+	}
+
+	// 生成文件路径
+	filePath := filepath.Join(outputPath, outputFileName)
+
+	// 准备模板数据，包含包名和表结构
+	templateData := TemplateData{
+		DaoPackageName: getPackageName(g.configger.GenerateOption.Package.DaoPackage),
+		PoPackageName:  getPackageName(g.configger.GenerateOption.Package.PoPackage),
+		DtoPackageName: getPackageName(g.configger.GenerateOption.Package.DtoPackage),
+		Schemas:        schemas,
+	}
+
+	// 先将模板执行结果写入缓冲区
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, templateData)
+	if err != nil {
+		return fmt.Errorf("执行 DAO 模板失败: %w", err)
+	}
+
+	// 使用 go/format 格式化代码
+	formattedCode, err := format.Source(buf.Bytes())
+	if err != nil {
+		// 如果格式化失败，记录警告但仍然写入未格式化的代码
+		log.Printf("警告: 格式化 DAO 代码失败: %v，将写入未格式化的代码\n", err)
+		formattedCode = buf.Bytes()
+	}
+
+	// 创建输出文件并写入格式化后的代码
+	err = os.WriteFile(filePath, formattedCode, 0644)
+	if err != nil {
+		return fmt.Errorf("写入 DAO 输出文件失败: %w", err)
+	}
+
+	log.Printf("成功生成 DAO 文件: %s\n", filePath)
 	return nil
 }
 
