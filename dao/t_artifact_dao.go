@@ -99,29 +99,11 @@ func (dao *TArtifactDAO) buildQueryCondition(db *gorm.DB, dto *query.TArtifactDT
 	if len(dto.ArtifactIdList) > 0 {
 		db = db.Where("artifactId IN ?", dto.ArtifactIdList)
 	}
-	if len(dto.ArtifactNameList) > 0 {
-		db = db.Where("artifactName IN ?", dto.ArtifactNameList)
-	}
 	if len(dto.SessionIdList) > 0 {
 		db = db.Where("sessionId IN ?", dto.SessionIdList)
 	}
 	if len(dto.StepList) > 0 {
 		db = db.Where("step IN ?", dto.StepList)
-	}
-	if len(dto.SubStepList) > 0 {
-		db = db.Where("subStep IN ?", dto.SubStepList)
-	}
-	if len(dto.ContentList) > 0 {
-		db = db.Where("content IN ?", dto.ContentList)
-	}
-	if len(dto.VersionList) > 0 {
-		db = db.Where("version IN ?", dto.VersionList)
-	}
-	if len(dto.CreateTimeList) > 0 {
-		db = db.Where("createTime IN ?", dto.CreateTimeList)
-	}
-	if len(dto.UpdateTimeList) > 0 {
-		db = db.Where("updateTime IN ?", dto.UpdateTimeList)
 	}
 
 	return db

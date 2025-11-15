@@ -201,32 +201,3 @@ func TrimPrefix(s, prefix string) string {
 func TrimPointer(s string) string {
 	return tool.TrimPrefix(s, "*")
 }
-
-// IsIndexedColumn 判断某个字段是否在索引中
-// 用于模板中判断是否需要为字段生成 _list 字段（用于 IN 查询）
-// 参数:
-//   - schema: 表结构信息，包含所有索引
-//   - columnName: 要检查的字段名
-//
-// 返回:
-//   - bool: 如果字段在任何索引中则返回 true，否则返回 false
-//
-// 示例:
-//   - IsIndexedColumn(schema, "user_id") -> true (如果 user_id 在某个索引中)
-//   - IsIndexedColumn(schema, "description") -> false (如果 description 不在任何索引中)
-func IsIndexedColumn(schema model.Schema, columnName string) bool {
-	// 检查所有索引（包括主键、唯一索引和普通索引）
-	allIndexes := append([]model.Index{schema.PrimaryKey}, schema.Indexes...)
-	
-	// 遍历所有索引
-	for _, index := range allIndexes {
-		// 遍历索引中的所有列
-		for _, col := range index.Columns {
-			if col.ColumnName == columnName {
-				return true
-			}
-		}
-	}
-	
-	return false
-}

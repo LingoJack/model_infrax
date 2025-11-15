@@ -11,7 +11,7 @@ import (
 // {{ $schema.Name | ToPascalCase }}DTO {{ $schema.Comment }} 数据传输对象
 type {{ $schema.Name | ToPascalCase }}DTO struct {
 {{- range $schema.Columns }}
-	{{ .ColumnName | ToPascalCase }} {{ . | GetGoType }} `json:"{{ .ColumnName }}"`
+	{{ .ColumnName | ToPascalCase }} {{ . | GetGoType }} `json:"{{ .ColumnName }}"` // {{ .Comment }}
 {{- end }}
 {{- range $schema.Columns }}
 {{- if eq (. | GetGoType) "time.Time" }}
@@ -40,8 +40,9 @@ type {{ $schema.Name | ToPascalCase }}DTO struct {
 	{{ .ColumnName | ToPascalCase }}List []{{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- end }}
-	PageOffset int `json:"pageOffset"` // 分页偏移量
-	PageSize   int `json:"pageSize"`   // 每页数量
+	OrderBy    string `json:"orderBy"`    // 排序字段
+	PageOffset int    `json:"pageOffset"` // 分页偏移量
+	PageSize   int    `json:"pageSize"`   // 每页数量
 }
 
 // Jsonify 将结构体序列化为 JSON 字符串（紧凑格式）
@@ -112,7 +113,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 {{- if not $column.IsAutoIncrement }}
 {{- if eq ($column | GetGoType) "time.Time" }}
 
-// With{{ $column.ColumnName | ToPascalCase }}Start 设置 {{ $column.ColumnName }}_start 字段
+// With{{ $column.ColumnName | ToPascalCase }}Start 设置 {{ $column.ColumnName }}Start 字段
 // 参数:
 //   - {{ $column.ColumnName | ToSafeParamName }}Start: {{ $column.Comment }} 开始时间
 // 返回:
@@ -122,7 +123,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 	return b
 }
 
-// With{{ $column.ColumnName | ToPascalCase }}End 设置 {{ $column.ColumnName }}_end 字段
+// With{{ $column.ColumnName | ToPascalCase }}End 设置 {{ $column.ColumnName }}End 字段
 // 参数:
 //   - {{ $column.ColumnName | ToSafeParamName }}End: {{ $column.Comment }} 结束时间
 // 返回:
@@ -133,7 +134,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 }
 {{- if $column.IsIndexed }}
 
-// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}_list 字段
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
 // 参数:
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
@@ -156,7 +157,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 }
 {{- if $column.IsIndexed }}
 
-// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}_list 字段
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
 // 参数:
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
@@ -168,7 +169,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 {{- end }}
 {{- else if eq ($column | GetGoType) "*time.Time" }}
 
-// With{{ $column.ColumnName | ToPascalCase }}Start 设置 {{ $column.ColumnName }}_start 字段
+// With{{ $column.ColumnName | ToPascalCase }}Start 设置 {{ $column.ColumnName }}Start 字段
 // 参数:
 //   - {{ $column.ColumnName | ToSafeParamName }}Start: {{ $column.Comment }} 开始时间
 // 返回:
@@ -178,7 +179,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 	return b
 }
 
-// With{{ $column.ColumnName | ToPascalCase }}End 设置 {{ $column.ColumnName }}_end 字段
+// With{{ $column.ColumnName | ToPascalCase }}End 设置 {{ $column.ColumnName }}End 字段
 // 参数:
 //   - {{ $column.ColumnName | ToSafeParamName }}End: {{ $column.Comment }} 结束时间
 // 返回:
@@ -189,7 +190,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 }
 {{- if $column.IsIndexed }}
 
-// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}_list 字段
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
 // 参数:
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
@@ -212,7 +213,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 }
 {{- if $column.IsIndexed }}
 
-// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}_list 字段
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
 // 参数:
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
@@ -224,7 +225,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 {{- end }}
 {{- else if $column.IsIndexed }}
 
-// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}_list 字段
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
 // 参数:
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
@@ -237,7 +238,17 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) With{{ $column.ColumnName 
 {{- end }}
 {{- end }}
 
-// WithPageOffset 设置 page_offset 字段
+// WithOrderBy 设置 orderBy 字段
+// 参数:
+//   - orderBy: 排序字段
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DTOBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) WithOrderBy(orderBy string) *{{ $schema.Name | ToPascalCase }}DTOBuilder {
+	b.instance.OrderBy = orderBy
+	return b
+}
+
+// WithPageOffset 设置 pageOffset 字段
 // 参数:
 //   - pageOffset: 分页偏移量
 // 返回:
@@ -247,7 +258,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DTOBuilder) WithPageOffset(pageOffset 
 	return b
 }
 
-// WithPageSize 设置 page_size 字段
+// WithPageSize 设置 pageSize 字段
 // 参数:
 //   - pageSize: 每页数量
 // 返回:
