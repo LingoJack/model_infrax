@@ -144,7 +144,7 @@ func (dao *TArtifactDAO) SelectList(queryDTO *query.TArtifactDTO) ([]*entity.TAr
 
 	// 排序
 	if queryDTO != nil && queryDTO.OrderBy != "" {
-		if isValidOrderBy(queryDTO.OrderBy) {
+		if dao.isValidOrderBy(queryDTO.OrderBy) {
 			db = db.Order(queryDTO.OrderBy)
 		}
 	}
@@ -392,32 +392,6 @@ func (dao *TArtifactDAO) UpdateByIdWithMapAndCondition(id uint64, updatedMap map
 	}
 
 	return db.Updates(updatedMap).Error
-}
-
-// MustUpdateById 必须更新一条记录，如果影响行数不为1则返回错误
-// 参数:
-//   - poBean: 包含更新数据的PO对象
-//   - id: 主键值
-//
-// 返回:
-//   - error: 错误信息
-//
-// 说明:
-//   - 只更新非零值字段
-//   - 如果影响行数不为1（记录不存在或被删除），返回错误
-//   - 适用于必须确保更新成功的场景
-func (dao *TArtifactDAO) MustUpdateById(poBean *entity.TArtifact, id uint64) error {
-	if poBean == nil {
-		return fmt.Errorf("更新对象不能为空")
-	}
-	result := dao.db.Model(&entity.TArtifact{}).Where("id = ?", id).Updates(poBean)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected != 1 {
-		return fmt.Errorf("期望更新1条记录，实际更新了%d条", result.RowsAffected)
-	}
-	return nil
 }
 
 // DeleteById 根据主键Id删除
@@ -683,21 +657,24 @@ func (dao *TArtifactDAO) DeleteByStep(step int) error {
 	return dao.db.Where("step = ?", step).Delete(&entity.TArtifact{}).Error
 }
 
-// ==================== 辅助函数 ====================
+// ==================== 辅助方法 ====================
 
-// validOrderByFields 定义允许排序的字段白名单
-// 只有在此列表中的字段才允许用于排序，防止SQL注入
-var validOrderByFields = map[string]bool{
-	"id":           true,
-	"artifactId":   true,
-	"artifactName": true,
-	"sessionId":    true,
-	"step":         true,
-	"subStep":      true,
-	"content":      true,
-	"version":      true,
-	"createTime":   true,
-	"updateTime":   true,
+// getValidOrderByFields 获取允许排序的字段白名单
+// 返回:
+//   - map[string]bool: 字段白名单，key为字段名，value为true表示允许排序
+func (dao *TArtifactDAO) getValidOrderByFields() map[string]bool {
+	return map[string]bool{
+		"id":           true,
+		"artifactId":   true,
+		"artifactName": true,
+		"sessionId":    true,
+		"step":         true,
+		"subStep":      true,
+		"content":      true,
+		"version":      true,
+		"createTime":   true,
+		"updateTime":   true,
+	}
 }
 
 // isValidOrderBy 验证排序字符串是否安全（基于字段白名单）
@@ -711,10 +688,13 @@ var validOrderByFields = map[string]bool{
 // 返回:
 //   - true: 排序字符串合法且所有字段都在白名单中
 //   - false: 排序字符串不合法或包含非白名单字段
-func isValidOrderBy(orderBy string) bool {
+func (dao *TArtifactDAO) isValidOrderBy(orderBy string) bool {
 	if orderBy == "" {
 		return false
 	}
+
+	// 获取字段白名单
+	validFields := dao.getValidOrderByFields()
 
 	// 按逗号分割多个排序字段
 	orderParts := strings.Split(orderBy, ",")
@@ -734,7 +714,7 @@ func isValidOrderBy(orderBy string) bool {
 
 		// 验证字段名是否在白名单中
 		fieldName := tokens[0]
-		if !validOrderByFields[fieldName] {
+		if !validFields[fieldName] {
 			// 字段不在白名单中
 			return false
 		}

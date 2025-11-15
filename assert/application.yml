@@ -5,7 +5,7 @@ generate_config:
   port: 3306
   username: root
   password: 200487
-  all_tables: false
+  all_tables: true
   table_names:
     - t_artifact
 
