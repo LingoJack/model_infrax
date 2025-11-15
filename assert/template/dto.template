@@ -1,5 +1,5 @@
 {{- /* 生成 DTO 结构体的模板 */ -}}
-package {{ .PackageName }}
+package {{ .DtoPackageName }}
 
 import (
 	"encoding/json"

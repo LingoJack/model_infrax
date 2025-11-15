@@ -1,5 +1,5 @@
 {{- /* 生成 GORM 模型结构体的模板 */ -}}
-package {{ .PackageName }}
+package {{ .PoPackageName }}
 
 import (
 	"encoding/json"

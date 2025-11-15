@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-type IndexName string
-
 type Schema struct {
 	Name        string
 	Columns     []Column
