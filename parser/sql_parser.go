@@ -51,7 +51,7 @@ func NewParser(cfg *config.Configger) (*Parser, error) {
 }
 
 type mysqlTable struct {
-	Name          string  `json:"ColumnName"`            // 表名
+	Name          string  `json:"ColumnName"`      // 表名
 	Engine        string  `json:"Engine"`          // 存储引擎
 	Version       int     `json:"Version"`         // 版本号
 	RowFormat     string  `json:"Row_format"`      // 行格式
@@ -178,6 +178,53 @@ func (p *Parser) AllTables() (schemas []model.Schema, err error) {
 				uniqueIndexes = append(uniqueIndexes, inexName2Index[index.KeyName])
 			}
 		})
+
+		// 找到所有索引的列
+		var indexedColumns []model.Column
+		lo.ForEach(indexes, func(index model.Index, i int) {
+			indexedColumns = append(indexedColumns, index.Columns...)
+		})
+
+		// 找到所有唯一索引的列
+		var uniqueIndexedColumns []model.Column
+		lo.ForEach(uniqueIndexes, func(index model.Index, i int) {
+			uniqueIndexedColumns = append(uniqueIndexedColumns, index.Columns...)
+		})
+
+		// 找到所有主键的列
+		var primaryKeyColumns []model.Column
+		lo.ForEach(primaryKey.Columns, func(column model.Column, i int) {
+			primaryKeyColumns = append(primaryKeyColumns, column)
+		})
+
+		// 标记索引列：直接在 columns 切片中更新
+		for i := range columns {
+			columnName := columns[i].ColumnName
+			
+			// 检查是否为索引列
+			for _, indexedCol := range indexedColumns {
+				if indexedCol.ColumnName == columnName {
+					columns[i].IsIndexed = true
+					break
+				}
+			}
+			
+			// 检查是否为唯一索引列
+			for _, uniqueCol := range uniqueIndexedColumns {
+				if uniqueCol.ColumnName == columnName {
+					columns[i].IsUnique = true
+					break
+				}
+			}
+			
+			// 检查是否为主键列
+			for _, pkCol := range primaryKeyColumns {
+				if pkCol.ColumnName == columnName {
+					columns[i].IsPrimaryKey = true
+					break
+				}
+			}
+		}
 
 		// 构建 Schema 对象
 		return model.Schema{
