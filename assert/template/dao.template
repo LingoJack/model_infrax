@@ -183,33 +183,6 @@ func (dao *{{ $daoName }}) SelectCount(queryDTO *{{ $.DtoPackageName }}.{{ $dtoN
 	return count, err
 }
 
-// SelectListWithPage 分页查询列表（同时返回总数）
-// 参数:
-//   - queryDTO: 查询条件DTO对象
-//   - page: 页码（从1开始）
-//   - pageSize: 每页数量
-// 返回:
-//   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
-//   - int64: 总记录数
-//   - error: 错误信息
-func (dao *{{ $daoName }}) SelectListWithPage(queryDTO *{{ $.DtoPackageName }}.{{ $dtoName }}, page, pageSize int) ([]*{{ $.PoPackageName }}.{{ $entityName }}, int64, error) {
-	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
-	var total int64
-
-	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
-	db = dao.build{{ $entityName }}QueryCondition(db, queryDTO)
-
-	// 先查询总数
-	if err := db.Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
-	// 再查询分页数据
-	offset := (page - 1) * pageSize
-	err := db.Offset(offset).Limit(pageSize).Find(&resultList).Error
-	return resultList, total, err
-}
-
 // ==================== 基础插入方法 ====================
 
 // Insert 单行插入
