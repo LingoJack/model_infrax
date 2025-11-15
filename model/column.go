@@ -12,6 +12,9 @@ type Column struct {
 	Type            string
 	IsAutoIncrement bool
 	IsNullable      bool
+	IsIndexed       bool
+	IsUnique        bool
+	IsPrimaryKey    bool
 }
 
 func (f Column) Json() string {

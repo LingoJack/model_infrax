@@ -9,120 +9,18 @@ import (
 	"gorm.io/gorm"
 )
 
-// TArtifactDAO 任务执行流程中生成的中间产物表 DAO接口
-type TArtifactDAO interface {
-	// SelectList 查询列表（支持基础、扩展、列表查询条件）
-	SelectList(dto *query.TArtifactDTO) ([]*entity.TArtifact, error)
-
-	// SelectCount 查询数量（支持基础、扩展、列表查询条件）
-	SelectCount(dto *query.TArtifactDTO) (int64, error)
-
-	// Insert 单行插入（允许指定主键）
-	Insert(bean *entity.TArtifact) error
-
-	// InsertOrUpdateNullable 插入或更新（存在唯一键冲突则更新，允许null值覆盖）
-	InsertOrUpdateNullable(bean *entity.TArtifact) error
-
-	// InsertBatch 批量插入（允许指定主键）
-	InsertBatch(list []*entity.TArtifact) error
-
-	// InsertOrUpdateBatchNullable  批量插入或更新（允许null值覆盖）
-	InsertOrUpdateBatchNullable(list []*entity.TArtifact) error
-
-	// SelectById 根据Id查询
-	SelectById(id uint64) (*entity.TArtifact, error)
-
-	// UpdateById 根据Id更新（不允许null值覆盖非null值）
-	UpdateById(bean *entity.TArtifact, id uint64) error
-
-	// UpdateByIdWithMap 根据Id使用Map更新指定字段（允许更新为零值）
-	UpdateByIdWithMap(id uint64, updates map[string]interface{}) error
-
-	// UpdateByIdWithCondition 根据Id和额外条件更新（不允许null值覆盖非null值）
-	UpdateByIdWithCondition(bean *entity.TArtifact, id uint64, condition map[string]interface{}) error
-
-	// UpdateByIdWithMapAndCondition 根据Id和额外条件使用Map更新指定字段
-	UpdateByIdWithMapAndCondition(id uint64, updates map[string]interface{}, condition map[string]interface{}) error
-
-	// DeleteById 根据Id删除
-	DeleteById(id uint64) error
-
-	// SelectByIdList 根据IdList列表查询
-	SelectByIdList(idList []uint64) ([]*entity.TArtifact, error)
-
-	// SelectByArtifactId 根据ArtifactId查询
-	SelectByArtifactId(artifactId string) (*entity.TArtifact, error)
-
-	// UpdateByArtifactId 根据ArtifactId更新（不允许null值覆盖非null值）
-	UpdateByArtifactId(bean *entity.TArtifact, artifactId string) error
-
-	// UpdateByArtifactIdWithMap 根据ArtifactId使用Map更新指定字段（允许更新为零值）
-	UpdateByArtifactIdWithMap(artifactId string, updates map[string]interface{}) error
-
-	// UpdateByArtifactIdWithCondition 根据ArtifactId和额外条件更新（不允许null值覆盖非null值）
-	UpdateByArtifactIdWithCondition(bean *entity.TArtifact, artifactId string, condition map[string]interface{}) error
-
-	// UpdateByArtifactIdWithMapAndCondition 根据ArtifactId和额外条件使用Map更新指定字段
-	UpdateByArtifactIdWithMapAndCondition(artifactId string, updates map[string]interface{}, condition map[string]interface{}) error
-
-	// DeleteByArtifactId 根据ArtifactId删除
-	DeleteByArtifactId(artifactId string) error
-
-	// SelectByArtifactIdList 根据ArtifactIdList列表查询
-	SelectByArtifactIdList(artifactIdList []string) ([]*entity.TArtifact, error)
-
-	// SelectBySessionIdAndVersion 根据SessionIdAndVersion查询
-	SelectBySessionIdAndVersion(sessionId string, version string) (*entity.TArtifact, error)
-
-	// UpdateBySessionIdAndVersion 根据SessionIdAndVersion更新（不允许null值覆盖非null值）
-	UpdateBySessionIdAndVersion(bean *entity.TArtifact, sessionId string, version string) error
-
-	// UpdateBySessionIdAndVersionWithMap 根据SessionIdAndVersion使用Map更新指定字段（允许更新为零值）
-	UpdateBySessionIdAndVersionWithMap(sessionId string, version string, updates map[string]interface{}) error
-
-	// UpdateBySessionIdAndVersionWithCondition 根据SessionIdAndVersion和额外条件更新（不允许null值覆盖非null值）
-	UpdateBySessionIdAndVersionWithCondition(bean *entity.TArtifact, sessionId string, version string, condition map[string]interface{}) error
-
-	// UpdateBySessionIdAndVersionWithMapAndCondition 根据SessionIdAndVersion和额外条件使用Map更新指定字段
-	UpdateBySessionIdAndVersionWithMapAndCondition(sessionId string, version string, updates map[string]interface{}, condition map[string]interface{}) error
-
-	// DeleteBySessionIdAndVersion 根据SessionIdAndVersion删除
-	DeleteBySessionIdAndVersion(sessionId string, version string) error
-
-	// SelectByStep 根据Step查询
-	SelectByStep(step int) ([]*entity.TArtifact, error)
-
-	// UpdateByStep 根据Step更新（不允许null值覆盖非null值）
-	UpdateByStep(bean *entity.TArtifact, step int) error
-
-	// UpdateByStepWithMap 根据Step使用Map更新指定字段（允许更新为零值）
-	UpdateByStepWithMap(step int, updates map[string]interface{}) error
-
-	// UpdateByStepWithCondition 根据Step和额外条件更新（不允许null值覆盖非null值）
-	UpdateByStepWithCondition(bean *entity.TArtifact, step int, condition map[string]interface{}) error
-
-	// UpdateByStepWithMapAndCondition 根据Step和额外条件使用Map更新指定字段
-	UpdateByStepWithMapAndCondition(step int, updates map[string]interface{}, condition map[string]interface{}) error
-
-	// DeleteByStep 根据Step删除
-	DeleteByStep(step int) error
-
-	// SelectByStepList 根据StepList列表查询
-	SelectByStepList(stepList []int) ([]*entity.TArtifact, error)
-}
-
-// tArtifactDAOImpl TArtifactDAO的实现
-type tArtifactDAOImpl struct {
+// TArtifactDAO TArtifactDAO的实现
+type TArtifactDAO struct {
 	db *gorm.DB
 }
 
 // NewTArtifactDAO 创建TArtifactDAO实例
-func NewTArtifactDAO(db *gorm.DB) TArtifactDAO {
-	return &tArtifactDAOImpl{db: db}
+func NewTArtifactDAO(db *gorm.DB) *TArtifactDAO {
+	return &TArtifactDAO{db: db}
 }
 
 // buildQueryCondition 构建查询条件
-func (dao *tArtifactDAOImpl) buildQueryCondition(db *gorm.DB, dto *query.TArtifactDTO) *gorm.DB {
+func (dao *TArtifactDAO) buildQueryCondition(db *gorm.DB, dto *query.TArtifactDTO) *gorm.DB {
 	if dto == nil {
 		return db
 	}
@@ -230,7 +128,7 @@ func (dao *tArtifactDAOImpl) buildQueryCondition(db *gorm.DB, dto *query.TArtifa
 }
 
 // SelectList 查询列表
-func (dao *tArtifactDAOImpl) SelectList(dto *query.TArtifactDTO) ([]*entity.TArtifact, error) {
+func (dao *TArtifactDAO) SelectList(dto *query.TArtifactDTO) ([]*entity.TArtifact, error) {
 	var result []*entity.TArtifact
 	db := dao.db.Model(&entity.TArtifact{})
 
@@ -255,7 +153,7 @@ func (dao *tArtifactDAOImpl) SelectList(dto *query.TArtifactDTO) ([]*entity.TArt
 }
 
 // SelectCount 查询数量
-func (dao *tArtifactDAOImpl) SelectCount(dto *query.TArtifactDTO) (int64, error) {
+func (dao *TArtifactDAO) SelectCount(dto *query.TArtifactDTO) (int64, error) {
 	var count int64
 	db := dao.db.Model(&entity.TArtifact{})
 
@@ -267,7 +165,7 @@ func (dao *tArtifactDAOImpl) SelectCount(dto *query.TArtifactDTO) (int64, error)
 }
 
 // Insert 单行插入
-func (dao *tArtifactDAOImpl) Insert(bean *entity.TArtifact) error {
+func (dao *TArtifactDAO) Insert(bean *entity.TArtifact) error {
 	if bean == nil {
 		return fmt.Errorf("插入对象不能为空")
 	}
@@ -283,7 +181,7 @@ func (dao *tArtifactDAOImpl) Insert(bean *entity.TArtifact) error {
 //     例如：如果 bean.ArtifactName = ""，会将数据库中的 artifactName 字段更新为空字符串
 //  4. 这种行为适用于需要"完整替换"记录的场景
 //  5. 如果不希望零值覆盖数据库中的非零值，应使用 UpdateById 等方法（内部使用 Updates）
-func (dao *tArtifactDAOImpl) InsertOrUpdateNullable(bean *entity.TArtifact) error {
+func (dao *TArtifactDAO) InsertOrUpdateNullable(bean *entity.TArtifact) error {
 	if bean == nil {
 		return fmt.Errorf("插入或更新对象不能为空")
 	}
@@ -295,7 +193,7 @@ func (dao *tArtifactDAOImpl) InsertOrUpdateNullable(bean *entity.TArtifact) erro
 }
 
 // InsertBatch 批量插入
-func (dao *tArtifactDAOImpl) InsertBatch(list []*entity.TArtifact) error {
+func (dao *TArtifactDAO) InsertBatch(list []*entity.TArtifact) error {
 	if len(list) == 0 {
 		return fmt.Errorf("批量插入列表不能为空")
 	}
@@ -313,7 +211,7 @@ func (dao *tArtifactDAOImpl) InsertBatch(list []*entity.TArtifact) error {
 //  6. 适用场景：需要完整替换多条记录的场景
 //  7. 性能提示：批量操作比逐条调用 InsertOrUpdate 效率更高
 //  8. 如果不希望零值覆盖，建议逐条调用 UpdateById 等方法
-func (dao *tArtifactDAOImpl) InsertOrUpdateBatchNullable(list []*entity.TArtifact) error {
+func (dao *TArtifactDAO) InsertOrUpdateBatchNullable(list []*entity.TArtifact) error {
 	if len(list) == 0 {
 		return fmt.Errorf("批量插入或更新列表不能为空")
 	}
@@ -325,7 +223,7 @@ func (dao *tArtifactDAOImpl) InsertOrUpdateBatchNullable(list []*entity.TArtifac
 }
 
 // SelectById 根据Id查询
-func (dao *tArtifactDAOImpl) SelectById(id uint64) (*entity.TArtifact, error) {
+func (dao *TArtifactDAO) SelectById(id uint64) (*entity.TArtifact, error) {
 	var result entity.TArtifact
 	err := dao.db.Where("id = ?", id).First(&result).Error
 	if err != nil {
@@ -343,7 +241,7 @@ func (dao *tArtifactDAOImpl) SelectById(id uint64) (*entity.TArtifact, error) {
 //  3. 这种行为适用于"部分更新"场景，保留数据库中未传入的字段值
 //  4. 如果需要将某个字段更新为零值，应使用 UpdateByIdWithMap 方法显式指定
 //  5. 与 InsertOrUpdate 的区别：InsertOrUpdate 会用零值覆盖，UpdateById 不会
-func (dao *tArtifactDAOImpl) UpdateById(bean *entity.TArtifact, id uint64) error {
+func (dao *TArtifactDAO) UpdateById(bean *entity.TArtifact, id uint64) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -360,7 +258,7 @@ func (dao *tArtifactDAOImpl) UpdateById(bean *entity.TArtifact, id uint64) error
 //  2. 只更新非零值字段，零值字段会被忽略
 //  3. 适用场景：需要在主键基础上增加额外的更新条件，如乐观锁、状态检查等
 //  4. 示例：condition["version"] = 1 可以实现乐观锁，只有版本号匹配才更新
-func (dao *tArtifactDAOImpl) UpdateByIdWithCondition(bean *entity.TArtifact, id uint64, condition map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateByIdWithCondition(bean *entity.TArtifact, id uint64, condition map[string]interface{}) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -380,7 +278,7 @@ func (dao *tArtifactDAOImpl) UpdateByIdWithCondition(bean *entity.TArtifact, id 
 //  2. 使用 map 可以显式指定要更新的字段，包括零值字段
 //  3. 适用场景：需要精确控制更新字段，并且需要额外的更新条件
 //  4. 示例：updates["status"] = 0, condition["old_status"] = 1 实现状态流转控制
-func (dao *tArtifactDAOImpl) UpdateByIdWithMapAndCondition(id uint64, updates map[string]interface{}, condition map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateByIdWithMapAndCondition(id uint64, updates map[string]interface{}, condition map[string]interface{}) error {
 	if len(updates) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -395,12 +293,12 @@ func (dao *tArtifactDAOImpl) UpdateByIdWithMapAndCondition(id uint64, updates ma
 }
 
 // DeleteById 根据Id删除
-func (dao *tArtifactDAOImpl) DeleteById(id uint64) error {
+func (dao *TArtifactDAO) DeleteById(id uint64) error {
 	return dao.db.Where("id = ?", id).Delete(&entity.TArtifact{}).Error
 }
 
 // SelectByIdList 根据IdList列表查询
-func (dao *tArtifactDAOImpl) SelectByIdList(idList []uint64) ([]*entity.TArtifact, error) {
+func (dao *TArtifactDAO) SelectByIdList(idList []uint64) ([]*entity.TArtifact, error) {
 	if len(idList) == 0 {
 		return []*entity.TArtifact{}, nil
 	}
@@ -410,7 +308,7 @@ func (dao *tArtifactDAOImpl) SelectByIdList(idList []uint64) ([]*entity.TArtifac
 }
 
 // SelectByArtifactId 根据ArtifactId查询
-func (dao *tArtifactDAOImpl) SelectByArtifactId(artifactId string) (*entity.TArtifact, error) {
+func (dao *TArtifactDAO) SelectByArtifactId(artifactId string) (*entity.TArtifact, error) {
 	var result entity.TArtifact
 	err := dao.db.Where("artifactId = ?", artifactId).First(&result).Error
 	if err != nil {
@@ -420,7 +318,7 @@ func (dao *tArtifactDAOImpl) SelectByArtifactId(artifactId string) (*entity.TArt
 }
 
 // UpdateByArtifactId 根据ArtifactId更新
-func (dao *tArtifactDAOImpl) UpdateByArtifactId(bean *entity.TArtifact, artifactId string) error {
+func (dao *TArtifactDAO) UpdateByArtifactId(bean *entity.TArtifact, artifactId string) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -433,7 +331,7 @@ func (dao *tArtifactDAOImpl) UpdateByArtifactId(bean *entity.TArtifact, artifact
 //  1. 根据指定的 artifactId 更新记录
 //  2. 使用 map 可以显式指定要更新的字段，包括零值字段
 //  3. 只更新 map 中指定的字段，未指定的字段保持不变
-func (dao *tArtifactDAOImpl) UpdateByArtifactIdWithMap(artifactId string, updates map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateByArtifactIdWithMap(artifactId string, updates map[string]interface{}) error {
 	if len(updates) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -445,7 +343,7 @@ func (dao *tArtifactDAOImpl) UpdateByArtifactIdWithMap(artifactId string, update
 //  1. 根据指定的 artifactId 和额外的条件更新记录
 //  2. 只更新非零值字段，零值字段会被忽略
 //  3. 适用场景：需要在唯一键基础上增加额外的更新条件
-func (dao *tArtifactDAOImpl) UpdateByArtifactIdWithCondition(bean *entity.TArtifact, artifactId string, condition map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateByArtifactIdWithCondition(bean *entity.TArtifact, artifactId string, condition map[string]interface{}) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -464,7 +362,7 @@ func (dao *tArtifactDAOImpl) UpdateByArtifactIdWithCondition(bean *entity.TArtif
 //  1. 根据指定的 artifactId 和额外的条件更新记录
 //  2. 使用 map 可以显式指定要更新的字段，包括零值字段
 //  3. 提供最灵活的更新控制方式
-func (dao *tArtifactDAOImpl) UpdateByArtifactIdWithMapAndCondition(artifactId string, updates map[string]interface{}, condition map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateByArtifactIdWithMapAndCondition(artifactId string, updates map[string]interface{}, condition map[string]interface{}) error {
 	if len(updates) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -479,12 +377,12 @@ func (dao *tArtifactDAOImpl) UpdateByArtifactIdWithMapAndCondition(artifactId st
 }
 
 // DeleteByArtifactId 根据ArtifactId删除
-func (dao *tArtifactDAOImpl) DeleteByArtifactId(artifactId string) error {
+func (dao *TArtifactDAO) DeleteByArtifactId(artifactId string) error {
 	return dao.db.Where("artifactId = ?", artifactId).Delete(&entity.TArtifact{}).Error
 }
 
 // SelectByArtifactIdList 根据ArtifactIdList列表查询
-func (dao *tArtifactDAOImpl) SelectByArtifactIdList(artifactIdList []string) ([]*entity.TArtifact, error) {
+func (dao *TArtifactDAO) SelectByArtifactIdList(artifactIdList []string) ([]*entity.TArtifact, error) {
 	if len(artifactIdList) == 0 {
 		return []*entity.TArtifact{}, nil
 	}
@@ -494,7 +392,7 @@ func (dao *tArtifactDAOImpl) SelectByArtifactIdList(artifactIdList []string) ([]
 }
 
 // SelectBySessionIdAndVersion 根据SessionIdAndVersion查询
-func (dao *tArtifactDAOImpl) SelectBySessionIdAndVersion(sessionId string, version string) (*entity.TArtifact, error) {
+func (dao *TArtifactDAO) SelectBySessionIdAndVersion(sessionId string, version string) (*entity.TArtifact, error) {
 	var result entity.TArtifact
 	err := dao.db.Where("sessionId = ? AND version = ?", sessionId, version).First(&result).Error
 	if err != nil {
@@ -504,7 +402,7 @@ func (dao *tArtifactDAOImpl) SelectBySessionIdAndVersion(sessionId string, versi
 }
 
 // UpdateBySessionIdAndVersion 根据SessionIdAndVersion更新
-func (dao *tArtifactDAOImpl) UpdateBySessionIdAndVersion(bean *entity.TArtifact, sessionId string, version string) error {
+func (dao *TArtifactDAO) UpdateBySessionIdAndVersion(bean *entity.TArtifact, sessionId string, version string) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -517,7 +415,7 @@ func (dao *tArtifactDAOImpl) UpdateBySessionIdAndVersion(bean *entity.TArtifact,
 //  1. 根据指定的 sessionId 和 version 更新记录
 //  2. 使用 map 可以显式指定要更新的字段，包括零值字段
 //  3. 只更新 map 中指定的字段，未指定的字段保持不变
-func (dao *tArtifactDAOImpl) UpdateBySessionIdAndVersionWithMap(sessionId string, version string, updates map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateBySessionIdAndVersionWithMap(sessionId string, version string, updates map[string]interface{}) error {
 	if len(updates) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -529,7 +427,7 @@ func (dao *tArtifactDAOImpl) UpdateBySessionIdAndVersionWithMap(sessionId string
 //  1. 根据指定的 sessionId、version 和额外的条件更新记录
 //  2. 只更新非零值字段，零值字段会被忽略
 //  3. 适用场景：需要在复合键基础上增加额外的更新条件
-func (dao *tArtifactDAOImpl) UpdateBySessionIdAndVersionWithCondition(bean *entity.TArtifact, sessionId string, version string, condition map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateBySessionIdAndVersionWithCondition(bean *entity.TArtifact, sessionId string, version string, condition map[string]interface{}) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -548,7 +446,7 @@ func (dao *tArtifactDAOImpl) UpdateBySessionIdAndVersionWithCondition(bean *enti
 //  1. 根据指定的 sessionId、version 和额外的条件更新记录
 //  2. 使用 map 可以显式指定要更新的字段，包括零值字段
 //  3. 提供最灵活的更新控制方式
-func (dao *tArtifactDAOImpl) UpdateBySessionIdAndVersionWithMapAndCondition(sessionId string, version string, updates map[string]interface{}, condition map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateBySessionIdAndVersionWithMapAndCondition(sessionId string, version string, updates map[string]interface{}, condition map[string]interface{}) error {
 	if len(updates) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -563,19 +461,19 @@ func (dao *tArtifactDAOImpl) UpdateBySessionIdAndVersionWithMapAndCondition(sess
 }
 
 // DeleteBySessionIdAndVersion 根据SessionIdAndVersion删除
-func (dao *tArtifactDAOImpl) DeleteBySessionIdAndVersion(sessionId string, version string) error {
+func (dao *TArtifactDAO) DeleteBySessionIdAndVersion(sessionId string, version string) error {
 	return dao.db.Where("sessionId = ? AND version = ?", sessionId, version).Delete(&entity.TArtifact{}).Error
 }
 
 // SelectByStep 根据Step查询
-func (dao *tArtifactDAOImpl) SelectByStep(step int) ([]*entity.TArtifact, error) {
+func (dao *TArtifactDAO) SelectByStep(step int) ([]*entity.TArtifact, error) {
 	var result []*entity.TArtifact
 	err := dao.db.Where("step = ?", step).Find(&result).Error
 	return result, err
 }
 
 // UpdateByStep 根据Step更新
-func (dao *tArtifactDAOImpl) UpdateByStep(bean *entity.TArtifact, step int) error {
+func (dao *TArtifactDAO) UpdateByStep(bean *entity.TArtifact, step int) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -589,7 +487,7 @@ func (dao *tArtifactDAOImpl) UpdateByStep(bean *entity.TArtifact, step int) erro
 //  2. 使用 map 可以显式指定要更新的字段，包括零值字段
 //  3. 只更新 map 中指定的字段，未指定的字段保持不变
 //  4. 注意：step 不是唯一键，可能会更新多条记录
-func (dao *tArtifactDAOImpl) UpdateByStepWithMap(step int, updates map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateByStepWithMap(step int, updates map[string]interface{}) error {
 	if len(updates) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -602,7 +500,7 @@ func (dao *tArtifactDAOImpl) UpdateByStepWithMap(step int, updates map[string]in
 //  2. 只更新非零值字段，零值字段会被忽略
 //  3. 适用场景：需要在 step 基础上增加额外的更新条件，缩小更新范围
 //  4. 注意：可能会更新多条记录
-func (dao *tArtifactDAOImpl) UpdateByStepWithCondition(bean *entity.TArtifact, step int, condition map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateByStepWithCondition(bean *entity.TArtifact, step int, condition map[string]interface{}) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -622,7 +520,7 @@ func (dao *tArtifactDAOImpl) UpdateByStepWithCondition(bean *entity.TArtifact, s
 //  2. 使用 map 可以显式指定要更新的字段，包括零值字段
 //  3. 提供最灵活的更新控制方式
 //  4. 注意：可能会更新多条记录
-func (dao *tArtifactDAOImpl) UpdateByStepWithMapAndCondition(step int, updates map[string]interface{}, condition map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateByStepWithMapAndCondition(step int, updates map[string]interface{}, condition map[string]interface{}) error {
 	if len(updates) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -637,12 +535,12 @@ func (dao *tArtifactDAOImpl) UpdateByStepWithMapAndCondition(step int, updates m
 }
 
 // DeleteByStep 根据Step删除
-func (dao *tArtifactDAOImpl) DeleteByStep(step int) error {
+func (dao *TArtifactDAO) DeleteByStep(step int) error {
 	return dao.db.Where("step = ?", step).Delete(&entity.TArtifact{}).Error
 }
 
 // SelectByStepList 根据StepList列表查询
-func (dao *tArtifactDAOImpl) SelectByStepList(stepList []int) ([]*entity.TArtifact, error) {
+func (dao *TArtifactDAO) SelectByStepList(stepList []int) ([]*entity.TArtifact, error) {
 	if len(stepList) == 0 {
 		return []*entity.TArtifact{}, nil
 	}
@@ -654,7 +552,7 @@ func (dao *tArtifactDAOImpl) SelectByStepList(stepList []int) ([]*entity.TArtifa
 // 以下是一些辅助方法，用于更灵活的查询
 
 // SelectListWithPage 分页查询列表
-func (dao *tArtifactDAOImpl) SelectListWithPage(dto *query.TArtifactDTO, page, pageSize int) ([]*entity.TArtifact, int64, error) {
+func (dao *TArtifactDAO) SelectListWithPage(dto *query.TArtifactDTO, page, pageSize int) ([]*entity.TArtifact, int64, error) {
 	var result []*entity.TArtifact
 	var total int64
 
@@ -673,7 +571,7 @@ func (dao *tArtifactDAOImpl) SelectListWithPage(dto *query.TArtifactDTO, page, p
 }
 
 // UpdateByIdSelective 根据Id选择性更新（只更新非空字段）
-func (dao *tArtifactDAOImpl) UpdateByIdSelective(bean *entity.TArtifact, id uint64) error {
+func (dao *TArtifactDAO) UpdateByIdSelective(bean *entity.TArtifact, id uint64) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -691,7 +589,7 @@ func (dao *tArtifactDAOImpl) UpdateByIdSelective(bean *entity.TArtifact, id uint
 //  4. 只更新 map 中指定的字段，未指定的字段保持不变
 //  5. 适用场景：需要精确控制更新哪些字段，包括需要将某些字段设置为零值的场景
 //  6. 使用建议：字段名必须与数据库列名一致（或使用 GORM 的字段映射名）
-func (dao *tArtifactDAOImpl) UpdateByIdWithMap(id uint64, updates map[string]interface{}) error {
+func (dao *TArtifactDAO) UpdateByIdWithMap(id uint64, updates map[string]interface{}) error {
 	if len(updates) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -703,7 +601,7 @@ func (dao *tArtifactDAOImpl) UpdateByIdWithMap(id uint64, updates map[string]int
 }
 
 // MustUpdateById 必须更新一条记录，如果影响行数不为1则返回错误
-func (dao *tArtifactDAOImpl) MustUpdateById(bean *entity.TArtifact, id uint64) error {
+func (dao *TArtifactDAO) MustUpdateById(bean *entity.TArtifact, id uint64) error {
 	if bean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -718,7 +616,7 @@ func (dao *tArtifactDAOImpl) MustUpdateById(bean *entity.TArtifact, id uint64) e
 }
 
 // SelectListWithOrder 带排序的查询列表
-func (dao *tArtifactDAOImpl) SelectListWithOrder(dto *query.TArtifactDTO, orderBy string) ([]*entity.TArtifact, error) {
+func (dao *TArtifactDAO) SelectListWithOrder(dto *query.TArtifactDTO, orderBy string) ([]*entity.TArtifact, error) {
 	var result []*entity.TArtifact
 	db := dao.db.Model(&entity.TArtifact{})
 
