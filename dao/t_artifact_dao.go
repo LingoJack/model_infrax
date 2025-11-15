@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"model_infrax/output/model/entity"
 	"model_infrax/output/model/query"
-
 	"strings"
 
 	"gorm.io/gorm"
