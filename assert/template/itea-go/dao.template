@@ -6,7 +6,7 @@ import (
 
 	"strings"
 
-	// "gorm.io/gorm"  // 非 itea-go 框架 使用
+	"gorm.io/gorm"
 	igorm "git.woa.com/tencent-cloud-platform/go-module/itea-gorm"	// itea-go 框架提供的 db 注入
 )
 
@@ -142,7 +142,7 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 //   - error: 错误信息
 func (dao *{{ $daoName }}) SelectList(queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
-	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
 
 	// 应用查询条件
 	db = dao.build{{ $entityName }}QueryCondition(db, queryDto)
@@ -171,7 +171,7 @@ func (dao *{{ $daoName }}) SelectList(queryDto *{{ $.DtoPackageName }}.{{ $dtoNa
 //   - error: 错误信息
 func (dao *{{ $daoName }}) SelectCount(queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) (int64, error) {
 	var count int64
-	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
 
 	// 应用查询条件
 	db = dao.build{{ $entityName }}QueryCondition(db, queryDto)
@@ -194,7 +194,7 @@ func (dao *{{ $daoName }}) Insert(poBean *{{ $.PoPackageName }}.{{ $entityName }
 	if poBean == nil {
 		return fmt.Errorf("插入对象不能为空")
 	}
-	return dao.db.Create(poBean).Error
+	return dao.Create(poBean).Error
 }
 
 // InsertBatch 批量插入
@@ -209,7 +209,7 @@ func (dao *{{ $daoName }}) InsertBatch(poBeanList []*{{ $.PoPackageName }}.{{ $e
 	if len(poBeanList) == 0 {
 		return fmt.Errorf("批量插入列表不能为空")
 	}
-	return dao.db.Create(&poBeanList).Error
+	return dao.Create(&poBeanList).Error
 }
 
 // InsertOrUpdateNullable 插入或更新（会用零值覆盖）
@@ -233,7 +233,7 @@ func (dao *{{ $daoName }}) InsertOrUpdateNullable(poBean *{{ $.PoPackageName }}.
 	// - 根据主键判断记录是否存在
 	// - 存在则更新所有字段（包括零值字段）
 	// - 不存在则插入新记录
-	return dao.db.Save(poBean).Error
+	return dao.Save(poBean).Error
 }
 
 // InsertOrUpdateBatchNullable 批量插入或更新（会用零值覆盖）
@@ -259,7 +259,7 @@ func (dao *{{ $daoName }}) InsertOrUpdateBatchNullable(poBeanList []*{{ $.PoPack
 	// - 对每条记录根据主键判断是插入还是更新
 	// - 更新时会覆盖所有字段（包括零值字段）
 	// - 在一个事务中执行，保证原子性
-	return dao.db.Save(&poBeanList).Error
+	return dao.Save(&poBeanList).Error
 }
 
 {{- /* ==================== 主键索引方法 ==================== */ -}}
@@ -281,7 +281,7 @@ func (dao *{{ $daoName }}) InsertOrUpdateBatchNullable(poBeanList []*{{ $.PoPack
 //   - error: 错误信息
 func (dao *{{ $daoName }}) SelectBy{{ $pkFieldName }}({{ $pkParamName }} {{ $pkGoType }}) (*{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	var resultBean {{ $.PoPackageName }}.{{ $entityName }}
-	err := dao.db.Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }}).First(&resultBean).Error
+	err := dao.Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }}).First(&resultBean).Error
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +300,7 @@ func (dao *{{ $daoName }}) SelectBy{{ $pkFieldName }}List({{ $pkParamName }}List
 		return []*{{ $.PoPackageName }}.{{ $entityName }}{}, nil
 	}
 	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
-	err := dao.db.Where("{{ $pkCol.ColumnName }} IN ?", {{ $pkParamName }}List).Find(&resultList).Error
+	err := dao.Where("{{ $pkCol.ColumnName }} IN ?", {{ $pkParamName }}List).Find(&resultList).Error
 	return resultList, err
 }
 {{- end }}
@@ -327,7 +327,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}(poBean *{{ $.PoPackageName
 	// - 只更新结构体中的非零值字段
 	// - 零值字段会被忽略，保留数据库中的原值
 	// - 适合部分更新场景
-	return dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }}).Updates(poBean).Error
+	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }}).Updates(poBean).Error
 }
 
 // UpdateBy{{ $pkFieldName }}WithMap 根据主键{{ $pkFieldName }}使用Map更新指定字段（可以用零值覆盖）
@@ -353,7 +353,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithMap({{ $pkParamName }} 
 	// - 可以显式更新零值字段
 	// - 只更新 map 中指定的字段
 	// - 提供最精确的字段更新控制
-	return dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }}).Updates(updatedMap).Error
+	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }}).Updates(updatedMap).Error
 }
 
 // UpdateBy{{ $pkFieldName }}WithCondition 根据主键{{ $pkFieldName }}和额外条件更新（不会用零值覆盖）
@@ -372,7 +372,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithCondition(poBean *{{ $.
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
-	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }})
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }})
 
 	// 应用额外的条件
 	for key, value := range conditionMap {
@@ -397,7 +397,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithMapAndCondition({{ $pkP
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
-	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }})
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }})
 
 	// 应用额外的条件
 	for key, value := range conditionMap {
@@ -413,7 +413,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithMapAndCondition({{ $pkP
 // 返回:
 //   - error: 错误信息
 func (dao *{{ $daoName }}) DeleteBy{{ $pkFieldName }}({{ $pkParamName }} {{ $pkGoType }}) error {
-	return dao.db.Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }}).Delete(&{{ $.PoPackageName }}.{{ $entityName }}{}).Error
+	return dao.Where("{{ $pkCol.ColumnName }} = ?", {{ $pkParamName }}).Delete(&{{ $.PoPackageName }}.{{ $entityName }}{}).Error
 }
 
 {{- end }}
@@ -445,7 +445,7 @@ func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}(
 {{- if $i }}, {{ end }}{{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}
 {{- end }}) (*{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	var resultBean {{ $.PoPackageName }}.{{ $entityName }}
-	err := dao.db.Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+	err := dao.Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
 {{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }}).First(&resultBean).Error
 	if err != nil {
 		return nil, err
@@ -468,7 +468,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}(poBean *{{ $.PoPackageNam
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
-	return dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
 {{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }}).Updates(poBean).Error
 }
 
@@ -488,7 +488,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMap(
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
-	return dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
 {{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }}).Updates(updatedMap).Error
 }
 
@@ -509,7 +509,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithCondition(poBean *{{ $
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
-	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
 {{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }})
 
 	// 应用额外的条件
@@ -537,7 +537,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMapAndCondition(
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
-	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
 {{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }})
 
 	// 应用额外的条件
@@ -557,7 +557,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMapAndCondition(
 //   - error: 错误信息
 func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(
 {{- range $i, $col := $indexColumns }}{{ if $i }}, {{ end }}{{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}) error {
-	return dao.db.Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+	return dao.Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
 {{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }}).Delete(&{{ $.PoPackageName }}.{{ $entityName }}{}).Error
 }
 
@@ -598,7 +598,7 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(
 //   - 该索引不是唯一索引，可能返回多条记录
 func (dao *{{ $daoName }}) SelectBy{{ $fieldName }}({{ $paramName }} {{ $goType }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
-	err := dao.db.Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Find(&resultList).Error
+	err := dao.Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Find(&resultList).Error
 	return resultList, err
 }
 
@@ -613,7 +613,7 @@ func (dao *{{ $daoName }}) SelectBy{{ $fieldName }}List({{ $paramName }}List []{
 		return []*{{ $.PoPackageName }}.{{ $entityName }}{}, nil
 	}
 	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
-	err := dao.db.Where("{{ $col.ColumnName }} IN ?", {{ $paramName }}List).Find(&resultList).Error
+	err := dao.Where("{{ $col.ColumnName }} IN ?", {{ $paramName }}List).Find(&resultList).Error
 	return resultList, err
 }
 
@@ -630,7 +630,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}(poBean *{{ $.PoPackageName }
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
-	return dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Updates(poBean).Error
+	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Updates(poBean).Error
 }
 
 // UpdateBy{{ $fieldName }}WithMap 根据索引{{ $index.IndexName }}使用Map更新指定字段（可以用零值覆盖）
@@ -647,7 +647,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithMap({{ $paramName }} {{ $
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
-	return dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Updates(updatedMap).Error
+	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Updates(updatedMap).Error
 }
 
 // UpdateBy{{ $fieldName }}WithCondition 根据索引{{ $index.IndexName }}和额外条件更新（不会用零值覆盖）
@@ -665,7 +665,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithCondition(poBean *{{ $.Po
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
-	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }})
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }})
 
 	// 应用额外的条件
 	for key, value := range conditionMap {
@@ -690,7 +690,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithMapAndCondition({{ $param
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
-	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }})
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }})
 
 	// 应用额外的条件
 	for key, value := range conditionMap {
@@ -708,7 +708,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithMapAndCondition({{ $param
 // 说明:
 //   - 注意: {{ $paramName }} 不是唯一键，可能会删除多条记录
 func (dao *{{ $daoName }}) DeleteBy{{ $fieldName }}({{ $paramName }} {{ $goType }}) error {
-	return dao.db.Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Delete(&{{ $.PoPackageName }}.{{ $entityName }}{}).Error
+	return dao.Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Delete(&{{ $.PoPackageName }}.{{ $entityName }}{}).Error
 }
 
 {{- end }}
