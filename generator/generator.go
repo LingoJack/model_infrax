@@ -37,13 +37,25 @@ type TemplateData struct {
 // 返回:
 //   - *Generator: 生成器实例
 func NewGenerator(cfg *config.Configger) *Generator {
-	return &Generator{
+	generator := Generator{
 		modelTemplatePath: "./assert/template/po.template",
 		daoTemplatePath:   "./assert/template/dao.template",
 		dtoTemplatePath:   "./assert/template/dto.template",
 		toolTemplateDir:   "./assert/template/tools",
 		configger:         cfg,
 	}
+
+	if cfg.GenerateOption.UseFramework == "itea-go" {
+		generator = Generator{
+			modelTemplatePath: "./assert/template/itea-go/po.template",
+			daoTemplatePath:   "./assert/template/itea-go/dao.template",
+			dtoTemplatePath:   "./assert/template/itea-go/dto.template",
+			toolTemplateDir:   "./assert/template/tools",
+			configger:         cfg,
+		}
+	}
+
+	return &generator
 }
 
 // GenerateModelOneByOne 根据模板生成代码，每个表生成一个文件
@@ -71,6 +83,7 @@ func (g *Generator) GenerateModelOneByOne(schemas []model.Schema) (err error) {
 // 返回:
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateModel(schemas []model.Schema, outputFileName string) (err error) {
+
 	// 读取模板文件
 	tmplContent, err := os.ReadFile(g.modelTemplatePath)
 	if err != nil {

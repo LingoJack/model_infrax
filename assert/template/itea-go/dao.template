@@ -6,7 +6,8 @@ import (
 
 	"strings"
 
-	"gorm.io/gorm"
+	// "gorm.io/gorm"  // 非 itea-go 框架 使用
+	igorm "git.woa.com/tencent-cloud-platform/go-module/itea-gorm"	// itea-go 框架提供的 db 注入
 )
 
 {{- range $schema := .Schemas }}
@@ -17,21 +18,13 @@ import (
 
 // {{ $daoName }} {{ $schema.Comment }}的Dao实现
 type {{ $daoName }} struct {
-	db *gorm.DB
+	// itea-go 框架提供的 db 注入
+	igorm.BaseDao `wired:"true"`
 }
 
 func (dao *{{ $daoName }} ) Database() string {
     // TODO 补全 db 名称
 	return ""
-}
-
-// New{{ $daoName }} 创建{{ $daoName }}实例
-// 参数:
-//   - db: GORM数据库连接实例
-// 返回:
-//   - *{{ $daoName }}: Dao实例
-func New{{ $daoName }}(db *gorm.DB) *{{ $daoName }} {
-	return &{{ $daoName }}{db: db}
 }
 
 // build{{ $entityName }}QueryCondition 构建查询条件

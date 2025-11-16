@@ -58,11 +58,7 @@ func (a *App) Run() error {
 	log.Println("================ 开始生成 DTO 代码 ==================")
 
 	// 生成 DTO 代码
-	if a.Config.GenerateOption.ModelAllInOneFile {
-		err = a.Generator.GenerateDTO(schemas, a.Config.GenerateOption.ModelAllInOneFileName)
-	} else {
-		err = a.Generator.GenerateDTOOneByOne(schemas)
-	}
+	err = a.Generator.GenerateDTOOneByOne(schemas)
 	if err != nil {
 		return err
 	}
@@ -72,11 +68,7 @@ func (a *App) Run() error {
 	log.Println("================ 开始生成 DAO 代码 ==================")
 
 	// 生成 DAO 代码
-	if a.Config.GenerateOption.ModelAllInOneFile {
-		err = a.Generator.GenerateDAO(schemas, a.Config.GenerateOption.ModelAllInOneFileName)
-	} else {
-		err = a.Generator.GenerateDAOOneByOne(schemas)
-	}
+	err = a.Generator.GenerateDAOOneByOne(schemas)
 	if err != nil {
 		return err
 	}

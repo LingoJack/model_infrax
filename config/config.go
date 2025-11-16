@@ -32,6 +32,7 @@ type GenerateOption struct {
 	Package               PackageConfig `yaml:"package_name"`             // 包配置
 	ModelAllInOneFile     bool          `yaml:"all_model_in_one_file"`    // 是否将所有模型放在一个文件中
 	ModelAllInOneFileName string        `yaml:"all_model_in_one_file_name"`
+	UseFramework          string        `yaml:"use_framework"`
 }
 
 type PackageConfig struct {
