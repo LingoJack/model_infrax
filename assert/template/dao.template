@@ -1,9 +1,9 @@
-{{- /* DAO 层代码生成模板 */ -}}
+{{- /* Dao 层代码生成模板 */ -}}
 package {{ .DaoPackageName }}
 
 import (
 	"fmt"
-	
+
 	"strings"
 
 	"gorm.io/gorm"
@@ -11,11 +11,11 @@ import (
 
 {{- range $schema := .Schemas }}
 {{- $entityName := $schema.Name | ToPascalCase }}
-{{- $daoName := printf "%sDAO" $entityName }}
-{{- $dtoName := printf "%sDTO" $entityName }}
+{{- $daoName := printf "%sDao" $entityName }}
+{{- $dtoName := printf "%sDto" $entityName }}
 {{- $varName := $schema.Name | ToCamelCase }}
 
-// {{ $daoName }} {{ $schema.Comment }}的DAO实现
+// {{ $daoName }} {{ $schema.Comment }}的Dao实现
 type {{ $daoName }} struct {
 	db *gorm.DB
 }
@@ -24,7 +24,7 @@ type {{ $daoName }} struct {
 // 参数:
 //   - db: GORM数据库连接实例
 // 返回:
-//   - *{{ $daoName }}: DAO实例
+//   - *{{ $daoName }}: Dao实例
 func New{{ $daoName }}(db *gorm.DB) *{{ $daoName }} {
 	return &{{ $daoName }}{db: db}
 }
@@ -32,14 +32,14 @@ func New{{ $daoName }}(db *gorm.DB) *{{ $daoName }} {
 // build{{ $entityName }}QueryCondition 构建查询条件
 // 参数:
 //   - db: GORM数据库连接实例
-//   - queryDTO: 查询条件DTO对象
+//   - queryDto: 查询条件Dto对象
 // 返回:
 //   - *gorm.DB: 应用了查询条件的数据库连接
 // 说明:
 //   - 支持精确匹配、模糊查询、IN查询、范围查询等多种查询方式
 //   - 零值字段会被忽略，不会作为查询条件
-func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, queryDTO *{{ $.DtoPackageName }}.{{ $dtoName }}) *gorm.DB {
-	if queryDTO == nil {
+func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) *gorm.DB {
+	if queryDto == nil {
 		return db
 	}
 
@@ -48,45 +48,45 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 {{- $fieldName := .ColumnName | ToPascalCase }}
 {{- $goType := . | GetGoType }}
 {{- if eq $goType "string" }}
-	if queryDTO.{{ $fieldName }} != "" {
-		db = db.Where("{{ .ColumnName }} = ?", queryDTO.{{ $fieldName }})
+	if queryDto.{{ $fieldName }} != "" {
+		db = db.Where("{{ .ColumnName }} = ?", queryDto.{{ $fieldName }})
 	}
 {{- else if eq $goType "int" }}
-	if queryDTO.{{ $fieldName }} != 0 {
-		db = db.Where("{{ .ColumnName }} = ?", queryDTO.{{ $fieldName }})
+	if queryDto.{{ $fieldName }} != 0 {
+		db = db.Where("{{ .ColumnName }} = ?", queryDto.{{ $fieldName }})
 	}
 {{- else if eq $goType "uint64" }}
-	if queryDTO.{{ $fieldName }} != 0 {
-		db = db.Where("{{ .ColumnName }} = ?", queryDTO.{{ $fieldName }})
+	if queryDto.{{ $fieldName }} != 0 {
+		db = db.Where("{{ .ColumnName }} = ?", queryDto.{{ $fieldName }})
 	}
 {{- else if eq $goType "int64" }}
-	if queryDTO.{{ $fieldName }} != 0 {
-		db = db.Where("{{ .ColumnName }} = ?", queryDTO.{{ $fieldName }})
+	if queryDto.{{ $fieldName }} != 0 {
+		db = db.Where("{{ .ColumnName }} = ?", queryDto.{{ $fieldName }})
 	}
 {{- else if eq $goType "bool" }}
-	// bool类型字段：false也是有效值，这里简化处理，如需区分未设置和false，DTO应使用*bool
-	if queryDTO.{{ $fieldName }} {
-		db = db.Where("{{ .ColumnName }} = ?", queryDTO.{{ $fieldName }})
+	// bool类型字段：false也是有效值，这里简化处理，如需区分未设置和false，Dto应使用*bool
+	if queryDto.{{ $fieldName }} {
+		db = db.Where("{{ .ColumnName }} = ?", queryDto.{{ $fieldName }})
 	}
 {{- else if eq $goType "time.Time" }}
-	if !queryDTO.{{ $fieldName }}.IsZero() {
-		db = db.Where("{{ .ColumnName }} = ?", queryDTO.{{ $fieldName }})
+	if !queryDto.{{ $fieldName }}.IsZero() {
+		db = db.Where("{{ .ColumnName }} = ?", queryDto.{{ $fieldName }})
 	}
 {{- else if eq $goType "*string" }}
-	if queryDTO.{{ $fieldName }} != nil && *queryDTO.{{ $fieldName }} != "" {
-		db = db.Where("{{ .ColumnName }} = ?", *queryDTO.{{ $fieldName }})
+	if queryDto.{{ $fieldName }} != nil && *queryDto.{{ $fieldName }} != "" {
+		db = db.Where("{{ .ColumnName }} = ?", *queryDto.{{ $fieldName }})
 	}
 {{- else if eq $goType "*int" }}
-	if queryDTO.{{ $fieldName }} != nil {
-		db = db.Where("{{ .ColumnName }} = ?", *queryDTO.{{ $fieldName }})
+	if queryDto.{{ $fieldName }} != nil {
+		db = db.Where("{{ .ColumnName }} = ?", *queryDto.{{ $fieldName }})
 	}
 {{- else if eq $goType "*time.Time" }}
-	if queryDTO.{{ $fieldName }} != nil && !queryDTO.{{ $fieldName }}.IsZero() {
-		db = db.Where("{{ .ColumnName }} = ?", *queryDTO.{{ $fieldName }})
+	if queryDto.{{ $fieldName }} != nil && !queryDto.{{ $fieldName }}.IsZero() {
+		db = db.Where("{{ .ColumnName }} = ?", *queryDto.{{ $fieldName }})
 	}
 {{- else }}
-	if queryDTO.{{ $fieldName }} != nil {
-		db = db.Where("{{ .ColumnName }} = ?", queryDTO.{{ $fieldName }})
+	if queryDto.{{ $fieldName }} != nil {
+		db = db.Where("{{ .ColumnName }} = ?", queryDto.{{ $fieldName }})
 	}
 {{- end }}
 {{- end }}
@@ -96,12 +96,12 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 {{- $fieldName := .ColumnName | ToPascalCase }}
 {{- $goType := . | GetGoType }}
 {{- if eq $goType "string" }}
-	if queryDTO.{{ $fieldName }}Fuzzy != "" {
-		db = db.Where("{{ .ColumnName }} LIKE ?", "%"+queryDTO.{{ $fieldName }}Fuzzy+"%")
+	if queryDto.{{ $fieldName }}Fuzzy != "" {
+		db = db.Where("{{ .ColumnName }} LIKE ?", "%"+queryDto.{{ $fieldName }}Fuzzy+"%")
 	}
 {{- else if eq $goType "*string" }}
-	if queryDTO.{{ $fieldName }}Fuzzy != nil && *queryDTO.{{ $fieldName }}Fuzzy != "" {
-		db = db.Where("{{ .ColumnName }} LIKE ?", "%"+*queryDTO.{{ $fieldName }}Fuzzy+"%")
+	if queryDto.{{ $fieldName }}Fuzzy != nil && *queryDto.{{ $fieldName }}Fuzzy != "" {
+		db = db.Where("{{ .ColumnName }} LIKE ?", "%"+*queryDto.{{ $fieldName }}Fuzzy+"%")
 	}
 {{- end }}
 {{- end }}
@@ -111,11 +111,11 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 {{- $fieldName := .ColumnName | ToPascalCase }}
 {{- $goType := . | GetGoType }}
 {{- if or (eq $goType "time.Time") (eq $goType "*time.Time") }}
-	if !queryDTO.{{ $fieldName }}Start.IsZero() {
-		db = db.Where("{{ .ColumnName }} >= ?", queryDTO.{{ $fieldName }}Start)
+	if !queryDto.{{ $fieldName }}Start.IsZero() {
+		db = db.Where("{{ .ColumnName }} >= ?", queryDto.{{ $fieldName }}Start)
 	}
-	if !queryDTO.{{ $fieldName }}End.IsZero() {
-		db = db.Where("{{ .ColumnName }} < DATE_ADD(?, INTERVAL 1 DAY)", queryDTO.{{ $fieldName }}End)
+	if !queryDto.{{ $fieldName }}End.IsZero() {
+		db = db.Where("{{ .ColumnName }} < DATE_ADD(?, INTERVAL 1 DAY)", queryDto.{{ $fieldName }}End)
 	}
 {{- end }}
 {{- end }}
@@ -125,8 +125,8 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 {{- if .IsIndexed }}
 {{- $fieldName := .ColumnName | ToPascalCase }}
 {{- $goType := . | GetGoType }}
-	if len(queryDTO.{{ $fieldName }}List) > 0 {
-		db = db.Where("{{ .ColumnName }} IN ?", queryDTO.{{ $fieldName }}List)
+	if len(queryDto.{{ $fieldName }}List) > 0 {
+		db = db.Where("{{ .ColumnName }} IN ?", queryDto.{{ $fieldName }}List)
 	}
 {{- end }}
 {{- end }}
@@ -138,27 +138,27 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 
 // SelectList 查询列表
 // 参数:
-//   - queryDTO: 查询条件DTO对象，支持分页、排序、多条件查询
+//   - queryDto: 查询条件Dto对象，支持分页、排序、多条件查询
 // 返回:
 //   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
-func (dao *{{ $daoName }}) SelectList(queryDTO *{{ $.DtoPackageName }}.{{ $dtoName }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
+func (dao *{{ $daoName }}) SelectList(queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
 	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
 
 	// 应用查询条件
-	db = dao.build{{ $entityName }}QueryCondition(db, queryDTO)
+	db = dao.build{{ $entityName }}QueryCondition(db, queryDto)
 
 	// 排序
-	if queryDTO != nil && queryDTO.OrderBy != "" {
-		if dao.isValidOrderBy(queryDTO.OrderBy) {
-			db = db.Order(queryDTO.OrderBy)
+	if queryDto != nil && queryDto.OrderBy != "" {
+		if dao.isValidOrderBy(queryDto.OrderBy) {
+			db = db.Order(queryDto.OrderBy)
 		}
 	}
 
 	// 分页
-	if queryDTO != nil && queryDTO.PageSize > 0 {
-		db = db.Offset(queryDTO.PageOffset).Limit(queryDTO.PageSize)
+	if queryDto != nil && queryDto.PageSize > 0 {
+		db = db.Offset(queryDto.PageOffset).Limit(queryDto.PageSize)
 	}
 
 	err := db.Find(&resultList).Error
@@ -167,16 +167,16 @@ func (dao *{{ $daoName }}) SelectList(queryDTO *{{ $.DtoPackageName }}.{{ $dtoNa
 
 // SelectCount 查询数量
 // 参数:
-//   - queryDTO: 查询条件DTO对象
+//   - queryDto: 查询条件Dto对象
 // 返回:
 //   - int64: 符合条件的记录数量
 //   - error: 错误信息
-func (dao *{{ $daoName }}) SelectCount(queryDTO *{{ $.DtoPackageName }}.{{ $dtoName }}) (int64, error) {
+func (dao *{{ $daoName }}) SelectCount(queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) (int64, error) {
 	var count int64
 	db := dao.db.Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
 
 	// 应用查询条件
-	db = dao.build{{ $entityName }}QueryCondition(db, queryDTO)
+	db = dao.build{{ $entityName }}QueryCondition(db, queryDto)
 
 	err := db.Count(&count).Error
 	return count, err
