@@ -1,0 +1,278 @@
+{{- /* 生成 Dto 结构体的模板 */ -}}
+package {{ .DtoPackageName }}
+
+import (
+	"encoding/json"
+	"time"
+)
+
+{{- range $schema := .Schemas }}
+
+// {{ $schema.Name | ToPascalCase }}Dto {{ $schema.Comment }} 数据传输对象
+type {{ $schema.Name | ToPascalCase }}Dto struct {
+{{- range $schema.Columns }}
+	{{ .ColumnName | ToPascalCase }} {{ . | GetGoType }} `json:"{{ .ColumnName }}"` // {{ .Comment }}
+{{- end }}
+{{- range $schema.Columns }}
+{{- if eq (. | GetGoType) "time.Time" }}
+	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ .ColumnName }}Start"` // {{ .Comment }} 开始时间
+	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ .ColumnName }}End"` // {{ .Comment }} 结束时间
+{{- if .IsIndexed }}
+	{{ .ColumnName | ToPascalCase }}List []{{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+{{- end }}
+{{- else if eq (. | GetGoType) "string" }}
+	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ .ColumnName }}Fuzzy"` // {{ .Comment }} 模糊查询
+{{- if .IsIndexed }}
+	{{ .ColumnName | ToPascalCase }}List []{{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+{{- end }}
+{{- else if eq (. | GetGoType) "*time.Time" }}
+	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ .ColumnName }}Start"` // {{ .Comment }} 开始时间
+	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ .ColumnName }}End"` // {{ .Comment }} 结束时间
+{{- if .IsIndexed }}
+	{{ .ColumnName | ToPascalCase }}List []{{ . | GetGoType | TrimPointer }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+{{- end }}
+{{- else if eq (. | GetGoType) "*string" }}
+	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ .ColumnName }}Fuzzy"` // {{ .Comment }} 模糊查询
+{{- if .IsIndexed }}
+	{{ .ColumnName | ToPascalCase }}List []string `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+{{- end }}
+{{- else if .IsIndexed }}
+	{{ .ColumnName | ToPascalCase }}List []{{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+{{- end }}
+{{- end }}
+	OrderBy    string `json:"orderBy"`    // 排序字段
+	PageOffset int    `json:"pageOffset"` // 分页偏移量
+	PageSize   int    `json:"pageSize"`   // 每页数量
+}
+
+// Jsonify 将结构体序列化为 JSON 字符串（紧凑格式）
+// 返回:
+//   - string: JSON 字符串，如果序列化失败则返回错误信息的 JSON
+func (t *{{ $schema.Name | ToPascalCase }}Dto) Jsonify() string {
+	byts, err := json.Marshal(t)
+	if err != nil {
+		return `{"error": "` + err.Error() + `"}`
+	}
+	return string(byts)
+}
+
+// JsonifyIndent 将结构体序列化为格式化的 JSON 字符串（带缩进）
+// 返回:
+//   - string: 格式化的 JSON 字符串，如果序列化失败则返回错误信息的 JSON
+func (t *{{ $schema.Name | ToPascalCase }}Dto) JsonifyIndent() string {
+	byts, err := json.MarshalIndent(t, "", "  ")
+	if err != nil {
+		return `{"error": "` + err.Error() + `"}`
+	}
+	return string(byts)
+}
+
+
+// {{ $schema.Name | ToPascalCase }}DtoBuilder 用于构建 {{ $schema.Name | ToPascalCase }}Dto 实例的 Builder
+type {{ $schema.Name | ToPascalCase }}DtoBuilder struct {
+	instance *{{ $schema.Name | ToPascalCase }}Dto
+}
+
+// New{{ $schema.Name | ToPascalCase }}DtoBuilder 创建一个新的 {{ $schema.Name | ToPascalCase }}DtoBuilder 实例
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: Builder 实例，用于链式调用
+func New{{ $schema.Name | ToPascalCase }}DtoBuilder() *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	return &{{ $schema.Name | ToPascalCase }}DtoBuilder{
+		instance: &{{ $schema.Name | ToPascalCase }}Dto{},
+	}
+}
+
+{{- range $column := $schema.Columns }}
+{{- if not $column.IsAutoIncrement }}
+
+// With{{ $column.ColumnName | ToPascalCase }} 设置 {{ $column.ColumnName }} 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}: {{ $column.Comment }}
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}({{ $column.ColumnName | ToSafeParamName }} {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }} = {{ $column.ColumnName | ToSafeParamName }}
+	return b
+}
+{{- if $column.IsNullable }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Value 设置 {{ $column.ColumnName }} 字段（便捷方法，自动转换为指针）
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}: {{ $column.Comment }}
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}Value({{ $column.ColumnName | ToSafeParamName }} {{ $column | GetGoType | TrimPointer }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }} = &{{ $column.ColumnName | ToSafeParamName }}
+	return b
+}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- range $column := $schema.Columns }}
+{{- if not $column.IsAutoIncrement }}
+{{- if eq ($column | GetGoType) "time.Time" }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Start 设置 {{ $column.ColumnName }}Start 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}Start: {{ $column.Comment }} 开始时间
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}Start({{ $column.ColumnName | ToSafeParamName }}Start {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}Start = {{ $column.ColumnName | ToSafeParamName }}Start
+	return b
+}
+
+// With{{ $column.ColumnName | ToPascalCase }}End 设置 {{ $column.ColumnName }}End 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}End: {{ $column.Comment }} 结束时间
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}End({{ $column.ColumnName | ToSafeParamName }}End {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}End = {{ $column.ColumnName | ToSafeParamName }}End
+	return b
+}
+{{- if $column.IsIndexed }}
+
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []{{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
+	return b
+}
+{{- end }}
+{{- else if eq ($column | GetGoType) "string" }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Fuzzy 设置 {{ $column.ColumnName }}_fuzzy 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}Fuzzy: {{ $column.Comment }} 模糊查询
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}Fuzzy({{ $column.ColumnName | ToSafeParamName }}Fuzzy {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}Fuzzy = {{ $column.ColumnName | ToSafeParamName }}Fuzzy
+	return b
+}
+{{- if $column.IsIndexed }}
+
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []{{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
+	return b
+}
+{{- end }}
+{{- else if eq ($column | GetGoType) "*time.Time" }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Start 设置 {{ $column.ColumnName }}Start 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}Start: {{ $column.Comment }} 开始时间
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}Start({{ $column.ColumnName | ToSafeParamName }}Start {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}Start = {{ $column.ColumnName | ToSafeParamName }}Start
+	return b
+}
+
+// With{{ $column.ColumnName | ToPascalCase }}End 设置 {{ $column.ColumnName }}End 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}End: {{ $column.Comment }} 结束时间
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}End({{ $column.ColumnName | ToSafeParamName }}End {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}End = {{ $column.ColumnName | ToSafeParamName }}End
+	return b
+}
+{{- if $column.IsIndexed }}
+
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []{{ $column | GetGoType | TrimPointer }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
+	return b
+}
+{{- end }}
+{{- else if eq ($column | GetGoType) "*string" }}
+
+// With{{ $column.ColumnName | ToPascalCase }}Fuzzy 设置 {{ $column.ColumnName }}_fuzzy 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}Fuzzy: {{ $column.Comment }} 模糊查询
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}Fuzzy({{ $column.ColumnName | ToSafeParamName }}Fuzzy {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}Fuzzy = {{ $column.ColumnName | ToSafeParamName }}Fuzzy
+	return b
+}
+{{- if $column.IsIndexed }}
+
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []string) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
+	return b
+}
+{{- end }}
+{{- else if $column.IsIndexed }}
+
+// With{{ $column.ColumnName | ToPascalCase }}List 设置 {{ $column.ColumnName }}List 字段
+// 参数:
+//   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []{{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
+	return b
+}
+{{- end }}
+{{- end }}
+{{- end }}
+
+// WithOrderBy 设置 orderBy 字段
+// 参数:
+//   - orderBy: 排序字段
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) WithOrderBy(orderBy string) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.OrderBy = orderBy
+	return b
+}
+
+// WithPageOffset 设置 pageOffset 字段
+// 参数:
+//   - pageOffset: 分页偏移量
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) WithPageOffset(pageOffset int) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.PageOffset = pageOffset
+	return b
+}
+
+// WithPageSize 设置 pageSize 字段
+// 参数:
+//   - pageSize: 每页数量
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) WithPageSize(pageSize int) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+	b.instance.PageSize = pageSize
+	return b
+}
+
+// Build 构建并返回 {{ $schema.Name | ToPascalCase }}Dto 实例
+// 返回:
+//   - *{{ $schema.Name | ToPascalCase }}Dto: 构建完成的实例
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) Build() *{{ $schema.Name | ToPascalCase }}Dto {
+	return b.instance
+}
+
+{{- end }}

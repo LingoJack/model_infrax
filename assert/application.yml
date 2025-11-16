@@ -29,3 +29,6 @@ generate_option:
     vo_package: model/view
     dao_package: dao
     tool_package: tool
+
+  # 使用框架, 为空时为 gorm 原生
+  use_framework: itea-go
