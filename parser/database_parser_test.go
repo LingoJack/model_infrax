@@ -22,11 +22,11 @@ func TestParser_AllTables(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	parser, err := NewParser(configger)
+	parser, err := NewDatabaseParser(configger)
 	if err != nil {
 		panic(err)
 	}
-	tables, err := parser.AllTablesFromDB()
+	tables, err := parser.Parse()
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +38,7 @@ func TestSql1(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	parser, err := NewParser(configger)
+	parser, err := NewDatabaseParser(configger)
 	if err != nil {
 		panic(err)
 	}
@@ -56,7 +56,7 @@ func TestSql2(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	parser, err := NewParser(configger)
+	parser, err := NewDatabaseParser(configger)
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +74,7 @@ func TestSql3(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	parser, err := NewParser(configger)
+	parser, err := NewDatabaseParser(configger)
 	if err != nil {
 		panic(err)
 	}
@@ -92,7 +92,7 @@ func TestSql4(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	parser, err := NewParser(configger)
+	parser, err := NewDatabaseParser(configger)
 	if err != nil {
 		panic(err)
 	}

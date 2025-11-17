@@ -20,7 +20,7 @@ func InitializeApp(configPath string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	parserParser, err := parser.NewParser(configger)
+	parserParser, err := parser.NewDatabaseParser(configger)
 	if err != nil {
 		return nil, err
 	}
@@ -30,12 +30,12 @@ func InitializeApp(configPath string) (*App, error) {
 }
 
 // InitializeParser 单独初始化Parser，用于需要独立使用Parser的场景
-func InitializeParser(configPath string) (*parser.Parser, error) {
+func InitializeParser(configPath string) (*parser.DatabaseParser, error) {
 	configger, err := config.NewConfigger(configPath)
 	if err != nil {
 		return nil, err
 	}
-	parserParser, err := parser.NewParser(configger)
+	parserParser, err := parser.NewDatabaseParser(configger)
 	if err != nil {
 		return nil, err
 	}
