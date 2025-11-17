@@ -1,8 +1,8 @@
 generate_config:
   # 生成模式: database(从数据库解析) 或 statement(从SQL文件解析)
-  generate_mode: database
+  generate_mode: statement
   
-  # database 模式配置
+  # database 模式配置（statement模式下不需要）
   database_name: test_db
   host: localhost
   port: 3306
@@ -13,9 +13,9 @@ generate_config:
   sql_file_path: ~/dev/model_infrax/assert/database.sql
   
   # 通用配置
-  all_tables: false
+  all_tables: true
   table_names:
-    - t_llm_history
+    - t_user
 
 generate_option:
   # 输出路径

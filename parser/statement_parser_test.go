@@ -80,18 +80,19 @@ func TestTiDBParser(t *testing.T) {
 }
 
 func TestStatementParser_Parse(t *testing.T) {
-	sqlFilePath := "/Users/jacklingo/dev/model_infrax/assert/database.sql"
-
+	// 加载配置文件
 	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
 	if err != nil {
 		panic(err)
 	}
 
-	p, err := NewStatementParser(configger, sqlFilePath)
+	// 创建StatementParser，SQL文件路径从配置中读取
+	p, err := NewStatementParser(configger)
 	if err != nil {
 		panic(err)
 	}
 
+	// 解析SQL文件
 	schemas, err := p.Parse()
 	if err != nil {
 		panic(err)
