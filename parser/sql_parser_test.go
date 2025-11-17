@@ -26,7 +26,7 @@ func TestParser_AllTables(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tables, err := parser.AllTables()
+	tables, err := parser.AllTablesFromDB()
 	if err != nil {
 		panic(err)
 	}

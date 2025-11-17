@@ -7,7 +7,7 @@ generate_config:
   password: 200487
   all_tables: true
   table_names:
-    - t_artifact
+    - t_llm_history
 
 generate_option:
   # 输出路径
