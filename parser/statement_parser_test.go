@@ -87,12 +87,12 @@ func TestStatementParser_Parse(t *testing.T) {
 		panic(err)
 	}
 
-	parser, err := NewStatementParser(configger, sqlFilePath)
+	p, err := NewStatementParser(configger, sqlFilePath)
 	if err != nil {
 		panic(err)
 	}
 
-	schemas, err := parser.Parse()
+	schemas, err := p.Parse()
 	if err != nil {
 		panic(err)
 	}
