@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+func TestGoMySQLServer(t *testing.T) {
+
+}
+
 func TestStatementParser_Parse(t *testing.T) {
 	sqlFilePath := "/Users/jacklingo/dev/model_infrax/assert/database.sql"
 
