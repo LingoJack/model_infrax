@@ -116,12 +116,24 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 		for _, option := range col.Options {
 			switch option.Tp {
 			case ast.ColumnOptionComment:
-				// 提取列注释
-				column.Comment = option.StrValue
+				// 提取列注释：优先使用Expr，如果Expr为nil则使用StrValue
+				if option.Expr != nil {
+					column.Comment = option.Expr.Text()
+				}
+				// 如果Expr方式没取到，尝试StrValue
+				if column.Comment == "" && option.StrValue != "" {
+					column.Comment = option.StrValue
+				}
 			case ast.ColumnOptionDefaultValue:
-				// 提取默认值
-				defaultVal := option.Expr.Text()
-				column.Default = &defaultVal
+				// 提取默认值：使用Expr.Text()获取原始文本
+				if option.Expr != nil {
+					defaultVal := option.Expr.Text()
+					// 去除可能的引号
+					if len(defaultVal) >= 2 && defaultVal[0] == '\'' && defaultVal[len(defaultVal)-1] == '\'' {
+						defaultVal = defaultVal[1 : len(defaultVal)-1]
+					}
+					column.Default = &defaultVal
+				}
 			case ast.ColumnOptionAutoIncrement:
 				// 标记自增列
 				column.IsAutoIncrement = true
@@ -137,7 +149,6 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 			case ast.ColumnOptionUniqKey:
 				// 标记唯一键
 				column.IsUnique = true
-			default:
 			}
 		}
 
@@ -149,8 +160,6 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 		schema.Columns = append(schema.Columns, column)
 		columnMap[column.ColumnName] = &schema.Columns[len(schema.Columns)-1]
 	}
-
-	// 提取约束信息（主键、唯一索引、普通索引）
 	for _, constraint := range createTableStmt.Constraints {
 		switch constraint.Tp {
 		case ast.ConstraintPrimaryKey:
