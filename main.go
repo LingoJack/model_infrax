@@ -10,16 +10,18 @@ import (
 )
 
 type App struct {
-	Config    *config.Configger
-	Parser    *parser.DatabaseParser
-	Generator *generator.Generator
+	Config          *config.Configger
+	DatabaseParser  *parser.DatabaseParser
+	StatementParser *parser.StatementParser
+	Generator       *generator.Generator
 }
 
-func NewApp(cfg *config.Configger, p *parser.DatabaseParser, g *generator.Generator) *App {
+func NewApp(cfg *config.Configger, p *parser.DatabaseParser, g *generator.Generator, s *parser.StatementParser) *App {
 	return &App{
-		Config:    cfg,
-		Parser:    p,
-		Generator: g,
+		Config:          cfg,
+		DatabaseParser:  p,
+		Generator:       g,
+		StatementParser: s,
 	}
 }
 
@@ -35,7 +37,7 @@ func (a *App) Run() error {
 	log.Println("🚀 开始解析数据库...")
 
 	// 获取数据库中所有表的结构信息
-	schemas, err := a.Parser.Parse()
+	schemas, err := a.DatabaseParser.Parse()
 	if err != nil {
 		return err
 	}
@@ -43,7 +45,7 @@ func (a *App) Run() error {
 	log.Printf("✅ 解析完成，共获取到 %d 个表", len(schemas))
 
 	// 根据配置文件中的表名过滤规则，筛选需要生成代码的表
-	schemas = a.Parser.FilterTables(schemas)
+	schemas = a.DatabaseParser.FilterTables(schemas)
 	log.Printf("🔍 过滤后需要处理的表数量: %d", len(schemas))
 
 	log.Println("🏗️ 开始生成 Model 代码...")
