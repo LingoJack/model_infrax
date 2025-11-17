@@ -5,7 +5,8 @@ import (
 	"model_infrax/config"
 	"model_infrax/generator"
 	"model_infrax/parser"
-	"model_infrax/tool"
+
+	flag "github.com/spf13/pflag"
 )
 
 type App struct {
@@ -22,28 +23,33 @@ func NewApp(cfg *config.Configger, p *parser.Parser, g *generator.Generator) *Ap
 	}
 }
 
-// Run 运行应用程序
+// Run 运行应用程序，执行完整的代码生成流程
+// 流程包括：
+// 1. 解析数据库表结构
+// 2. 根据配置过滤需要处理的表
+// 3. 生成Model实体类代码
+// 4. 生成DTO数据传输对象代码
+// 5. 生成DAO数据访问对象代码
+// 6. 生成Tool工具类代码
 func (a *App) Run() error {
-	log.Println("================ 开始解析数据库 ==================")
+	log.Println("🚀 开始解析数据库...")
 
-	schemas, err := a.Parser.AllTables()
+	// 获取数据库中所有表的结构信息
+	schemas, err := a.Parser.AllTablesFromDB()
 	if err != nil {
 		return err
 	}
 
-	log.Println("================ 解析结果 ==================")
+	log.Printf("✅ 解析完成，共获取到 %d 个表", len(schemas))
 
-	log.Println(tool.JsonifyIndent(schemas))
-
-	log.Println("================ 过滤后的表 ==================")
-
-	// 根据配置过滤表
+	// 根据配置文件中的表名过滤规则，筛选需要生成代码的表
 	schemas = a.Parser.FilterTables(schemas)
-	log.Println(tool.JsonifyIndent(schemas))
+	log.Printf("🔍 过滤后需要处理的表数量: %d", len(schemas))
 
-	log.Println("================ 开始生成 Model 代码 ==================")
+	log.Println("🏗️ 开始生成 Model 代码...")
 
-	// 生成 Model 代码
+	// 生成Model实体类代码
+	// 根据配置决定是生成到一个文件还是分别生成
 	if a.Config.GenerateOption.ModelAllInOneFile {
 		err = a.Generator.GenerateModel(schemas, a.Config.GenerateOption.ModelAllInOneFileName)
 	} else {
@@ -53,45 +59,48 @@ func (a *App) Run() error {
 		return err
 	}
 
-	log.Println("================ Model 代码生成完成 ==================")
+	log.Println("✅ Model 代码生成完成")
 
-	log.Println("================ 开始生成 DTO 代码 ==================")
+	log.Println("📝 开始生成 DTO 代码...")
 
-	// 生成 DTO 代码
+	// 生成DTO数据传输对象代码，用于API接口的数据交换
 	err = a.Generator.GenerateDTOOneByOne(schemas)
 	if err != nil {
 		return err
 	}
 
-	log.Println("================ DTO 代码生成完成 ==================")
+	log.Println("✅ DTO 代码生成完成")
 
-	log.Println("================ 开始生成 DAO 代码 ==================")
+	log.Println("🗄️ 开始生成 DAO 代码...")
 
-	// 生成 DAO 代码
+	// 生成DAO数据访问对象代码，提供数据库操作方法
 	err = a.Generator.GenerateDAOOneByOne(schemas)
 	if err != nil {
 		return err
 	}
 
-	log.Println("================ DAO 代码生成完成 ==================")
+	log.Println("✅ DAO 代码生成完成")
 
-	log.Println("================ 开始生成 Tool 代码 ==================")
+	log.Println("🛠️ 开始生成 Tool 工具代码...")
 
-	// 生成 Tool 工具代码
+	// 生成Tool工具类代码，提供通用的辅助功能
 	err = a.Generator.GenerateAllTools()
 	if err != nil {
 		return err
 	}
 
-	log.Println("================ Tool 代码生成完成 ==================")
+	log.Println("🎉 所有代码生成完成！")
 
 	return nil
 }
 
 func main() {
-	configPath := "./assert/application.yml"
 
-	app, err := InitializeApp(configPath)
+	configPath := flag.StringP("config", "c", "./assert/application.yml", "配置文件路径")
+
+	flag.Parse()
+
+	app, err := InitializeApp(*configPath)
 	if err != nil {
 		log.Fatalf("初始化应用失败: %v", err)
 	}

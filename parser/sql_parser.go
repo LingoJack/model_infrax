@@ -102,8 +102,8 @@ type mysqlIndex struct {
 	Expression   *string `json:"Expression"`    // 表达式索引的表达式（可能为null）
 }
 
-// AllTables 获取所有表名
-func (p *Parser) AllTables() (schemas []model.Schema, err error) {
+// AllTablesFromDB 获取所有表名
+func (p *Parser) AllTablesFromDB() (schemas []model.Schema, err error) {
 	// 执行 sqlShowTableStatus 拿到所有返回值
 	var tables []mysqlTable
 	if err = p.db.Raw("show table status").Scan(&tables).Error; err != nil {
@@ -131,6 +131,7 @@ func (p *Parser) AllTables() (schemas []model.Schema, err error) {
 				Collate:         tool.Stringify(field.Collation), // Stringify 已经处理了 nil 指针
 				Comment:         field.Comment,
 				Type:            field.Type,
+				Default:         field.Default, // 设置默认值
 				IsAutoIncrement: strings.Contains(field.Extra, "auto_increment"),
 				IsNullable:      field.Null == "YES",
 			}

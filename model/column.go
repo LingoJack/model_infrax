@@ -5,16 +5,18 @@ import (
 	"fmt"
 )
 
+// Column 数据库列的元数据信息
 type Column struct {
-	ColumnName      string
-	Collate         string
-	Comment         string
-	Type            string
-	IsAutoIncrement bool
-	IsNullable      bool
-	IsIndexed       bool
-	IsUnique        bool
-	IsPrimaryKey    bool
+	ColumnName      string  // 列名
+	Collate         string  // 字符集校对规则
+	Comment         string  // 列注释
+	Type            string  // 列类型
+	Default         *string // 默认值（可能为null）
+	IsAutoIncrement bool    // 是否自增
+	IsNullable      bool    // 是否允许为NULL
+	IsIndexed       bool    // 是否有索引
+	IsUnique        bool    // 是否唯一索引
+	IsPrimaryKey    bool    // 是否主键
 }
 
 func (f Column) Json() string {
