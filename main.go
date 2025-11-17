@@ -11,11 +11,11 @@ import (
 
 type App struct {
 	Config    *config.Configger
-	Parser    *parser.Parser
+	Parser    *parser.DatabaseParser
 	Generator *generator.Generator
 }
 
-func NewApp(cfg *config.Configger, p *parser.Parser, g *generator.Generator) *App {
+func NewApp(cfg *config.Configger, p *parser.DatabaseParser, g *generator.Generator) *App {
 	return &App{
 		Config:    cfg,
 		Parser:    p,
@@ -35,7 +35,7 @@ func (a *App) Run() error {
 	log.Println("🚀 开始解析数据库...")
 
 	// 获取数据库中所有表的结构信息
-	schemas, err := a.Parser.AllTablesFromDB()
+	schemas, err := a.Parser.Parse()
 	if err != nil {
 		return err
 	}

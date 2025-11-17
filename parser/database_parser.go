@@ -13,24 +13,13 @@ import (
 	"github.com/samber/lo"
 )
 
-// Parser SQL解析器，用于解析数据库表结构
-type Parser struct {
+// DatabaseParser SQL解析器，用于解析数据库表结构
+type DatabaseParser struct {
 	db        *gorm.DB
 	configger *config.Configger
 }
 
-const (
-	// 获取单个表的描述
-	sqlShowTableStatusForSingleTable = "show table status like '%s'"
-
-	// 查看所有字段
-	sqlShowTableFields = "show full fields from %s"
-
-	// 查看所有索引
-	sqlShowTableIndexes = "show full indexes from %s"
-)
-
-func NewParser(cfg *config.Configger) (*Parser, error) {
+func NewDatabaseParser(cfg *config.Configger) (*DatabaseParser, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.GenerateConfig.Username,
 		cfg.GenerateConfig.Password,
@@ -44,7 +33,7 @@ func NewParser(cfg *config.Configger) (*Parser, error) {
 		return nil, fmt.Errorf("连接数据库失败: %w", err)
 	}
 
-	return &Parser{
+	return &DatabaseParser{
 		db:        db,
 		configger: cfg,
 	}, nil
@@ -102,8 +91,8 @@ type mysqlIndex struct {
 	Expression   *string `json:"Expression"`    // 表达式索引的表达式（可能为null）
 }
 
-// AllTablesFromDB 获取所有表名
-func (p *Parser) AllTablesFromDB() (schemas []model.Schema, err error) {
+// Parse 获取所有表名
+func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 	// 执行 sqlShowTableStatus 拿到所有返回值
 	var tables []mysqlTable
 	if err = p.db.Raw("show table status").Scan(&tables).Error; err != nil {
@@ -242,7 +231,7 @@ func (p *Parser) AllTablesFromDB() (schemas []model.Schema, err error) {
 }
 
 // FilterTables 根据配置文件过滤表
-func (p *Parser) FilterTables(schemas []model.Schema) (filtered []model.Schema) {
+func (p *DatabaseParser) FilterTables(schemas []model.Schema) (filtered []model.Schema) {
 	if p.configger.GenerateConfig.AllTables {
 		filtered = schemas
 		return

@@ -17,7 +17,7 @@ func InitializeApp(configPath string) (*App, error) {
 		// 配置层
 		config.NewConfigger,
 		// 解析器层
-		parser.NewParser,
+		parser.NewDatabaseParser,
 		// 生成器层
 		generator.NewGenerator,
 		// 应用层
@@ -27,12 +27,12 @@ func InitializeApp(configPath string) (*App, error) {
 }
 
 // InitializeParser 单独初始化Parser，用于需要独立使用Parser的场景
-func InitializeParser(configPath string) (*parser.Parser, error) {
+func InitializeParser(configPath string) (*parser.DatabaseParser, error) {
 	wire.Build(
 		// 配置层
 		config.NewConfigger,
 		// 解析器层
-		parser.NewParser,
+		parser.NewDatabaseParser,
 	)
-	return &parser.Parser{}, nil
+	return &parser.DatabaseParser{}, nil
 }
