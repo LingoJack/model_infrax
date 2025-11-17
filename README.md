@@ -1,11 +1,15 @@
 # Model Infrax - GORM 模型与 DAO 生成器
 
-这是一个基于数据库表结构自动生成完整分层架构代码的工具，包括 GORM 模型、DAO 层、DTO/PO 结构体和工具函数。
+> 🚀 **支持双重解析模式**：数据库连接模式 + SQL 文件解析模式
+
+这是一个基于数据库表结构自动生成完整分层架构代码的工具，包括 GORM 模型、DAO 层、DTO/PO 结构体和工具函数。无需手动编写重复代码，专注于业务逻辑开发。
 
 ## 🌟 功能特性
 
-- 🚀 **自动从数据库读取表结构**：支持 MySQL 数据库连接和表结构解析
-- 📝 **生成符合 GORM 规范的 Go 结构体**：包含完整的标签和注释
+- 🚀 **双重解析模式**：
+  - **Database 模式**：直接连接数据库读取表结构
+  - **Statement 模式**：从 SQL 文件解析建表语句
+- 📝 **生成符合 GORM 规范的 Go 结构体**：包含完整的标签和注释，支持字段注释、默认值、字符集等
 - 🏗️ **完整的分层架构生成**：
   - **PO (Persistent Object)**：数据库实体模型
   - **DTO (Data Transfer Object)**：查询和传输对象
@@ -186,21 +190,33 @@
 
 ## 🚀 快速开始
 
-### 1. 配置数据库连接
+### 1. 配置解析模式
+
+#### 模式一：Database 模式（从数据库解析）
 
 编辑 `assert/application.yml` 文件：
 
 ```yaml
 generate_config:
+  # 生成模式: database(从数据库解析) 或 statement(从SQL文件解析)
   generate_mode: database
+  
+  # database 模式配置
   database_name: test_db
   host: localhost
   port: 3306
   username: root
   password: your_password
+  
+  # statement 模式配置（database模式下不需要）
+  sql_file_path: ~/dev/model_infrax/assert/database.sql
+  
+  # 通用配置
   all_tables: true
   table_names:
-    - t_artifact
+    - t_user
+    - t_memory
+    - t_llm_history
 
 generate_option:
   # 输出路径
@@ -222,6 +238,68 @@ generate_option:
     vo_package: model/view        # VO 层包名（预留）
     dao_package: dao              # DAO 层包名
     tool_package: tool            # 工具函数包名
+
+  # 使用框架, 为空时为 gorm 原生
+  use_framework: itea-go
+```
+
+#### 模式二：Statement 模式（从 SQL 文件解析）
+
+如果你没有数据库连接，但已有建表 SQL 文件，可以使用 statement 模式：
+
+```yaml
+generate_config:
+  # 生成模式: database(从数据库解析) 或 statement(从SQL文件解析)
+  generate_mode: statement
+  
+  # database 模式配置（statement模式下不需要）
+  database_name: test_db
+  host: localhost
+  port: 3306
+  username: root
+  password: your_password
+  
+  # statement 模式配置
+  sql_file_path: ~/dev/model_infrax/assert/database.sql
+  
+  # 通用配置
+  all_tables: true
+  table_names:
+    - t_user
+    - t_memory
+    - t_llm_history
+
+# generate_option 配置与 database 模式相同...
+```
+
+**SQL 文件示例**（`assert/database.sql`）：
+
+```sql
+CREATE TABLE IF NOT EXISTS `t_user`
+(
+    `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `userId`     varchar(128)        NOT NULL DEFAULT '' COMMENT '用户ID',
+    `userName`   varchar(128)        NOT NULL DEFAULT '' COMMENT '用户名称',
+    `createTime` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updateTime` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_userId_userName` (`userId`, `userName`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT = '用户表';
+```
+
+### 2. 运行生成器
+
+```bash
+# 生成 Wire 依赖注入代码
+go generate ./...
+
+# 运行程序（使用默认配置）
+go run .
+
+# 或指定配置文件
+go run . -c ./assert/application_statement.yml
 ```
 
 ### 2. 运行生成器
@@ -261,8 +339,9 @@ output/
 ```
 model_infrax/
 ├── assert/                      # 配置和模板文件
-│   ├── application.yml         # 配置文件
-│   ├── database.sql            # 测试数据库脚本
+│   ├── application.yml         # 默认配置文件（database模式）
+│   ├── application_statement.yml # 示例配置文件（statement模式）
+│   ├── database.sql            # 测试用建表SQL文件
 │   └── template/               # 代码模板
 │       ├── dao.template        # DAO 层模板
 │       ├── dto.template        # DTO 结构体模板
@@ -277,6 +356,9 @@ model_infrax/
 │   └── template_func_test.go  # 单元测试
 ├── model/                      # 数据模型定义
 ├── parser/                     # SQL 解析器
+│   ├── database_parser.go      # 数据库解析器（database模式）
+│   ├── statement_parser.go     # SQL语句解析器（statement模式）
+│   └── *_test.go              # 单元测试
 ├── tool/                       # 工具函数
 ├── main.go                     # 程序入口
 ├── wire.go                     # Wire 依赖注入配置
@@ -425,14 +507,28 @@ type TArtifactQueryOptions struct {
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `generate_mode` | string | 生成模式，目前支持 `database` |
+| `generate_mode` | string | **生成模式**：`database`（从数据库解析）或 `statement`（从SQL文件解析） |
+| **Database 模式配置** | | |
 | `database_name` | string | 数据库名称 |
 | `host` | string | 数据库主机地址 |
 | `port` | int | 数据库端口 |
 | `username` | string | 数据库用户名 |
 | `password` | string | 数据库密码 |
+| **Statement 模式配置** | | |
+| `sql_file_path` | string | SQL 文件路径（statement 模式下必须配置） |
+| **通用配置** | | |
 | `all_tables` | bool | 是否处理所有表 |
 | `table_names` | []string | 指定要处理的表名列表 |
+
+### 模式对比
+
+| 特性 | Database 模式 | Statement 模式 |
+|------|---------------|----------------|
+| **数据源** | 数据库连接 | SQL 文件 |
+| **依赖** | 需要数据库连接 | 无需数据库连接 |
+| **实时性** | 实时读取数据库结构 | 基于静态 SQL 文件 |
+| **适用场景** | 生产环境、开发环境 | CI/CD、无数据库环境、文档生成 |
+| **配置复杂度** | 需要数据库连接信息 | 只需 SQL 文件路径 |
 
 ### generate_option 配置项
 
@@ -455,6 +551,25 @@ go test ./generator/...
 
 # 运行测试并显示覆盖率
 go test -cover ./...
+
+# 测试 Statement Parser
+go test -v -run TestStatementParser_Parse model_infrax/parser
+
+# 测试 Database Parser（需要数据库连接）
+go test -v -run TestDatabaseParser_Parse model_infrax/parser
+
+# 调试 AST 结构
+go test -v -run TestDebugAST model_infrax/parser
+```
+
+### 测试不同模式
+
+```bash
+# 测试 database 模式
+go run . -c ./assert/application.yml
+
+# 测试 statement 模式
+go run . -c ./assert/application_statement.yml
 ```
 
 ## 🔨 开发指南
@@ -513,10 +628,90 @@ func (dao *TArtifactDAO) UpdateByDTO(ctx context.Context, id uint64, dto *query.
 - 自动处理可空字段的指针类型
 - 提供类型转换和验证
 
+## 🚀 Statement 模式详解
+
+### 什么是 Statement 模式？
+
+Statement 模式允许你直接从 SQL 建表语句中解析表结构，无需连接数据库。这对于以下场景特别有用：
+
+- **CI/CD 流水线**：在构建过程中生成代码，无需数据库连接
+- **文档生成**：基于 SQL 文件生成数据模型文档
+- **离线开发**：没有数据库访问权限时也能生成代码
+- **版本控制**：SQL 文件可以纳入版本控制，便于追踪结构变更
+
+### 支持的 SQL 语法
+
+Statement 模式基于 TiDB Parser，支持完整的 MySQL 建表语法：
+
+```sql
+CREATE TABLE IF NOT EXISTS `table_name`
+(
+    `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `field1`     varchar(128)        NOT NULL DEFAULT '' COMMENT '字段1',
+    `field2`     text                NULL COMMENT '字段2',
+    `field3`     datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_field1` (`field1`),
+    KEY `idx_field1_field2` (`field1`, `field2`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci 
+  COMMENT = '表注释';
+```
+
+### 解析能力
+
+✅ **完整解析**：
+- 表名和表注释
+- 列名、类型、注释
+- 默认值（包括函数表达式如 `CURRENT_TIMESTAMP`）
+- 主键、唯一索引、普通索引
+- 字符集和排序规则
+- 自动递增、非空约束等属性
+
+✅ **数据类型支持**：
+- 整数类型：`int`, `bigint`, `tinyint` 等
+- 字符串类型：`varchar`, `char`, `text` 等
+- 时间类型：`datetime`, `timestamp`, `date` 等
+- 浮点类型：`decimal`, `float`, `double` 等
+- JSON 类型和其他特殊类型
+
+### 使用示例
+
+1. **准备 SQL 文件**：
+```bash
+# 将你的建表 SQL 保存到文件中
+echo "CREATE TABLE `users` (...)" > schema.sql
+```
+
+2. **配置文件**：
+```yaml
+generate_config:
+  generate_mode: statement
+  sql_file_path: ./schema.sql
+  all_tables: true
+```
+
+3. **运行生成**：
+```bash
+go run . -c ./config.yml
+```
+
+### 与 Database 模式的对比
+
+| 方面 | Statement 模式 | Database 模式 |
+|------|----------------|---------------|
+| **依赖** | 仅需 SQL 文件 | 需要数据库连接 |
+| **速度** | 快速解析 | 需要网络连接 |
+| **完整性** | 基于静态 SQL | 反映当前数据库状态 |
+| **安全性** | 无数据库访问风险 | 需要数据库权限 |
+| **适用场景** | 文档生成、CI/CD | 开发环境、生产同步 |
+
 ## 📦 依赖项
 
 - [GORM](https://gorm.io/) - ORM 库
 - [Wire](https://github.com/google/wire) - 依赖注入
+- [TiDB Parser](https://github.com/pingcap/tidb) - SQL 解析器
 - [lo](https://github.com/samber/lo) - 函数式编程工具
 - [yaml.v3](https://github.com/go-yaml/yaml) - YAML 解析
 
