@@ -20,24 +20,49 @@ func InitializeApp(configPath string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	parserParser, err := parser.NewDatabaseParser(configger)
+	databaseParser, err := parser.NewDatabaseParser(configger)
 	if err != nil {
 		return nil, err
 	}
 	generatorGenerator := generator.NewGenerator(configger)
-	app := NewApp(configger, parserParser, generatorGenerator)
+	statementParser, err := parser.NewStatementParser(configger, configPath)
+	if err != nil {
+		return nil, err
+	}
+	app := NewApp(configger, databaseParser, generatorGenerator, statementParser)
 	return app, nil
 }
 
-// InitializeParser 单独初始化Parser，用于需要独立使用Parser的场景
-func InitializeParser(configPath string) (*parser.DatabaseParser, error) {
+// InitializeDatabaseParser 单独初始化Parser，用于需要独立使用Parser的场景
+func InitializeDatabaseParser(configPath string) (*parser.DatabaseParser, error) {
 	configger, err := config.NewConfigger(configPath)
 	if err != nil {
 		return nil, err
 	}
-	parserParser, err := parser.NewDatabaseParser(configger)
+	databaseParser, err := parser.NewDatabaseParser(configger)
 	if err != nil {
 		return nil, err
 	}
-	return parserParser, nil
+	return databaseParser, nil
+}
+
+func InitializeStatementParser(configPath string) (*parser.StatementParser, error) {
+	configger, err := config.NewConfigger(configPath)
+	if err != nil {
+		return nil, err
+	}
+	statementParser, err := parser.NewStatementParser(configger, configPath)
+	if err != nil {
+		return nil, err
+	}
+	return statementParser, nil
+}
+
+func InitializeGenerator(configPath string) (*generator.Generator, error) {
+	configger, err := config.NewConfigger(configPath)
+	if err != nil {
+		return nil, err
+	}
+	generatorGenerator := generator.NewGenerator(configger)
+	return generatorGenerator, nil
 }
