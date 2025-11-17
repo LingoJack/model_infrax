@@ -5,7 +5,6 @@ import (
 	"log"
 	"model_infrax/config"
 	"model_infrax/model"
-	"model_infrax/tool"
 	"os"
 	"strings"
 
@@ -20,15 +19,25 @@ type StatementParser struct {
 	statements []string
 }
 
-func NewStatementParser(cfg *config.Configger, sqlFilePath string) (*StatementParser, error) {
-	path := tool.EscapeHomeDir(sqlFilePath)
-
-	byts, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
+// NewStatementParser 创建SQL语句解析器
+// 从配置文件中读取SQL文件路径，解析SQL文件内容
+func NewStatementParser(cfg *config.Configger) (*StatementParser, error) {
+	// 从配置中获取SQL文件路径
+	sqlFilePath := cfg.GenerateConfig.SqlFilePath
+	if sqlFilePath == "" {
+		return nil, fmt.Errorf("statement模式下必须配置sql_file_path")
 	}
 
+	// 读取SQL文件内容
+	byts, err := os.ReadFile(sqlFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("读取SQL文件失败 [%s]: %w", sqlFilePath, err)
+	}
+
+	// 按分号分割SQL语句
 	statements := strings.Split(string(byts), ";")
+
+	log.Printf("📄 成功加载SQL文件: %s, 共 %d 条语句", sqlFilePath, len(statements))
 
 	return &StatementParser{
 		configger:  cfg,

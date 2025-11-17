@@ -25,7 +25,7 @@ func InitializeApp(configPath string) (*App, error) {
 		return nil, err
 	}
 	generatorGenerator := generator.NewGenerator(configger)
-	statementParser, err := parser.NewStatementParser(configger, configPath)
+	statementParser, err := parser.NewStatementParser(configger)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func InitializeStatementParser(configPath string) (*parser.StatementParser, erro
 	if err != nil {
 		return nil, err
 	}
-	statementParser, err := parser.NewStatementParser(configger, configPath)
+	statementParser, err := parser.NewStatementParser(configger)
 	if err != nil {
 		return nil, err
 	}
