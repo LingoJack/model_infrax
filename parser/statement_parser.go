@@ -11,7 +11,7 @@ import (
 
 	"github.com/pingcap/tidb/pkg/parser"
 	"github.com/pingcap/tidb/pkg/parser/ast"
-	_ "github.com/pingcap/tidb/pkg/parser/test_driver"
+	"github.com/pingcap/tidb/pkg/parser/test_driver"
 	"github.com/samber/lo"
 )
 
@@ -116,22 +116,39 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 		for _, option := range col.Options {
 			switch option.Tp {
 			case ast.ColumnOptionComment:
-				// 提取列注释：优先使用Expr，如果Expr为nil则使用StrValue
+				// 提取列注释：从ValueExpr的Datum.b字段中读取UTF-8编码的字节数组
 				if option.Expr != nil {
-					column.Comment = option.Expr.Text()
+					// 尝试类型断言为test_driver.ValueExpr
+					if valueExpr, ok := option.Expr.(*test_driver.ValueExpr); ok {
+						// Datum.b 存储的是UTF-8编码的字节数组
+						if len(valueExpr.Datum.GetBytes()) > 0 {
+							column.Comment = string(valueExpr.Datum.GetBytes())
+						}
+					}
 				}
-				// 如果Expr方式没取到，尝试StrValue
+				// 如果Expr方式没取到，尝试StrValue（兼容处理）
 				if column.Comment == "" && option.StrValue != "" {
 					column.Comment = option.StrValue
 				}
 			case ast.ColumnOptionDefaultValue:
-				// 提取默认值：使用Expr.Text()获取原始文本
+				// 提取默认值：需要区分ValueExpr（字符串/数值）和FuncCallExpr（函数如CURRENT_TIMESTAMP）
 				if option.Expr != nil {
-					defaultVal := option.Expr.Text()
-					// 去除可能的引号
-					if len(defaultVal) >= 2 && defaultVal[0] == '\'' && defaultVal[len(defaultVal)-1] == '\'' {
-						defaultVal = defaultVal[1 : len(defaultVal)-1]
+					var defaultVal string
+
+					// 处理ValueExpr类型（字符串或数值默认值）
+					if valueExpr, ok := option.Expr.(*test_driver.ValueExpr); ok {
+						// 如果Datum.b为空字节数组，表示空字符串''
+						if len(valueExpr.Datum.GetBytes()) == 0 {
+							defaultVal = ""
+						} else {
+							// 否则转换字节数组为字符串
+							defaultVal = string(valueExpr.Datum.GetBytes())
+						}
+					} else if funcExpr, ok := option.Expr.(*ast.FuncCallExpr); ok {
+						// 处理FuncCallExpr类型（如CURRENT_TIMESTAMP）
+						defaultVal = funcExpr.FnName.O
 					}
+
 					column.Default = &defaultVal
 				}
 			case ast.ColumnOptionAutoIncrement:

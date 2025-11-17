@@ -137,9 +137,12 @@ func TestDebugAST(t *testing.T) {
 
 		for j, option := range col.Options {
 			log.Printf("  选项[%d] Tp=%d", j, option.Tp)
-			log.Printf("    StrValue: %s", option.StrValue)
+			log.Printf("    StrValue: '%s'", option.StrValue)
 			if option.Expr != nil {
-				log.Printf("    Expr.Text(): %s", option.Expr.Text())
+				log.Printf("    Expr类型: %T", option.Expr)
+				log.Printf("    Expr.Text(): '%s'", option.Expr.Text())
+				// 打印完整的Expr结构，看看里面有什么字段
+				log.Printf("    Expr完整结构: %#v", option.Expr)
 			}
 		}
 	}
