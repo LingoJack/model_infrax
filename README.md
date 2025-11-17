@@ -18,6 +18,172 @@
 - 🛠️ **工具函数生成**：自动生成指针操作和字符串处理工具
 - 📦 **使用 Wire 进行依赖注入**：现代化的依赖管理
 
+## 解析结构示例
+```json
+{
+    "Name": "t_llm_history",
+    "Columns": [
+        {
+            "ColumnName": "id",
+            "Collate": "",
+            "Comment": "主键ID",
+            "Type": "bigint unsigned",
+            "Default": null,
+            "IsAutoIncrement": true,
+            "IsNullable": false,
+            "IsIndexed": true,
+            "IsUnique": true,
+            "IsPrimaryKey": true
+        },
+        {
+            "ColumnName": "model",
+            "Collate": "utf8mb4_unicode_ci",
+            "Comment": "模型名称",
+            "Type": "varchar(128)",
+            "Default": "",
+            "IsAutoIncrement": false,
+            "IsNullable": false,
+            "IsIndexed": true,
+            "IsUnique": false,
+            "IsPrimaryKey": false
+        },
+        {
+            "ColumnName": "input",
+            "Collate": "utf8mb4_unicode_ci",
+            "Comment": "输入内容",
+            "Type": "text",
+            "Default": null,
+            "IsAutoIncrement": false,
+            "IsNullable": false,
+            "IsIndexed": false,
+            "IsUnique": false,
+            "IsPrimaryKey": false
+        },
+        {
+            "ColumnName": "output",
+            "Collate": "utf8mb4_unicode_ci",
+            "Comment": "输出内容",
+            "Type": "text",
+            "Default": null,
+            "IsAutoIncrement": false,
+            "IsNullable": false,
+            "IsIndexed": false,
+            "IsUnique": false,
+            "IsPrimaryKey": false
+        },
+        {
+            "ColumnName": "createTime",
+            "Collate": "",
+            "Comment": "创建时间",
+            "Type": "datetime",
+            "Default": "CURRENT_TIMESTAMP",
+            "IsAutoIncrement": false,
+            "IsNullable": false,
+            "IsIndexed": true,
+            "IsUnique": false,
+            "IsPrimaryKey": false
+        },
+        {
+            "ColumnName": "updateTime",
+            "Collate": "",
+            "Comment": "更新时间",
+            "Type": "datetime",
+            "Default": "CURRENT_TIMESTAMP",
+            "IsAutoIncrement": false,
+            "IsNullable": false,
+            "IsIndexed": false,
+            "IsUnique": false,
+            "IsPrimaryKey": false
+        }
+    ],
+    "Comment": "LLM历史记录表",
+    "PrimaryKey": {
+        "IndexName": "PRIMARY",
+        "Columns": [
+            {
+                "ColumnName": "id",
+                "Collate": "",
+                "Comment": "主键ID",
+                "Type": "bigint unsigned",
+                "Default": null,
+                "IsAutoIncrement": true,
+                "IsNullable": false,
+                "IsIndexed": false,
+                "IsUnique": false,
+                "IsPrimaryKey": false
+            }
+        ]
+    },
+    "UniqueIndex": [
+        {
+            "IndexName": "PRIMARY",
+            "Columns": [
+                {
+                    "ColumnName": "id",
+                    "Collate": "",
+                    "Comment": "主键ID",
+                    "Type": "bigint unsigned",
+                    "Default": null,
+                    "IsAutoIncrement": true,
+                    "IsNullable": false,
+                    "IsIndexed": false,
+                    "IsUnique": false,
+                    "IsPrimaryKey": false
+                }
+            ]
+        }
+    ],
+    "Indexes": [
+        {
+            "IndexName": "idx_model_createTime",
+            "Columns": [
+                {
+                    "ColumnName": "model",
+                    "Collate": "utf8mb4_unicode_ci",
+                    "Comment": "模型名称",
+                    "Type": "varchar(128)",
+                    "Default": "",
+                    "IsAutoIncrement": false,
+                    "IsNullable": false,
+                    "IsIndexed": false,
+                    "IsUnique": false,
+                    "IsPrimaryKey": false
+                },
+                {
+                    "ColumnName": "createTime",
+                    "Collate": "",
+                    "Comment": "创建时间",
+                    "Type": "datetime",
+                    "Default": "CURRENT_TIMESTAMP",
+                    "IsAutoIncrement": false,
+                    "IsNullable": false,
+                    "IsIndexed": false,
+                    "IsUnique": false,
+                    "IsPrimaryKey": false
+                }
+            ]
+        },
+        {
+            "IndexName": "PRIMARY",
+            "Columns": [
+                {
+                    "ColumnName": "id",
+                    "Collate": "",
+                    "Comment": "主键ID",
+                    "Type": "bigint unsigned",
+                    "Default": null,
+                    "IsAutoIncrement": true,
+                    "IsNullable": false,
+                    "IsIndexed": false,
+                    "IsUnique": false,
+                    "IsPrimaryKey": false
+                }
+            ]
+        }
+    ]
+}
+```
+
 ## 🚀 快速开始
 
 ### 1. 配置数据库连接
