@@ -121,7 +121,7 @@ func (a *App) Run() error {
 
 func main() {
 
-	configPath := flag.StringP("config", "c", "./assert/application.yml", "配置文件路径")
+	configPath := flag.StringP("config", "c", "./application.yml", "配置文件路径")
 
 	flag.Parse()
 

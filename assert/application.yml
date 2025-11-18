@@ -10,7 +10,7 @@ generate_config:
   password: 200487
   
   # statement 模式配置
-  sql_file_path: ~/dev/model_infrax/assert/database.sql
+  sql_file_path: ~/dev/model_infrax/assert/schema.sql
   
   # 通用配置
   all_tables: true

@@ -48,7 +48,7 @@ func parse(sql string) (*ast.StmtNode, error) {
 func TestTidbPaseNode(t *testing.T) {
 	p := parser.New()
 
-	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/database.sql")
+	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/schema.sql")
 	if err != nil {
 		panic(err)
 	}
@@ -64,7 +64,7 @@ func TestTidbPaseNode(t *testing.T) {
 }
 
 func TestTiDBParser(t *testing.T) {
-	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/database.sql")
+	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/schema.sql")
 	if err != nil {
 		panic(err)
 	}
@@ -105,7 +105,7 @@ func TestStatementParser_Parse(t *testing.T) {
 func TestDebugAST(t *testing.T) {
 	p := parser.New()
 
-	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/database.sql")
+	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/schema.sql")
 	if err != nil {
 		panic(err)
 	}
