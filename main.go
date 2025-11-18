@@ -127,7 +127,10 @@ func main() {
 
 	app, err := InitializeApp(*configPath)
 	if err != nil {
-		log.Fatalf("初始化应用失败: %v", err)
+		app, err = InitializeApp("./assert/application.yml")
+		if err != nil {
+			log.Fatalf("初始化应用失败: %v", err)
+		}
 	}
 
 	if err = app.Run(); err != nil {
