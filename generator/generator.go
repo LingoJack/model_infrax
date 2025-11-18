@@ -15,10 +15,10 @@ import (
 
 // Generator 代码生成器
 type Generator struct {
-	modelTemplatePath string            // 模板文件路径
-	daoTemplatePath   string            // dao文件路径
-	dtoTemplatePath   string            // dto文件路径
-	toolTemplateDir   string            // tool文件路径
+	modelTemplatePath string            // 模板文件路径（嵌入式路径）
+	daoTemplatePath   string            // dao文件路径（嵌入式路径）
+	dtoTemplatePath   string            // dto文件路径（嵌入式路径）
+	toolTemplateDir   string            // tool文件路径（嵌入式路径）
 	configger         *config.Configger // 配置对象
 }
 
@@ -37,20 +37,23 @@ type TemplateData struct {
 // 返回:
 //   - *Generator: 生成器实例
 func NewGenerator(cfg *config.Configger) *Generator {
+	// 使用嵌入式模板路径（相对于 embed.FS 的根路径）
+	// 由于 embed.go 在 generator 目录下，需要使用 ../assert/template/ 前缀
 	generator := Generator{
-		modelTemplatePath: "./assert/template/po.template",
-		daoTemplatePath:   "./assert/template/dao.template",
-		dtoTemplatePath:   "./assert/template/dto.template",
-		toolTemplateDir:   "./assert/template/tools",
+		modelTemplatePath: templatePathPrefix + "po.template",
+		daoTemplatePath:   templatePathPrefix + "dao.template",
+		dtoTemplatePath:   templatePathPrefix + "dto.template",
+		toolTemplateDir:   templatePathPrefix + "tools",
 		configger:         cfg,
 	}
 
+	// 如果使用 itea-go 框架，切换到对应的模板路径
 	if cfg.GenerateOption.UseFramework == "itea-go" {
 		generator = Generator{
-			modelTemplatePath: "./assert/template/itea-go/po.template",
-			daoTemplatePath:   "./assert/template/itea-go/dao.template",
-			dtoTemplatePath:   "./assert/template/itea-go/dto.template",
-			toolTemplateDir:   "./assert/template/tools",
+			modelTemplatePath: templatePathPrefix + "itea-go/po.template",
+			daoTemplatePath:   templatePathPrefix + "itea-go/dao.template",
+			dtoTemplatePath:   templatePathPrefix + "itea-go/dto.template",
+			toolTemplateDir:   templatePathPrefix + "tools",
 			configger:         cfg,
 		}
 	}
@@ -84,10 +87,10 @@ func (g *Generator) GenerateModelOneByOne(schemas []model.Schema) (err error) {
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateModel(schemas []model.Schema, outputFileName string) (err error) {
 
-	// 读取模板文件
-	tmplContent, err := os.ReadFile(g.modelTemplatePath)
+	// 从嵌入的文件系统中读取模板文件
+	tmplContent, err := templateFS.ReadFile(g.modelTemplatePath)
 	if err != nil {
-		return fmt.Errorf("读取模板文件失败: %w", err)
+		return fmt.Errorf("读取嵌入式模板文件失败: %w", err)
 	}
 
 	// 创建模板并注册函数
@@ -171,10 +174,10 @@ func (g *Generator) GenerateDTOOneByOne(schemas []model.Schema) (err error) {
 // 返回:
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
-	// 读取 DTO 模板文件
-	tmplContent, err := os.ReadFile(g.dtoTemplatePath)
+	// 从嵌入的文件系统中读取 DTO 模板文件
+	tmplContent, err := templateFS.ReadFile(g.dtoTemplatePath)
 	if err != nil {
-		return fmt.Errorf("读取 DTO 模板文件失败: %w", err)
+		return fmt.Errorf("读取嵌入式 DTO 模板文件失败: %w", err)
 	}
 
 	// 创建模板并注册函数
@@ -241,17 +244,17 @@ func (g *Generator) GenerateDTO(schemas []model.Schema, outputFileName string) (
 // 返回:
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateTool(templateFileName, outputFileName string) (err error) {
-	// 构建模板文件路径
+	// 构建嵌入式模板文件路径
 	templatePath := filepath.Join(g.toolTemplateDir, templateFileName)
 
-	// 读取模板文件
-	tmplContent, err := os.ReadFile(templatePath)
+	// 从嵌入的文件系统中读取模板文件
+	tmplContent, err := templateFS.ReadFile(templatePath)
 	if err != nil {
-		return fmt.Errorf("读取工具模板文件失败: %w", err)
+		return fmt.Errorf("读取嵌入式工具模板文件失败: %w", err)
 	}
 
 	// 创建模板并注册函数
-	tmpl, err := template.New("dto").Funcs(template.FuncMap{
+	tmpl, err := template.New("tool").Funcs(template.FuncMap{
 		"ToPascalCase":    ToPascalCase,
 		"ToCamelCase":     ToCamelCase,
 		"ToSafeParamName": ToSafeParamName,
@@ -323,10 +326,10 @@ func (g *Generator) GenerateDAOOneByOne(schemas []model.Schema) (err error) {
 // 返回:
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateDAO(schemas []model.Schema, outputFileName string) (err error) {
-	// 读取 DAO 模板文件
-	tmplContent, err := os.ReadFile(g.daoTemplatePath)
+	// 从嵌入的文件系统中读取 DAO 模板文件
+	tmplContent, err := templateFS.ReadFile(g.daoTemplatePath)
 	if err != nil {
-		return fmt.Errorf("读取 DAO 模板文件失败: %w", err)
+		return fmt.Errorf("读取嵌入式 DAO 模板文件失败: %w", err)
 	}
 
 	// 创建模板并注册函数
@@ -389,10 +392,10 @@ func (g *Generator) GenerateDAO(schemas []model.Schema, outputFileName string) (
 // 返回:
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateAllTools() (err error) {
-	// 读取工具模板目录
-	entries, err := os.ReadDir(g.toolTemplateDir)
+	// 从嵌入的文件系统中读取工具模板目录
+	entries, err := templateFS.ReadDir(g.toolTemplateDir)
 	if err != nil {
-		return fmt.Errorf("读取工具模板目录失败: %w", err)
+		return fmt.Errorf("读取嵌入式工具模板目录失败: %w", err)
 	}
 
 	// 遍历所有模板文件

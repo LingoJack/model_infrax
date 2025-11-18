@@ -7,4 +7,5 @@ mv ~/dev/model_infrax/target/assert/application.yml ~/dev/model_infrax/target/
 mv ~/dev/model_infrax/target/assert/schema.sql ~/dev/model_infrax/target/
 mv ~/dev/model_infrax/target/assert/install.sh ~/dev/model_infrax/target/
 mkdir -p ~/dev/model_infrax/target/output/
+mkdir -p ~/dev/model_infrax/pack/
 cd ~/dev/model_infrax/target && zip -r ~/dev/model_infrax/pack/jen.zip .
