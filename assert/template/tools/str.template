@@ -1,8 +1,6 @@
 package tool
 
 import (
-	"strings"
-
 	"github.com/iancoleman/strcase"
 )
 
@@ -39,69 +37,19 @@ func ToCamelCase(s string) string {
 	return strcase.ToLowerCamel(s)
 }
 
-// goKeywords Go 语言关键字集合
-var goKeywords = map[string]bool{
-	"break":       true,
-	"case":        true,
-	"chan":        true,
-	"const":       true,
-	"continue":    true,
-	"default":     true,
-	"defer":       true,
-	"else":        true,
-	"fallthrough": true,
-	"for":         true,
-	"func":        true,
-	"go":          true,
-	"goto":        true,
-	"if":          true,
-	"import":      true,
-	"interface":   true,
-	"map":         true,
-	"package":     true,
-	"range":       true,
-	"return":      true,
-	"select":      true,
-	"struct":      true,
-	"switch":      true,
-	"type":        true,
-	"var":         true,
-}
-
-// ToSafeParamName 将字符串转换为安全的参数名（避免 Go 关键字冲突）
+// ToSnakeCase 将字符串转换为 snake_case（下划线分隔）
+// 使用 strcase 库实现，支持多种命名格式转换
 // 参数:
-//   - s: 待转换的字符串
+//   - s: 待转换的字符串（支持大驼峰、小驼峰、短横线分隔或已有驼峰格式）
 //
 // 返回:
-//   - string: 安全的参数名，如果是 Go 关键字则添加 "Val" 后缀
+//   - string: 转换后的小驼峰格式字符串
 //
 // 示例:
-//   - "interface" -> "interfaceVal"
-//   - "type" -> "typeVal"
-//   - "user_name" -> "userName"
-func ToSafeParamName(s string) string {
-	// 先转换为小驼峰
-	camelCase := ToCamelCase(s)
-
-	// 检查是否为 Go 关键字
-	if goKeywords[camelCase] {
-		return camelCase + "Val"
-	}
-
-	return camelCase
-}
-
-// TrimPrefix 去除字符串的前缀
-// 参数:
-//   - s: 原始字符串
-//   - prefix: 要去除的前缀
-//
-// 返回:
-//   - string: 去除前缀后的字符串
-//
-// 示例:
-//   - TrimPrefix("*string", "*") -> "string"
-//   - TrimPrefix("[]byte", "[]") -> "byte"
-func TrimPrefix(s, prefix string) string {
-	return strings.TrimPrefix(s, prefix)
+//   - "userName" -> "user_name"
+//   - "UserName" -> "user_name"
+//   - "userId" -> "user_id"
+//   - "user-name" -> "user_name"
+func ToSnakeCase(s string) string {
+	return strcase.ToSnake(s)
 }
