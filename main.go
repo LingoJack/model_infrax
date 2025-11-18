@@ -12,18 +12,17 @@ import (
 )
 
 type App struct {
-	Config          *config.Configger
-	DatabaseParser  *parser.DatabaseParser
-	StatementParser *parser.StatementParser
-	Generator       *generator.Generator
+	Config    *config.Configger
+	Generator *generator.Generator
 }
 
-func NewApp(cfg *config.Configger, p *parser.DatabaseParser, g *generator.Generator, s *parser.StatementParser) *App {
+// NewApp 创建应用实例
+// 注意：DatabaseParser 和 StatementParser 不再作为依赖注入，而是在 Run 方法中根据模式动态创建
+// 这样可以避免 statement 模式下不必要的数据库连接
+func NewApp(cfg *config.Configger, g *generator.Generator) *App {
 	return &App{
-		Config:          cfg,
-		DatabaseParser:  p,
-		Generator:       g,
-		StatementParser: s,
+		Config:    cfg,
+		Generator: g,
 	}
 }
 
@@ -40,30 +39,48 @@ func (a *App) Run() error {
 	var err error
 
 	// 根据配置的生成模式选择不同的解析器
+	// 采用延迟初始化策略：只在需要时才创建对应的解析器
+	// 这样可以避免 statement 模式下不必要的数据库连接尝试
 	switch a.Config.GenerateConfig.GenerateMode {
 	case "database":
 		// 从数据库解析表结构
 		log.Println("🚀 开始从数据库解析表结构...")
-		schemas, err = a.DatabaseParser.Parse()
+
+		// 动态创建 DatabaseParser，只在 database 模式下才会尝试连接数据库
+		var databaseParser *parser.DatabaseParser
+		databaseParser, err = parser.NewDatabaseParser(a.Config)
+		if err != nil {
+			return fmt.Errorf("初始化数据库解析器失败: %w", err)
+		}
+
+		schemas, err = databaseParser.Parse()
 		if err != nil {
 			return err
 		}
 		log.Printf("✅ 数据库解析完成，共获取到 %d 个表", len(schemas))
 
 		// 根据配置文件中的表名过滤规则，筛选需要生成代码的表
-		schemas = a.DatabaseParser.FilterTables(schemas)
+		schemas = databaseParser.FilterTables(schemas)
 
 	case "statement":
 		// 从SQL文件解析表结构
 		log.Println("🚀 开始从SQL文件解析表结构...")
-		schemas, err = a.StatementParser.Parse()
+
+		// 动态创建 StatementParser，不需要数据库连接，只解析 SQL 文件
+		var statementParser *parser.StatementParser
+		statementParser, err = parser.NewStatementParser(a.Config)
+		if err != nil {
+			return fmt.Errorf("初始化SQL文件解析器失败: %w", err)
+		}
+
+		schemas, err = statementParser.Parse()
 		if err != nil {
 			return err
 		}
 		log.Printf("✅ SQL文件解析完成，共获取到 %d 个表", len(schemas))
 
 		// 根据配置文件中的表名过滤规则，筛选需要生成代码的表
-		schemas = a.StatementParser.FilterTables(schemas)
+		schemas = statementParser.FilterTables(schemas)
 
 	default:
 		return fmt.Errorf("不支持的生成模式: %s，请使用 'database' 或 'statement'", a.Config.GenerateConfig.GenerateMode)

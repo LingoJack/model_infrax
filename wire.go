@@ -12,13 +12,13 @@ import (
 )
 
 // InitializeApp 初始化应用程序，Wire会自动生成依赖注入代码
+// 注意：解析器（DatabaseParser/StatementParser）不再在此处注入
+// 而是在 App.Run() 方法中根据配置的 GenerateMode 动态创建
+// 这样可以避免 statement 模式下不必要的数据库连接
 func InitializeApp(configPath string) (*App, error) {
 	wire.Build(
 		// 配置层
 		config.NewConfigger,
-		// 解析器层
-		parser.NewDatabaseParser,
-		parser.NewStatementParser,
 		// 生成器层
 		generator.NewGenerator,
 		// 应用层
