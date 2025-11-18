@@ -209,7 +209,7 @@ generate_config:
   password: your_password
   
   # statement 模式配置（database模式下不需要）
-  sql_file_path: ~/dev/model_infrax/assert/database.sql
+  sql_file_path: ~/dev/model_infrax/assert/schema.sql
   
   # 通用配置
   all_tables: true
@@ -260,7 +260,7 @@ generate_config:
   password: your_password
   
   # statement 模式配置
-  sql_file_path: ~/dev/model_infrax/assert/database.sql
+  sql_file_path: ~/dev/model_infrax/assert/schema.sql
   
   # 通用配置
   all_tables: true
@@ -272,7 +272,7 @@ generate_config:
 # generate_option 配置与 database 模式相同...
 ```
 
-**SQL 文件示例**（`assert/database.sql`）：
+**SQL 文件示例**（`assert/schema.sql`）：
 
 ```sql
 CREATE TABLE IF NOT EXISTS `t_user`
@@ -341,7 +341,7 @@ model_infrax/
 ├── assert/                      # 配置和模板文件
 │   ├── application.yml         # 默认配置文件（database模式）
 │   ├── application_statement.yml # 示例配置文件（statement模式）
-│   ├── database.sql            # 测试用建表SQL文件
+│   ├── schema.sql            # 测试用建表SQL文件
 │   └── template/               # 代码模板
 │       ├── dao.template        # DAO 层模板
 │       ├── dto.template        # DTO 结构体模板
