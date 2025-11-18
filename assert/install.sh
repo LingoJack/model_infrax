@@ -14,5 +14,5 @@ echo '📝 jen directory has been added to PATH while preserving existing PATH e
 chmod +x /Applications/jen/jen
 echo '✅ jen init successfully'
 
-chmod +x /Applications/jen/jenfile
-echo '✅ jenfile init successfully'
+chmod +x /Applications/jen/jcode
+echo '✅ jcode init successfully'
