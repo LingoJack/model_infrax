@@ -10,3 +10,9 @@ mv ~/.zshrc.tmp ~/.zshrc
 source ~/.zshrc
 echo '✅ Environment done (original zshrc file backup at ~/.zshrc.bak)'
 echo '📝 jen directory has been added to PATH while preserving existing PATH entries'
+
+chmod +x /Applications/jen/jen
+echo '✅ jen init successfully'
+
+chmod +x /Applications/jen/jenfile
+echo '✅ jenfile init successfully'
