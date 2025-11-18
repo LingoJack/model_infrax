@@ -119,6 +119,13 @@ func (a *App) Run() error {
 	return nil
 }
 
+var defaultConfigPaths = []string{
+	"./application.yml",
+	"./assert/application.yml",
+	"/Applications/jen/application.yml",
+	"/Applications/jen/assert/application.yml",
+}
+
 func main() {
 
 	configPath := flag.StringP("config", "c", "./application.yml", "配置文件路径")
@@ -127,9 +134,14 @@ func main() {
 
 	app, err := InitializeApp(*configPath)
 	if err != nil {
-		app, err = InitializeApp("./assert/application.yml")
+		for _, path := range defaultConfigPaths {
+			app, err = InitializeApp(path)
+			if err == nil {
+				break
+			}
+		}
 		if err != nil {
-			log.Fatalf("初始化应用失败: %v", err)
+			log.Fatal(err)
 		}
 	}
 
