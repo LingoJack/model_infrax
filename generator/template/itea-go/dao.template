@@ -568,14 +568,16 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(
 {{- /* ==================== 普通索引方法 ==================== */ -}}
 {{- range $index := $schema.Indexes }}
 {{- $indexColumns := $index.Columns }}
-{{- /* 只处理单列索引，且不是主键或唯一索引 */ -}}
-{{- if eq (len $indexColumns) 1 }}
-{{- $col := index $indexColumns 0 }}
-{{- $fieldName := $col.ColumnName | ToPascalCase }}
-{{- $goType := $col | GetGoType }}
-{{- $paramName := $col.ColumnName | ToSafeParamName }}
+{{- if gt (len $indexColumns) 0 }}
+{{- /* 构建方法名后缀，支持单列和多列索引 */ -}}
+{{- $methodSuffix := "" }}
+{{- range $i, $col := $indexColumns }}
+{{- if $i }}{{ $methodSuffix = printf "%sAnd%s" $methodSuffix ($col.ColumnName | ToPascalCase) }}{{ else }}{{ $methodSuffix = $col.ColumnName | ToPascalCase }}{{ end }}
+{{- end }}
 {{- /* 检查是否是唯一索引或主键，避免重复生成 */ -}}
 {{- $isUnique := false }}
+{{- if eq (len $indexColumns) 1 }}
+{{- $col := index $indexColumns 0 }}
 {{- range $uIndex := $schema.UniqueIndex }}
 {{- if eq (len $uIndex.Columns) 1 }}
 {{- $uCol := index $uIndex.Columns 0 }}
@@ -584,31 +586,42 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(
 {{- end }}
 {{- end }}
 {{- end }}
+{{- end }}
 {{- if not $isUnique }}
 
 // ==================== 普通索引 {{ $index.IndexName }} 方法 ====================
 
-// SelectBy{{ $fieldName }} 根据索引{{ $index.IndexName }}查询列表
+// SelectBy{{ $methodSuffix }} 根据索引{{ $index.IndexName }}查询列表
 // 参数:
-//   - {{ $paramName }}: {{ $col.Comment }}
+{{- range $col := $indexColumns }}
+//   - {{ $col.ColumnName | ToSafeParamName }}: {{ $col.Comment }}
+{{- end }}
 // 返回:
 //   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
 // 说明:
 //   - 该索引不是唯一索引，可能返回多条记录
-func (dao *{{ $daoName }}) SelectBy{{ $fieldName }}({{ $paramName }} {{ $goType }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
+func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}(
+{{- range $i, $col := $indexColumns }}{{ if $i }}, {{ end }}{{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
-	err := dao.Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Find(&resultList).Error
+	err := dao.Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }}).Find(&resultList).Error
 	return resultList, err
 }
 
-// SelectBy{{ $fieldName }}List 根据索引{{ $index.IndexName }}批量查询列表
+{{- /* 只为单列索引生成批量查询方法 */ -}}
+{{- if eq (len $indexColumns) 1 }}
+{{- $col := index $indexColumns 0 }}
+{{- $goType := $col | GetGoType }}
+{{- $paramName := $col.ColumnName | ToSafeParamName }}
+
+// SelectBy{{ $methodSuffix }}List 根据索引{{ $index.IndexName }}批量查询列表
 // 参数:
 //   - {{ $paramName }}List: {{ $col.Comment }}列表
 // 返回:
 //   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
-func (dao *{{ $daoName }}) SelectBy{{ $fieldName }}List({{ $paramName }}List []{{ $goType }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
+func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}List({{ $paramName }}List []{{ $goType }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	if len({{ $paramName }}List) == 0 {
 		return []*{{ $.PoPackageName }}.{{ $entityName }}{}, nil
 	}
@@ -616,56 +629,69 @@ func (dao *{{ $daoName }}) SelectBy{{ $fieldName }}List({{ $paramName }}List []{
 	err := dao.Where("{{ $col.ColumnName }} IN ?", {{ $paramName }}List).Find(&resultList).Error
 	return resultList, err
 }
+{{- end }}
 
-// UpdateBy{{ $fieldName }} 根据索引{{ $index.IndexName }}更新（不会用零值覆盖）
+// UpdateBy{{ $methodSuffix }} 根据索引{{ $index.IndexName }}更新（不会用零值覆盖）
 // 参数:
 //   - poBean: 包含更新数据的PO对象
-//   - {{ $paramName }}: {{ $col.Comment }}
+{{- range $col := $indexColumns }}
+//   - {{ $col.ColumnName | ToSafeParamName }}: {{ $col.Comment }}
+{{- end }}
 // 返回:
 //   - error: 错误信息
 // 行为说明:
 //   - 只更新非零值字段，零值字段会被忽略
-//   - 注意: {{ $paramName }} 不是唯一键，可能会更新多条记录
-func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}(poBean *{{ $.PoPackageName }}.{{ $entityName }}, {{ $paramName }} {{ $goType }}) error {
+//   - 注意: 该索引不是唯一键，可能会更新多条记录
+func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}(poBean *{{ $.PoPackageName }}.{{ $entityName }}
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}) error {
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
-	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Updates(poBean).Error
+	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }}).Updates(poBean).Error
 }
 
-// UpdateBy{{ $fieldName }}WithMap 根据索引{{ $index.IndexName }}使用Map更新指定字段（可以用零值覆盖）
+// UpdateBy{{ $methodSuffix }}WithMap 根据索引{{ $index.IndexName }}使用Map更新指定字段（可以用零值覆盖）
 // 参数:
-//   - {{ $paramName }}: {{ $col.Comment }}
+{{- range $col := $indexColumns }}
+//   - {{ $col.ColumnName | ToSafeParamName }}: {{ $col.Comment }}
+{{- end }}
 //   - updatedMap: 要更新的字段Map
 // 返回:
 //   - error: 错误信息
 // 行为说明:
 //   - 使用 map 可以显式指定要更新的字段，包括零值字段
 //   - 只更新 map 中指定的字段，未指定的字段保持不变
-//   - 注意: {{ $paramName }} 不是唯一键，可能会更新多条记录
-func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithMap({{ $paramName }} {{ $goType }}, updatedMap map[string]interface{}) error {
+//   - 注意: 该索引不是唯一键，可能会更新多条记录
+func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMap(
+{{- range $i, $col := $indexColumns }}{{ if $i }}, {{ end }}{{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string]interface{}) error {
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
-	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Updates(updatedMap).Error
+	return dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }}).Updates(updatedMap).Error
 }
 
-// UpdateBy{{ $fieldName }}WithCondition 根据索引{{ $index.IndexName }}和额外条件更新（不会用零值覆盖）
+// UpdateBy{{ $methodSuffix }}WithCondition 根据索引{{ $index.IndexName }}和额外条件更新（不会用零值覆盖）
 // 参数:
 //   - poBean: 包含更新数据的PO对象
-//   - {{ $paramName }}: {{ $col.Comment }}
+{{- range $col := $indexColumns }}
+//   - {{ $col.ColumnName | ToSafeParamName }}: {{ $col.Comment }}
+{{- end }}
 //   - conditionMap: 额外的查询条件Map
 // 返回:
 //   - error: 错误信息
 // 行为说明:
 //   - 只更新非零值字段，零值字段会被忽略
-//   - 适用场景: 需要在 {{ $paramName }} 基础上增加额外的更新条件，缩小更新范围
+//   - 适用场景: 需要在索引基础上增加额外的更新条件，缩小更新范围
 //   - 注意: 可能会更新多条记录
-func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithCondition(poBean *{{ $.PoPackageName }}.{{ $entityName }}, {{ $paramName }} {{ $goType }}, conditionMap map[string]interface{}) error {
+func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithCondition(poBean *{{ $.PoPackageName }}.{{ $entityName }}
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, conditionMap map[string]interface{}) error {
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
-	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }})
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }})
 
 	// 应用额外的条件
 	for key, value := range conditionMap {
@@ -675,9 +701,11 @@ func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithCondition(poBean *{{ $.Po
 	return db.Updates(poBean).Error
 }
 
-// UpdateBy{{ $fieldName }}WithMapAndCondition 根据索引{{ $index.IndexName }}和额外条件使用Map更新指定字段（可以用零值覆盖）
+// UpdateBy{{ $methodSuffix }}WithMapAndCondition 根据索引{{ $index.IndexName }}和额外条件使用Map更新指定字段（可以用零值覆盖）
 // 参数:
-//   - {{ $paramName }}: {{ $col.Comment }}
+{{- range $col := $indexColumns }}
+//   - {{ $col.ColumnName | ToSafeParamName }}: {{ $col.Comment }}
+{{- end }}
 //   - updatedMap: 要更新的字段Map
 //   - conditionMap: 额外的查询条件Map
 // 返回:
@@ -686,11 +714,13 @@ func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithCondition(poBean *{{ $.Po
 //   - 使用 map 可以显式指定要更新的字段，包括零值字段
 //   - 提供最灵活的更新控制方式
 //   - 注意: 可能会更新多条记录
-func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithMapAndCondition({{ $paramName }} {{ $goType }}, updatedMap map[string]interface{}, conditionMap map[string]interface{}) error {
+func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMapAndCondition(
+{{- range $i, $col := $indexColumns }}{{ if $i }}, {{ end }}{{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string]interface{}, conditionMap map[string]interface{}) error {
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
-	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ $col.ColumnName }} = ?", {{ $paramName }})
+	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }})
 
 	// 应用额外的条件
 	for key, value := range conditionMap {
@@ -700,15 +730,19 @@ func (dao *{{ $daoName }}) UpdateBy{{ $fieldName }}WithMapAndCondition({{ $param
 	return db.Updates(updatedMap).Error
 }
 
-// DeleteBy{{ $fieldName }} 根据索引{{ $index.IndexName }}删除
+// DeleteBy{{ $methodSuffix }} 根据索引{{ $index.IndexName }}删除
 // 参数:
-//   - {{ $paramName }}: {{ $col.Comment }}
+{{- range $col := $indexColumns }}
+//   - {{ $col.ColumnName | ToSafeParamName }}: {{ $col.Comment }}
+{{- end }}
 // 返回:
 //   - error: 错误信息
 // 说明:
-//   - 注意: {{ $paramName }} 不是唯一键，可能会删除多条记录
-func (dao *{{ $daoName }}) DeleteBy{{ $fieldName }}({{ $paramName }} {{ $goType }}) error {
-	return dao.Where("{{ $col.ColumnName }} = ?", {{ $paramName }}).Delete(&{{ $.PoPackageName }}.{{ $entityName }}{}).Error
+//   - 注意: 该索引不是唯一键，可能会删除多条记录
+func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(
+{{- range $i, $col := $indexColumns }}{{ if $i }}, {{ end }}{{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}) error {
+	return dao.Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }}).Delete(&{{ $.PoPackageName }}.{{ $entityName }}{}).Error
 }
 
 {{- end }}
