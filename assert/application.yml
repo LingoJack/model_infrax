@@ -1,6 +1,6 @@
 generate_config:
   # 生成模式: database(从数据库解析) 或 statement(从SQL文件解析)
-  generate_mode: statement
+  generate_mode: database
   
   # database 模式配置
   database_name: test_db
@@ -13,9 +13,9 @@ generate_config:
   sql_file_path: ~/dev/model_infrax/assert/schema.sql
   
   # 通用配置
-  all_tables: true
+  all_tables: false
   table_names:
-    - t_llm_history
+    - t_session_step
 
 generate_option:
   # 输出路径
