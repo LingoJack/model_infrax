@@ -1,9 +1,10 @@
 package generator
 
 import (
-	"model_infrax/model"
-	"model_infrax/tool"
 	"strings"
+
+	"github.com/LingoJack/model_infrax/model"
+	"github.com/LingoJack/model_infrax/tool"
 )
 
 // typeMapping 定义了数据库类型到 Go 类型的映射规则
