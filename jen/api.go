@@ -1,4 +1,4 @@
-package modelinfra
+package jen
 
 import (
 	"fmt"
@@ -12,11 +12,11 @@ import (
 //
 // 使用示例:
 //
-//	import "github.com/LingoJack/model_infrax/modelinfra"
+//	import "github.com/LingoJack/model_infrax/jen"
 //
 //	func main() {
-//	    err := modelinfra.Generate(
-//	        modelinfra.NewBuilder().
+//	    err := jen.Generate(
+//	        jen.NewBuilder().
 //	            DatabaseMode("localhost", 3306, "mydb", "root", "password").
 //	            Tables("users", "orders").
 //	            OutputPath("./generated"),
@@ -40,10 +40,10 @@ func Generate(builder *config.ConfiggerBuilder) error {
 //
 // 使用示例:
 //
-//	import "github.com/LingoJack/model_infrax/modelinfra"
+//	import "github.com/LingoJack/model_infrax/jen"
 //
 //	func main() {
-//	    err := modelinfra.GenerateFromConfig("./application.yml")
+//	    err := jen.GenerateFromConfig("./application.yml")
 //	    if err != nil {
 //	        log.Fatal(err)
 //	    }
@@ -63,7 +63,7 @@ func GenerateFromConfig(configPath string) error {
 //
 // 使用示例:
 //
-//	builder := modelinfra.NewBuilder().
+//	builder := jen.NewBuilder().
 //	    DatabaseMode("localhost", 3306, "mydb", "root", "password").
 //	    AllTables().
 //	    OutputPath("./output")
