@@ -38,6 +38,9 @@ cmd/model_infrax/model_infrax
 generated/
 output/
 
+pack/
+target/
+
 # Configuration files with sensitive information
 model_infrax.go
 application.yml
