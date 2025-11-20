@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/LingoJack/model_infrax"
+	"github.com/LingoJack/model_infrax/modelinfra"
 )
 
 // 数据库模式示例：从数据库读取表结构生成代码
@@ -13,7 +13,7 @@ func main() {
 
 	// 使用 Builder 模式配置并生成代码
 	// 这种方式不需要配置文件，所有配置都在代码中完成
-	err := model_infrax.NewBuilder().
+	err := modelinfra.NewBuilder().
 		// 配置数据库连接信息
 		DatabaseMode("localhost", 3306, "test_db", "root", "password").
 		// 生成所有表
