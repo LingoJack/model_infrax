@@ -38,23 +38,23 @@ go install github.com/LingoJack/model_infrax/cmd/jen@latest
 
 1. 创建 `model_infra.go` 文件：
 ```go
+//go:build codegen
+// +build codegen
+
 package main
 
-import (
-    "log"
-    "github.com/LingoJack/model_infrax"
-)
+import "github.com/LingoJack/model_infrax/jen"
 
 func main() {
-    err := model_infrax.Generate(
-        model_infrax.NewBuilder().
-            DatabaseMode("localhost", 3306, "mydb", "root", "password").
-            AllTables().
-            OutputPath("./output").
-            BuildAndGenerate(),
-    )
+    // 从数据库生成代码
+    builder := jen.NewBuilder().
+        DatabaseMode("localhost", 3306, "mydb", "root", "password").
+        AllTables().
+        OutputPath("./output")
+    
+    err := jen.Generate(builder)
     if err != nil {
-        log.Fatal(err)
+        panic(err)
     }
 }
 ```
@@ -99,25 +99,25 @@ jen --config ./my-config.yml
 #### 方式一：使用 Builder 模式 API
 
 ```go
+//go:build codegen
+// +build codegen
+
 package main
 
-import (
-    "log"
-    "github.com/LingoJack/model_infrax"
-)
+import "github.com/LingoJack/model_infrax/jen"
 
 func main() {
     // 从数据库生成代码
-    err := model_infrax.Generate(
-        model_infrax.NewBuilder().
-            DatabaseMode("localhost", 3306, "mydb", "root", "password").
-            AllTables().
-            OutputPath("./output").
-            IgnoreTableNamePrefix(true).
-            UseFramework("itea-go"),
-    )
+    builder := jen.NewBuilder().
+        DatabaseMode("localhost", 3306, "mydb", "root", "password").
+        AllTables().
+        OutputPath("./output").
+        IgnoreTableNamePrefix(true).
+        UseFramework("itea-go")
+    
+    err := jen.Generate(builder)
     if err != nil {
-        log.Fatal(err)
+        panic(err)
     }
 }
 ```
@@ -151,17 +151,18 @@ generate_option:
 然后使用配置文件生成：
 
 ```go
+//go:build codegen
+// +build codegen
+
 package main
 
-import (
-    "log"
-    "github.com/LingoJack/model_infrax"
-)
+import "github.com/LingoJack/model_infrax/jen"
 
 func main() {
-    err := model_infrax.GenerateFromConfig("./application.yml")
+    // 从配置文件生成代码
+    err := jen.GenerateFromConfig("./application.yml")
     if err != nil {
-        log.Fatal(err)
+        panic(err)
     }
 }
 ```
@@ -193,11 +194,24 @@ func main() {
 直接连接数据库，实时获取表结构：
 
 ```go
-model_infrax.NewBuilder().
-    DatabaseMode("localhost", 3306, "mydb", "root", "password").
-    Tables("users", "orders").  // 指定表名
-    OutputPath("./model").
-    BuildAndGenerate()
+//go:build codegen
+// +build codegen
+
+package main
+
+import "github.com/LingoJack/model_infrax/jen"
+
+func main() {
+    builder := jen.NewBuilder().
+        DatabaseMode("localhost", 3306, "mydb", "root", "password").
+        Tables("users", "orders").  // 指定表名
+        OutputPath("./model")
+    
+    err := jen.Generate(builder)
+    if err != nil {
+        panic(err)
+    }
+}
 ```
 
 ### 2. SQL 文件模式
@@ -205,11 +219,24 @@ model_infrax.NewBuilder().
 从 SQL 建表语句生成代码，无需数据库连接：
 
 ```go
-model_infrax.NewBuilder().
-    StatementMode("./schema.sql").
-    AllTables().
-    OutputPath("./model").
-    BuildAndGenerate()
+//go:build codegen
+// +build codegen
+
+package main
+
+import "github.com/LingoJack/model_infrax/jen"
+
+func main() {
+    builder := jen.NewBuilder().
+        StatementMode("./schema.sql").
+        AllTables().
+        OutputPath("./model")
+    
+    err := jen.Generate(builder)
+    if err != nil {
+        panic(err)
+    }
+}
 ```
 
 ## ⚙️ 配置选项
@@ -217,26 +244,39 @@ model_infrax.NewBuilder().
 ### Builder API 完整配置
 
 ```go
-model_infrax.NewBuilder().
-    // 生成模式选择
-    DatabaseMode("host", port, "db", "user", "pass").  // 数据库模式
-    // StatementMode("./schema.sql").                   // SQL文件模式
+//go:build codegen
+// +build codegen
+
+package main
+
+import "github.com/LingoJack/model_infrax/jen"
+
+func main() {
+    builder := jen.NewBuilder().
+        // 生成模式选择
+        DatabaseMode("host", port, "db", "user", "pass").  // 数据库模式
+        // StatementMode("./schema.sql").                   // SQL文件模式
+        
+        // 表选择
+        AllTables().                                      // 所有表
+        // Tables("users", "orders").                     // 指定表
+        
+        // 输出配置
+        OutputPath("./output").                          // 输出路径
+        IgnoreTableNamePrefix(true).                     // 忽略表名前缀
+        CrudOnlyIdx(true).                               // 只为索引字段生成CRUD
+        ModelAllInOneFile(true, "models.go").           // 合并到一个文件
+        
+        // 框架和包配置
+        UseFramework("itea-go").                        // 使用框架
+        Packages("po", "dto", "vo", "dao", "tool")      // 配置包名
     
-    // 表选择
-    AllTables().                                      // 所有表
-    // Tables("users", "orders").                     // 指定表
-    
-    // 输出配置
-    OutputPath("./output").                          // 输出路径
-    IgnoreTableNamePrefix(true).                     // 忽略表名前缀
-    CrudOnlyIdx(true).                               // 只为索引字段生成CRUD
-    ModelAllInOneFile(true, "models.go").           // 合并到一个文件
-    
-    // 框架和包配置
-    UseFramework("itea-go").                        // 使用框架
-    Packages("po", "dto", "vo", "dao", "tool").      // 配置包名
-    
-    BuildAndGenerate()                               // 构建并生成
+    // 执行生成
+    err := jen.Generate(builder)
+    if err != nil {
+        panic(err)
+    }
+}
 ```
 
 ### 配置文件完整选项
@@ -340,29 +380,57 @@ func (d *UserDAO) FindByID(id uint) (*entity.User, error) {
 ### 批量生成多服务代码
 
 ```go
-services := map[string][]string{
-    "user_service":    {"t_user", "t_role"},
-    "order_service":   {"t_order", "t_order_item"},
-    "product_service": {"t_product", "t_category"},
-}
+//go:build codegen
+// +build codegen
 
-for service, tables := range services {
-    model_infrax.NewBuilder().
-        DatabaseMode("localhost", 3306, "mydb", "root", "password").
-        Tables(tables...).
-        OutputPath("./services/" + service + "/model").
-        IgnoreTableNamePrefix(true).
-        BuildAndGenerate()
+package main
+
+import "github.com/LingoJack/model_infrax/jen"
+
+func main() {
+    // 定义多个服务及其对应的表
+    services := map[string][]string{
+        "user_service":    {"t_user", "t_role"},
+        "order_service":   {"t_order", "t_order_item"},
+        "product_service": {"t_product", "t_category"},
+    }
+
+    // 批量生成各服务的代码
+    for service, tables := range services {
+        builder := jen.NewBuilder().
+            DatabaseMode("localhost", 3306, "mydb", "root", "password").
+            Tables(tables...).
+            OutputPath("./services/" + service + "/model").
+            IgnoreTableNamePrefix(true)
+        
+        err := jen.Generate(builder)
+        if err != nil {
+            panic(err)
+        }
+    }
 }
 ```
 
 ### 自定义数据库连接模板
 
 ```go
-model_infrax.NewBuilder().
-    DatabaseMode("localhost", 3306, "mydb", "root", "password").
-    URLTemplate("mysql://%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local").
-    BuildAndGenerate()
+//go:build codegen
+// +build codegen
+
+package main
+
+import "github.com/LingoJack/model_infrax/jen"
+
+func main() {
+    builder := jen.NewBuilder().
+        DatabaseMode("localhost", 3306, "mydb", "root", "password").
+        URLTemplate("mysql://%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local")
+    
+    err := jen.Generate(builder)
+    if err != nil {
+        panic(err)
+    }
+}
 ```
 
 ## 🛠️ 开发
@@ -467,23 +535,22 @@ jen --config /etc/jen/config.yml
 在当前目录创建 `model_infra.go` 文件：
 
 ```go
+//go:build codegen
+// +build codegen
+
 package main
 
-import (
-    "log"
-    "github.com/LingoJack/model_infrax"
-)
+import "github.com/LingoJack/model_infrax/jen"
 
 func main() {
-    err := model_infrax.Generate(
-        model_infrax.NewBuilder().
-            DatabaseMode("localhost", 3306, "mydb", "root", "password").
-            AllTables().
-            OutputPath("./output").
-            BuildAndGenerate(),
-    )
+    builder := jen.NewBuilder().
+        DatabaseMode("localhost", 3306, "mydb", "root", "password").
+        AllTables().
+        OutputPath("./output")
+    
+    err := jen.Generate(builder)
     if err != nil {
-        log.Fatal(err)
+        panic(err)
     }
 }
 ```
