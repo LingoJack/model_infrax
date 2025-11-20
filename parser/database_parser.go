@@ -2,11 +2,12 @@ package parser
 
 import (
 	"fmt"
-	"model_infrax/config"
-	"model_infrax/model"
-	"model_infrax/tool"
+
 	"strings"
 
+	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/model"
+	"github.com/LingoJack/model_infrax/tool"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 

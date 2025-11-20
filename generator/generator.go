@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"go/format"
 	"log"
-	"model_infrax/config"
-	"model_infrax/model"
+
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/model"
 )
 
 // Generator 代码生成器

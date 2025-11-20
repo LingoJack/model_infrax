@@ -1,4 +1,4 @@
-module model_infrax
+module github.com/LingoJack/model_infrax
 
 go 1.25.1
 

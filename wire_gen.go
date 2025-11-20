@@ -7,9 +7,9 @@
 package main
 
 import (
-	"model_infrax/config"
-	"model_infrax/generator"
-	"model_infrax/parser"
+	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/generator"
+	"github.com/LingoJack/model_infrax/parser"
 )
 
 // Injectors from wire.go:

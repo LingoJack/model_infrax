@@ -2,7 +2,8 @@ package config
 
 import (
 	"fmt"
-	"model_infrax/tool"
+
+	"github.com/LingoJack/model_infrax/tool"
 )
 
 // ConfiggerBuilder 配置构建器，提供链式API用于通过Go代码配置生成器

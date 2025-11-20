@@ -3,11 +3,12 @@ package parser
 import (
 	"fmt"
 	"log"
-	"model_infrax/config"
-	"model_infrax/model"
+
 	"os"
 	"strings"
 
+	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/model"
 	"github.com/pingcap/tidb/pkg/parser"
 	"github.com/pingcap/tidb/pkg/parser/ast"
 	"github.com/pingcap/tidb/pkg/parser/test_driver"

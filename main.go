@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/generator"
+	"github.com/LingoJack/model_infrax/model"
+	"github.com/LingoJack/model_infrax/parser"
+
 	"log"
-	"model_infrax/config"
-	"model_infrax/generator"
-	"model_infrax/model"
-	"model_infrax/parser"
 
 	flag "github.com/spf13/pflag"
 )

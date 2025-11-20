@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"model_infrax/config"
+
+	"github.com/LingoJack/model_infrax/config"
 )
 
 // Generate 是对外暴露的主要 API，用于执行代码生成
