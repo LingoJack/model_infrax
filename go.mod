@@ -3,10 +3,9 @@ module model_infrax
 go 1.25.1
 
 require (
-	git.woa.com/tencent-cloud-platform/go-module/itea-gorm v0.0.4
 	github.com/google/wire v0.7.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/pingcap/tidb/pkg/parser v0.0.0-20251117143011-7620a1e79992
+	github.com/pingcap/tidb/pkg/parser v0.0.0-20251119120444-d68297067486
 	github.com/samber/lo v1.52.0
 	github.com/spf13/pflag v1.0.10
 	gopkg.in/yaml.v3 v3.0.1
@@ -26,6 +25,7 @@ require (
 	git.woa.com/tencent-cloud-platform/go-module/interface v0.0.0-20221008014136-5ab0e780e952 // indirect
 	git.woa.com/tencent-cloud-platform/go-module/itea-config v0.0.0-20221008022445-13e2f8f832bc // indirect
 	git.woa.com/tencent-cloud-platform/go-module/itea-go v0.0.0-20221008030452-73139f8fc3f3 // indirect
+	git.woa.com/tencent-cloud-platform/go-module/itea-gorm v0.0.4 // indirect
 	git.woa.com/tencent-cloud-platform/go-module/itea-ioc v0.0.0-20221008015532-ee360effeb2b // indirect
 	git.woa.com/tencent-cloud-platform/go-module/itea-polaris v0.0.5 // indirect
 	git.woa.com/tencent-cloud-platform/go-module/itea-signal v0.0.0-20221008022711-fd3ffda0a246 // indirect
@@ -62,7 +62,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.38.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.0 // indirect
+	go.uber.org/zap v1.27.1 // indirect
 	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
