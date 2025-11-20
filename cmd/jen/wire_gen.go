@@ -6,7 +6,6 @@
 
 package main
 
-
 import (
 	"github.com/LingoJack/model_infrax/config"
 	"github.com/LingoJack/model_infrax/generator"
