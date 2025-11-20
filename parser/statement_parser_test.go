@@ -3,11 +3,12 @@ package parser
 import (
 	"fmt"
 	"log"
-	"model_infrax/config"
-	"model_infrax/tool"
+
 	"os"
 	"testing"
 
+	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/tool"
 	"github.com/pingcap/tidb/pkg/parser"
 	"github.com/pingcap/tidb/pkg/parser/ast"
 	_ "github.com/pingcap/tidb/pkg/parser/test_driver"
@@ -48,7 +49,7 @@ func parse(sql string) (*ast.StmtNode, error) {
 func TestTidbPaseNode(t *testing.T) {
 	p := parser.New()
 
-	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/schema.sql")
+	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assets/schema.sql")
 	if err != nil {
 		panic(err)
 	}
@@ -64,7 +65,7 @@ func TestTidbPaseNode(t *testing.T) {
 }
 
 func TestTiDBParser(t *testing.T) {
-	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/schema.sql")
+	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assets/schema.sql")
 	if err != nil {
 		panic(err)
 	}
@@ -81,7 +82,7 @@ func TestTiDBParser(t *testing.T) {
 
 func TestStatementParser_Parse(t *testing.T) {
 	// 加载配置文件
-	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assets/application.yml")
 	if err != nil {
 		panic(err)
 	}
@@ -105,7 +106,7 @@ func TestStatementParser_Parse(t *testing.T) {
 func TestDebugAST(t *testing.T) {
 	p := parser.New()
 
-	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/schema.sql")
+	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assets/schema.sql")
 	if err != nil {
 		panic(err)
 	}

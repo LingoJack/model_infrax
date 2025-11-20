@@ -2,15 +2,17 @@ package parser
 
 import (
 	"fmt"
-	"model_infrax/config"
-	"model_infrax/tool"
+
+	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/tool"
+
 	"os"
 	"testing"
 )
 
 // loadSQL 加载SQL文件内容
 func loadSQL() string {
-	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assert/schema.sql")
+	byts, err := os.ReadFile("/Users/jacklingo/dev/model_infrax/assets/schema.sql")
 	if err != nil {
 		panic(fmt.Sprintf("读取SQL文件失败: %v", err))
 	}
@@ -18,7 +20,7 @@ func loadSQL() string {
 }
 
 func TestParser_AllTables(t *testing.T) {
-	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assets/application.yml")
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +36,7 @@ func TestParser_AllTables(t *testing.T) {
 }
 
 func TestSql1(t *testing.T) {
-	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assets/application.yml")
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +54,7 @@ func TestSql1(t *testing.T) {
 }
 
 func TestSql2(t *testing.T) {
-	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assets/application.yml")
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +72,7 @@ func TestSql2(t *testing.T) {
 }
 
 func TestSql3(t *testing.T) {
-	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assets/application.yml")
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +90,7 @@ func TestSql3(t *testing.T) {
 }
 
 func TestSql4(t *testing.T) {
-	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assert/application.yml")
+	configger, err := config.NewConfigger("/Users/jacklingo/dev/model_infrax/assets/application.yml")
 	if err != nil {
 		panic(err)
 	}

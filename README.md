@@ -376,22 +376,75 @@ go run generate.go
 
 ```
 model_infrax/
-├── cmd/
-│   └── model_infrax/      # 命令行工具入口
-│       └── main.go
-├── config/                # 配置模块
+├── cmd/                          # 命令行工具
+│   └── jen/
+│       ├── main.go
+│       ├── wire.go
+│       └── wire_gen.go
+│
+├── config/                       # 配置管理
 │   ├── config.go
-│   └── builder.go         # Builder 模式配置
-├── parser/                # 解析器模块
-├── generator/             # 代码生成器模块
-├── examples/              # 使用示例
-│   └── programmatic_usage.go
-├── api.go                 # 对外暴露的 API
-├── main.go                # 原始入口（保留兼容）
-├── wire.go                # Wire 依赖注入配置
-├── README_API.md          # API 文档
-└── README.md              # 本文件
+│   └── builder.go
+│
+├── parser/                       # 解析器
+│   ├── parser.go
+│   ├── database_parser.go
+│   ├── database_parser_test.go
+│   ├── statement_parser.go
+│   └── statement_parser_test.go
+│
+├── generator/                    # 代码生成器
+│   ├── generator.go
+│   ├── template_func.go
+│   ├── embed.go
+│   └── template/
+│       ├── dao.template
+│       ├── dto.template
+│       ├── po.template
+│       ├── itea-go/
+│       └── tools/
+│
+├── model/                        # 数据模型
+│   ├── schema.go
+│   ├── column.go
+│   └── index.go
+│
+├── pkg/                          # 公共包
+│   └── app/
+│       └── app.go
+│
+├── tool/                         # 工具函数
+│   ├── copy.go
+│   ├── encode.go
+│   ├── file.go
+│   ├── ptr.go
+│   ├── str.go
+│   └── var.go
+│
+├── examples/                     # 使用示例 ✨
+│   ├── README.md
+│   ├── basic/                    # 基础示例
+│   ├── database/                 # 数据库模式
+│   ├── statement/                # SQL文件模式
+│   └── advanced/                 # 高级用法
+│
+├── assets/                       # 资源文件 ✨
+│   ├── application.yml
+│   ├── schema.sql
+│   ├── install.sh
+│   ├── jcode
+│   └── prompt/
+│
+├── api.go                        # 对外API
+├── wire.go                       # Wire配置
+├── wire_gen.go                   # Wire生成代码
+├── build.sh                      # 构建脚本
+├── README.md                     # 本文件
+├── README_API.md                 # API文档
+└── MIGRATION.md                  # 迁移指南
 ```
+
+> 💡 **注意**: 我们最近优化了目录结构，将 `assert` 重命名为 `assets`，并新增了 `examples` 目录。详见 [MIGRATION.md](./MIGRATION.md)
 
 ## 🔍 使用场景
 
@@ -470,7 +523,8 @@ export GOPRIVATE=github.com/LingoJack/*
 
 - **[API 文档](./README_API.md)** - 完整的 API 参考
 - **[示例代码](./examples/)** - 更多使用示例
-- **[配置示例](./assert/application.yml)** - YAML 配置示例
+- **[配置示例](./assets/application.yml)** - YAML 配置示例
+- **[迁移指南](./MIGRATION.md)** - 目录结构优化说明
 
 ## 🤝 贡献
 
