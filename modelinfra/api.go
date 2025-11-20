@@ -1,4 +1,4 @@
-package main
+package modelinfra
 
 import (
 	"fmt"
@@ -12,11 +12,11 @@ import (
 //
 // 使用示例:
 //
-//	import "github.com/LingoJack/model_infrax"
+//	import "github.com/LingoJack/model_infrax/modelinfra"
 //
 //	func main() {
-//	    err := model_infrax.Generate(
-//	        model_infrax.NewBuilder().
+//	    err := modelinfra.Generate(
+//	        modelinfra.NewBuilder().
 //	            DatabaseMode("localhost", 3306, "mydb", "root", "password").
 //	            Tables("users", "orders").
 //	            OutputPath("./generated"),
@@ -40,10 +40,10 @@ func Generate(builder *config.ConfiggerBuilder) error {
 //
 // 使用示例:
 //
-//	import "github.com/LingoJack/model_infrax"
+//	import "github.com/LingoJack/model_infrax/modelinfra"
 //
 //	func main() {
-//	    err := model_infrax.GenerateFromConfig("./application.yml")
+//	    err := modelinfra.GenerateFromConfig("./application.yml")
 //	    if err != nil {
 //	        log.Fatal(err)
 //	    }
@@ -63,7 +63,7 @@ func GenerateFromConfig(configPath string) error {
 //
 // 使用示例:
 //
-//	builder := model_infrax.NewBuilder().
+//	builder := modelinfra.NewBuilder().
 //	    DatabaseMode("localhost", 3306, "mydb", "root", "password").
 //	    AllTables().
 //	    OutputPath("./output")
@@ -72,6 +72,6 @@ func NewBuilder() *config.ConfiggerBuilder {
 }
 
 // initializeAppForAPI 函数已由 Wire 自动生成
-// Wire 会在根目录的 wire_gen.go 中生成 InitializeAppForAPI 函数
+// Wire 会在当前目录的 wire_gen.go 中生成 InitializeAppForAPI 函数
 // 该函数负责处理API模式下的所有依赖注入和初始化逻辑
 // 不再需要手动实现此函数

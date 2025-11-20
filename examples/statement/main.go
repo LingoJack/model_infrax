@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/LingoJack/model_infrax"
+	"github.com/LingoJack/model_infrax/modelinfra"
 )
 
 // SQL文件模式示例：从SQL文件解析表结构生成代码
@@ -13,7 +13,7 @@ func main() {
 	log.Println("🚀 开始从SQL文件生成代码...")
 
 	// 使用 Builder 模式配置并生成代码
-	err := model_infrax.NewBuilder().
+	err := modelinfra.NewBuilder().
 		// 配置SQL文件模式
 		StatementMode("./schema.sql").
 		// 指定要生成的表（如果不指定则生成所有表）

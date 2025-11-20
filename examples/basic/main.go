@@ -3,14 +3,13 @@ package main
 import (
 	"log"
 
-	"github.com/LingoJack/model_infrax"
-	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/modelinfra"
 )
 
 func main() {
 	log.Println("🚀 开始使用配置文件生成代码...")
 
-	err := model_infrax.GenerateFromConfig("./application.yml")
+	err := modelinfra.GenerateFromConfig("./application.yml")
 	if err != nil {
 		log.Fatalf("❌ 生成失败: %v", err)
 	}

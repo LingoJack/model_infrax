@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/LingoJack/model_infrax"
 	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/modelinfra"
 )
 
 // 高级用法示例：展示更多配置选项和灵活用法
@@ -12,7 +12,7 @@ func main() {
 	log.Println("🚀 高级用法示例...")
 
 	// 示例1: 使用自定义配置构建器
-	customConfig := model_infrax.NewBuilder().
+	customConfig := modelinfra.NewBuilder().
 		DatabaseMode("localhost", 3306, "test_db", "root", "password").
 		Tables("t_user", "t_order"). // 只生成指定的表
 		OutputPath("./custom_output").
@@ -29,7 +29,7 @@ func main() {
 		customConfig.GenerateConfig.GenerateMode)
 
 	// 示例2: 使用配置对象生成代码
-	err := model_infrax.GenerateFromBuilder(customConfig)
+	err := GenerateFromBuilder(customConfig)
 	if err != nil {
 		log.Fatalf("❌ 生成失败: %v", err)
 	}
@@ -41,7 +41,7 @@ func main() {
 	for _, dbName := range databases {
 		log.Printf("📦 正在生成数据库 %s 的代码...", dbName)
 
-		err := model_infrax.NewBuilder().
+		err := modelinfra.NewBuilder().
 			DatabaseMode("localhost", 3306, dbName, "root", "password").
 			AllTables().
 			OutputPath("./output/" + dbName).
