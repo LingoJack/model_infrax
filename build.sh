@@ -1,7 +1,7 @@
-go build -o jen main.go wire_gen.go
+go build -o model_infrax main.go wire_gen.go
 mkdir -p ~/dev/model_infrax/cmd/
 mkdir -p ~/dev/model_infrax/cmd/assert/
-mv jen ~/dev/model_infrax/cmd/
+mv model_infrax ~/dev/model_infrax/cmd/
 cp -r ~/dev/model_infrax/assert/prompt/ ~/dev/model_infrax/cmd/assert/
 cp ~/dev/model_infrax/assert/application.yml ~/dev/model_infrax/cmd/
 cp ~/dev/model_infrax/assert/schema.sql ~/dev/model_infrax/cmd/
@@ -11,7 +11,7 @@ mkdir -p ~/dev/model_infrax/cmd/output/
 mkdir -p ~/dev/model_infrax/pack/
 
 # 创建压缩包，如果文件存在则覆盖
-PACKAGE_NAME="jen.zip"
+PACKAGE_NAME="model_infrax.zip"
 PACKAGE_PATH="$HOME/dev/model_infrax/pack/$PACKAGE_NAME"
 
 # 切换到目标目录并创建压缩包
