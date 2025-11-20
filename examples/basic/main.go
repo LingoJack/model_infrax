@@ -2,15 +2,14 @@ package main
 
 import (
 	"log"
+
+	"github.com/LingoJack/model_infrax"
+	"github.com/LingoJack/model_infrax/config"
 )
 
-// 基础示例：使用配置文件生成代码
-// 这是最简单的使用方式，适合快速开始
 func main() {
 	log.Println("🚀 开始使用配置文件生成代码...")
 
-	// 方式1: 使用配置文件路径
-	// 配置文件中包含了所有必要的配置信息
 	err := model_infrax.GenerateFromConfig("./application.yml")
 	if err != nil {
 		log.Fatalf("❌ 生成失败: %v", err)
