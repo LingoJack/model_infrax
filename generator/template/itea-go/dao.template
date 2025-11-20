@@ -156,7 +156,7 @@ func (dao *{{ $daoName }}) SelectList(queryDto *{{ $.DtoPackageName }}.{{ $dtoNa
 
 	// 分页
 	if queryDto != nil && queryDto.PageSize > 0 {
-		db = db.Offset(queryDto.PageOffset).Limit(queryDto.PageSize)
+		db = db.Offset(queryDto.PageOffset * queryDto.PageSize).Limit(queryDto.PageSize)
 	}
 
 	err := db.Find(&resultList).Error
