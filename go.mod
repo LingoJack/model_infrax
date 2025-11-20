@@ -6,6 +6,7 @@ require (
 	git.woa.com/tencent-cloud-platform/go-module/itea-gorm v0.0.4
 	github.com/google/wire v0.7.0
 	github.com/iancoleman/strcase v0.3.0
+	github.com/jinzhu/copier v0.4.0
 	github.com/pingcap/tidb/pkg/parser v0.0.0-20251119120444-d68297067486
 	github.com/samber/lo v1.52.0
 	github.com/spf13/pflag v1.0.10
