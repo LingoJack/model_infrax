@@ -1,4 +1,4 @@
-package jen
+package main
 
 import (
 	"log"
