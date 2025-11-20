@@ -1,12 +1,12 @@
-go build -o jen cmd/jen/main.go
+go build -o jen cmd/jen/main.go cmd/jen/wire_gen.go
 mkdir -p ~/dev/model_infrax/target/
-mkdir -p ~/dev/model_infrax/target/assert/
+mkdir -p ~/dev/model_infrax/target/assets/
 mv jen ~/dev/model_infrax/target/
-cp -r ~/dev/model_infrax/assert/prompt/ ~/dev/model_infrax/target/assert/
-cp ~/dev/model_infrax/assert/application.yml ~/dev/model_infrax/target/
-cp ~/dev/model_infrax/assert/schema.sql ~/dev/model_infrax/target/
-cp ~/dev/model_infrax/assert/install.sh ~/dev/model_infrax/target/
-cp ~/dev/model_infrax/assert/jcode ~/dev/model_infrax/target/
+cp -r ~/dev/model_infrax/assets/prompt/ ~/dev/model_infrax/target/assets/
+cp ~/dev/model_infrax/assets/application.yml ~/dev/model_infrax/target/
+cp ~/dev/model_infrax/assets/schema.sql ~/dev/model_infrax/target/
+cp ~/dev/model_infrax/assets/install.sh ~/dev/model_infrax/target/
+cp ~/dev/model_infrax/assets/jcode ~/dev/model_infrax/target/
 mkdir -p ~/dev/model_infrax/target/output/
 mkdir -p ~/dev/model_infrax/pack/
 
