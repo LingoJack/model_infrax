@@ -26,6 +26,26 @@ func NewApp(cfg *config.Configger, g *generator.Generator) *App {
 	}
 }
 
+// NewAppFromBuilder 从配置构建器创建应用实例
+// 这是使用 Go 代码配置的便捷方法
+// 示例:
+//
+//	app := NewAppFromBuilder(
+//	    config.NewBuilder().
+//	        DatabaseMode("localhost", 3306, "mydb", "root", "password").
+//	        AllTables().
+//	        OutputPath("./output"),
+//	)
+func NewAppFromBuilder(builder *config.ConfiggerBuilder) (*App, error) {
+	cfg, err := builder.Build()
+	if err != nil {
+		return nil, fmt.Errorf("构建配置失败: %w", err)
+	}
+
+	gen := generator.NewGenerator(cfg)
+	return NewApp(cfg, gen), nil
+}
+
 // Run 运行应用程序，执行完整的代码生成流程
 // 流程包括：
 // 1. 解析数据库表结构（从数据库或SQL文件）
