@@ -10,6 +10,8 @@ Model Infrax 是一个强大的 Go 语言数据库代码生成工具，能够从
 
 - 🚀 **多种使用方式**：支持命令行工具和 Go 库两种使用方式
 - 📦 **多种生成模式**：支持从数据库连接或 SQL 文件生成代码
+- 🤖 **智能运行模式**：自动检测并选择最佳运行方式，支持编程式控制和声明式配置
+- 🎯 **优先级自动降级**：用户指定优先，智能降级到可用方式
 - 📋 **完整代码结构**：自动生成 Entity、DTO、VO、DAO 和工具类
 - 🎯 **灵活配置**：支持 YAML 配置文件和 Builder 模式 API
 - 🔧 **框架适配**：支持原生 GORM 和 itea-go 框架
@@ -28,6 +30,68 @@ go get github.com/LingoJack/model_infrax
 
 # 安装命令行工具
 go install github.com/LingoJack/model_infrax/cmd/jen@latest
+```
+
+### 三分钟上手
+
+#### 方式一：零配置快速体验（推荐新手）
+
+1. 创建 `model_infra.go` 文件：
+```go
+package main
+
+import (
+    "log"
+    "github.com/LingoJack/model_infrax"
+)
+
+func main() {
+    err := model_infrax.Generate(
+        model_infrax.NewBuilder().
+            DatabaseMode("localhost", 3306, "mydb", "root", "password").
+            AllTables().
+            OutputPath("./output").
+            BuildAndGenerate(),
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+2. 直接运行：
+```bash
+jen
+```
+
+#### 方式二：配置文件模式（推荐团队使用）
+
+1. 创建 `application.yml`：
+```yaml
+generate_config:
+  generate_mode: database
+  database_name: mydb
+  host: localhost
+  port: 3306
+  username: root
+  password: password
+  all_tables: true
+
+generate_option:
+  output_path: ./output
+  ignore_table_name_prefix: true
+  use_framework: itea-go
+```
+
+2. 运行：
+```bash
+jen
+```
+
+#### 方式三：指定配置文件（推荐生产环境）
+
+```bash
+jen --config ./my-config.yml
 ```
 
 ### 基础使用
@@ -101,6 +165,26 @@ func main() {
     }
 }
 ```
+
+## 📊 使用方式对比
+
+| 特性 | Go 文件模式 | 配置文件模式 | 指定配置模式 |
+|------|-------------|-------------|-------------|
+| **使用场景** | 快速原型、自定义逻辑 | 团队协作、标准化部署 | 生产环境、CI/CD |
+| **灵活性** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **易用性** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **可维护性** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **版本控制** | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **启动方式** | `jen` (自动检测) | `jen` (自动检测) | `jen --config file.yml` |
+| **适用人群** | 开发者、实验者 | 团队、运维人员 | 生产环境管理员 |
+
+### 🎯 如何选择？
+
+- **个人开发/快速实验** → 使用 Go 文件模式
+- **团队协作/标准化** → 使用配置文件模式  
+- **生产环境/自动化** → 使用指定配置模式
+
+---
 
 ## 📖 使用模式
 
@@ -329,7 +413,7 @@ model_infrax/
 
 ## 🔧 命令行工具 (jen)
 
-`jen` 是 Model Infrax 的命令行工具，提供了便捷的命令行接口。
+`jen` 是 Model Infrax 的命令行工具，提供了智能的多模式运行接口，支持编程式控制和声明式配置两种使用方式。
 
 ### 安装命令行工具
 
@@ -337,38 +421,166 @@ model_infrax/
 go install github.com/LingoJack/model_infrax/cmd/jen@latest
 ```
 
+### 运行模式与优先级
+
+`jen` 采用智能优先级自动降级策略，按以下顺序尝试运行：
+
+1. **用户指定配置模式**（最高优先级）
+   - 当用户明确指定 `--config` 参数时
+   - 严格按用户指定的配置文件运行
+
+2. **Go 文件模式**
+   - 检测当前目录是否存在 `model_infra.go` 文件
+   - 如果存在，直接执行该文件（类似 `go run model_infra.go`）
+
+3. **默认配置模式**
+   - 按预设路径顺序查找配置文件
+   - 使用第一个找到的可用配置文件
+
+4. **错误提示模式**
+   - 以上都失败时，提供详细的使用指导
+
 ### 命令行参数
 
 ```bash
 jen [flags]
 
 Flags:
-  -c, --config string   配置文件路径 (默认: "./application.yml")
+  -c, --config string   配置文件路径（可选，未指定时自动选择最佳运行方式）
   -h, --help           显示帮助信息
 ```
 
 ### 使用示例
 
-```bash
-# 使用默认配置文件
-jen
+#### 1. 强制使用配置文件（最高优先级）
 
-# 使用自定义配置文件
+```bash
+# 使用短格式参数
 jen -c ./config/my-app.yml
 
-# 使用绝对路径
+# 使用长格式参数
 jen --config /etc/jen/config.yml
 ```
 
-### 配置文件优先级
+#### 2. 编程式控制（Go 文件模式）
 
-如果不指定配置文件路径，工具会按以下顺序查找配置文件：
-1. `./application.yml`
-2. `./assets/application.yml` 
-3. `/Applications/jen/application.yml`
-4. `/Applications/jen/assets/application.yml`
+在当前目录创建 `model_infra.go` 文件：
+
+```go
+package main
+
+import (
+    "log"
+    "github.com/LingoJack/model_infrax"
+)
+
+func main() {
+    err := model_infrax.Generate(
+        model_infrax.NewBuilder().
+            DatabaseMode("localhost", 3306, "mydb", "root", "password").
+            AllTables().
+            OutputPath("./output").
+            BuildAndGenerate(),
+    )
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+```
+
+然后直接运行：
+```bash
+jen
+```
+
+#### 3. 声明式配置（默认配置模式）
+
+创建 `application.yml` 配置文件，然后运行：
+```bash
+jen
+```
+
+### 配置文件查找路径
+
+当使用默认配置模式时，工具会按以下顺序查找配置文件：
+
+1. `./application.yml`                    # 当前目录下的配置文件
+2. `./assets/application.yml`             # assets目录下的配置文件  
+3. `/Applications/jen/application.yml`    # 系统安装目录下的配置文件
+4. `/Applications/jen/assets/application.yml` # 系统安装目录assets子目录下的配置文件
 
 找到第一个可用配置文件后就会使用它。
+
+### 完整的工作流程
+
+```mermaid
+flowchart TD
+    A[运行 jen] --> B{用户指定 --config?}
+    B -->|是| C[使用指定配置文件]
+    B -->|否| D{存在 model_infra.go?}
+    D -->|是| E[执行 model_infra.go]
+    D -->|否| F[查找默认配置文件]
+    F --> G{找到配置文件?}
+    G -->|是| H[使用找到的配置文件]
+    G -->|否| I[显示错误提示和使用指导]
+    
+    C --> J[程序执行完成]
+    E --> J
+    H --> J
+    I --> K[程序退出]
+```
+
+### 使用场景建议
+
+#### 🎯 快速原型开发
+使用 Go 文件模式，适合需要灵活控制和自定义逻辑的场景：
+
+```bash
+# 1. 创建 model_infra.go
+# 2. 编写自定义生成逻辑
+# 3. 直接运行
+jen
+```
+
+#### 🏭 生产环境部署
+使用配置文件模式，适合标准化和可重复部署的场景：
+
+```bash
+# 使用明确指定的配置文件
+jen --config ./prod-config.yml
+```
+
+#### 🔧 团队协作
+将配置文件加入版本控制，确保团队成员使用一致的配置：
+
+```bash
+# 项目根目录放置 application.yml
+# 团队成员直接运行
+jen
+```
+
+### 错误处理与帮助
+
+当找不到可用的配置或代码文件时，`jen` 会显示详细的错误提示和完整的使用示例，包括：
+
+- `model_infra.go` 的完整示例代码
+- 配置文件的创建方法
+- 不同使用方式的适用场景说明
+
+### 日志输出说明
+
+`jen` 使用丰富的 emoji 标识不同状态：
+
+- 📋 使用用户指定的配置文件
+- 🎯 检测到 Go 文件，直接执行
+- 🔍 查找默认配置文件
+- 📁 找到配置文件
+- 🚀 开始执行代码生成
+- ✅ 操作成功
+- ⚠️ 警告信息
+- ❌ 错误信息
+- 💡 提示信息
+- 🎊 程序执行完成
 
 ## 🤝 贡献
 
