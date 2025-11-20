@@ -672,6 +672,7 @@ jen
 ## 📞 联系方式
 
 - 作者: LingoJack
+- email: 3065225677@qq.com | 3065225677w@gmail.com
 - 项目地址: [https://github.com/LingoJack/model_infrax](https://github.com/LingoJack/model_infrax)
 
 ---
