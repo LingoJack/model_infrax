@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/LingoJack/model_infrax/config"
-	"github.com/LingoJack/model_infrax/generator"
 	"github.com/LingoJack/model_infrax/pkg/app"
 )
 
@@ -37,6 +36,7 @@ func Generate(builder *config.ConfiggerBuilder) error {
 
 // GenerateFromConfig 从配置文件路径生成代码
 // 这是另一种使用方式，适合需要使用 YAML 配置文件的场景
+// 使用 Wire 进行依赖注入，提供更清晰和可维护的代码结构
 //
 // 使用示例:
 //
@@ -49,7 +49,8 @@ func Generate(builder *config.ConfiggerBuilder) error {
 //	    }
 //	}
 func GenerateFromConfig(configPath string) error {
-	appInstance, err := initializeAppForAPI(configPath)
+	// 使用 Wire 生成的 InitializeAppForAPI 函数进行依赖注入
+	appInstance, err := InitializeAppForAPI(configPath)
 	if err != nil {
 		return fmt.Errorf("初始化应用失败: %w", err)
 	}
@@ -70,27 +71,7 @@ func NewBuilder() *config.ConfiggerBuilder {
 	return config.NewBuilder()
 }
 
-// initializeAppForAPI 为API提供应用初始化功能
-// 重新实现原来wire生成的InitializeApp函数的逻辑，但使用pkg/app包
-//
-// 参数:
-//   - configPath: 配置文件的路径
-//
-// 返回:
-//   - *app.App: 初始化完成的应用实例
-//   - error: 初始化过程中的错误，nil表示成功
-func initializeAppForAPI(configPath string) (*app.App, error) {
-	// 加载配置文件
-	configger, err := config.NewConfigger(configPath)
-	if err != nil {
-		return nil, err
-	}
-
-	// 创建代码生成器实例
-	generatorGenerator := generator.NewGenerator(configger)
-
-	// 创建应用实例，使用pkg/app包中的NewApp函数
-	appInstance := app.NewApp(configger, generatorGenerator)
-	
-	return appInstance, nil
-}
+// initializeAppForAPI 函数已由 Wire 自动生成
+// Wire 会在根目录的 wire_gen.go 中生成 InitializeAppForAPI 函数
+// 该函数负责处理API模式下的所有依赖注入和初始化逻辑
+// 不再需要手动实现此函数

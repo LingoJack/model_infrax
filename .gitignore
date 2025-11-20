@@ -4,50 +4,58 @@
 *.dll
 *.so
 *.dylib
+jen
+model_infrax
 
 # Test binary, built with `go test -c`
 *.test
 
-# Output of the go coverage tool, specifically when used with LiteIDE
+# Output of the go coverage tool
 *.out
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
+coverage.txt
+coverage.html
 
 # Go workspace file
 go.work
 
-# IDE
+# Dependency directories
+vendor/
+
+# IDE specific files
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
-Thumbs.db
 
 # Build output
-jen
-cmd/jen/jen
-model_infrax
-cmd/model_infrax/model_infrax
-
-# Generated code
-generated/
-output/
-
-pack/
 target/
+dist/
+build/
+bin/
 
-# Configuration files with sensitive information
-model_infrax.go
-application.yml
-!assert/application.yml
-!cmd/application.yml
+# Generated code output
+output/
+generated/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Log files
+*.log
 
 # Environment files
 .env
 .env.local
 .env.*.local
+
+# OS specific
+Thumbs.db
+.DS_Store
+
+# Project specific
+# 如果你不想提交生成的 wire_gen.go，可以取消下面的注释
+# wire_gen.go
