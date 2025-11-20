@@ -1,0 +1,48 @@
+//go:build wireinject
+// +build wireinject
+
+package jen
+
+import (
+	"github.com/LingoJack/model_infrax/config"
+	"github.com/LingoJack/model_infrax/generator"
+	"github.com/LingoJack/model_infrax/pkg/app"
+	"github.com/google/wire"
+)
+
+// provideConfigger 提供配置管理器
+// 根据配置文件路径创建Configger实例
+func provideConfigger(configPath string) (*config.Configger, error) {
+	return config.NewConfigger(configPath)
+}
+
+// provideGenerator 提供代码生成器
+// 基于配置创建Generator实例
+func provideGenerator(cfg *config.Configger) *generator.Generator {
+	return generator.NewGenerator(cfg)
+}
+
+// provideApp 提供应用实例
+// 使用简化的构造函数，只注入Configger和Generator
+// DatabaseParser和StatementParser将在App.Run()中动态创建
+func provideApp(cfg *config.Configger, gen *generator.Generator) *app.App {
+	return app.NewApp(cfg, gen)
+}
+
+// InitializeApp 使用 Wire 初始化应用
+// 这个函数会由 Wire 自动生成实现代码，提供完整的依赖注入
+//
+// 参数:
+//   - configPath: 配置文件的路径
+//
+// 返回:
+//   - *app.App: 初始化完成的应用实例
+//   - error: 初始化过程中的错误，nil表示成功
+func InitializeApp(configPath string) (*app.App, error) {
+	wire.Build(
+		provideConfigger,
+		provideGenerator,
+		provideApp,
+	)
+	return nil, nil // 由 Wire 生成的代码会替换这个返回值
+}
