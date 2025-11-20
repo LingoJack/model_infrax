@@ -1,7 +1,7 @@
 //go:build wireinject
 // +build wireinject
 
-package jen
+package main
 
 import (
 	"github.com/LingoJack/model_infrax/config"
