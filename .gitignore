@@ -4,7 +4,6 @@
 *.dll
 *.so
 *.dylib
-jen
 model_infrax
 
 # Test binary, built with `go test -c`
