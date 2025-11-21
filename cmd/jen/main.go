@@ -15,10 +15,10 @@ const Version = "1.0.8"
 // defaultConfigPaths 默认配置文件路径列表
 // 按照优先级顺序查找配置文件，找到第一个可用的就使用
 var defaultConfigPaths = []string{
-	"./application.yml",                        // 当前目录下的配置文件
-	"./assets/application.yml",                 // assets目录下的配置文件
-	"/Applications/jen/application.yml",        // 系统安装目录下的配置文件
-	"/Applications/jen/assets/application.yml", // 系统安装目录assets子目录下的配置文件
+	"./application.yml",                                 // 当前目录下的配置文件
+	"./assets/application.yml",                          // assets目录下的配置文件
+	"/Applications/model_infrax/application.yml",        // 系统安装目录下的配置文件
+	"/Applications/model_infrax/assets/application.yml", // 系统安装目录assets子目录下的配置文件
 }
 
 // defaultGoFile 默认要执行的 Go 文件
