@@ -20,6 +20,7 @@ type Generator struct {
 	modelTemplatePath string            // 模板文件路径（嵌入式路径）
 	daoTemplatePath   string            // dao文件路径（嵌入式路径）
 	dtoTemplatePath   string            // dto文件路径（嵌入式路径）
+	voTemplatePath    string            // vo文件路径（嵌入式路径）
 	toolTemplateDir   string            // tool文件路径（嵌入式路径）
 	configger         *config.Configger // 配置对象
 }
@@ -28,6 +29,7 @@ type Generator struct {
 type TemplateData struct {
 	PoPackageName  string         // po 包名（从路径最后一段提取）
 	DtoPackageName string         // dto 包名（从路径最后一段提取）
+	VoPackageName  string         // vo 包名（从路径最后一段提取）
 	DaoPackageName string         // dao 包名（从路径最后一段提取）
 	Schemas        []model.Schema // 表结构列表
 }
@@ -45,6 +47,7 @@ func NewGenerator(cfg *config.Configger) *Generator {
 		modelTemplatePath: templatePathPrefix + "po.template",
 		daoTemplatePath:   templatePathPrefix + "dao.template",
 		dtoTemplatePath:   templatePathPrefix + "dto.template",
+		voTemplatePath:    templatePathPrefix + "vo.template",
 		toolTemplateDir:   templatePathPrefix + "tools",
 		configger:         cfg,
 	}
@@ -55,6 +58,7 @@ func NewGenerator(cfg *config.Configger) *Generator {
 			modelTemplatePath: templatePathPrefix + "itea-go/po.template",
 			daoTemplatePath:   templatePathPrefix + "itea-go/dao.template",
 			dtoTemplatePath:   templatePathPrefix + "itea-go/dto.template",
+			voTemplatePath:    templatePathPrefix + "itea-go/vo.template",
 			toolTemplateDir:   templatePathPrefix + "tools",
 			configger:         cfg,
 		}
@@ -445,4 +449,92 @@ func getPackageName(path string) string {
 		return parts[len(parts)-1]
 	}
 	return "model" // 默认返回 model
+}
+
+// GenerateVO 生成 VO 文件
+// 参数:
+//   - schemas: 表结构列表
+//   - outputFileName: 输出文件名
+//
+// 返回:
+//   - error: 生成过程中的错误
+func (g *Generator) GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
+	// 从嵌入的文件系统中读取 VO 模板文件
+	tmplContent, err := templateFS.ReadFile(g.voTemplatePath)
+	if err != nil {
+		return fmt.Errorf("读取嵌入式 VO 模板文件失败: %w", err)
+	}
+
+	// 创建模板并注册函数
+	tmpl, err := template.New("vo").Funcs(template.FuncMap{
+		"ToPascalCase":    ToPascalCase,
+		"ToCamelCase":     ToCamelCase,
+		"ToSafeParamName": ToSafeParamName,
+		"TrimPointer":     TrimPointer,
+		"GetGoType":       GetGoType,
+	}).Parse(string(tmplContent))
+	if err != nil {
+		return fmt.Errorf("解析 VO 模板失败: %w", err)
+	}
+
+	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
+	outputPath := filepath.Join(g.configger.GenerateOption.OutputPath, g.configger.GenerateOption.Package.VoPackage)
+
+	// 确保输出目录存在
+	if err = os.MkdirAll(outputPath, 0755); err != nil {
+		return fmt.Errorf("创建 VO 输出目录失败: %w", err)
+	}
+
+	// 生成文件路径
+	filePath := filepath.Join(outputPath, outputFileName)
+
+	// 准备模板数据，包含包名和表结构
+	templateData := TemplateData{
+		DaoPackageName: getPackageName(g.configger.GenerateOption.Package.DaoPackage),
+		PoPackageName:  getPackageName(g.configger.GenerateOption.Package.PoPackage),
+		DtoPackageName: getPackageName(g.configger.GenerateOption.Package.DtoPackage),
+		VoPackageName:  getPackageName(g.configger.GenerateOption.Package.VoPackage),
+		Schemas:        schemas,
+	}
+
+	// 先将模板执行结果写入缓冲区
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, templateData)
+	if err != nil {
+		return fmt.Errorf("执行模板失败: %w", err)
+	}
+
+	// 使用 go/format 格式化代码
+	formattedCode, err := format.Source(buf.Bytes())
+	if err != nil {
+		// 如果格式化失败，记录警告但仍然写入未格式化的代码
+		log.Printf("警告: 格式化代码失败: %v，将写入未格式化的代码\n", err)
+		formattedCode = buf.Bytes()
+	}
+
+	// 创建输出文件并写入格式化后的代码
+	err = os.WriteFile(filePath, formattedCode, 0644)
+	if err != nil {
+		return fmt.Errorf("写入输出文件失败: %w", err)
+	}
+
+	log.Printf("成功生成文件: %s\n", filePath)
+	return nil
+}
+
+// GenerateVOOneByOne 根据模板生成 VO 代码，每个表生成一个文件
+// 参数:
+//   - schemas: 表结构列表
+//
+// 返回:
+//   - error: 生成过程中的错误
+func (g *Generator) GenerateVOOneByOne(schemas []model.Schema) (err error) {
+	for _, schema := range schemas {
+		fileName := fmt.Sprintf("%s_vo.go", schema.Name)
+		err = g.GenerateVO([]model.Schema{schema}, fileName)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
