@@ -150,6 +150,7 @@ func (dao *{{ $daoName }}) SelectList(queryDto *{{ $.DtoPackageName }}.{{ $dtoNa
 	// 排序
 	if queryDto != nil && queryDto.OrderBy != "" {
 		if dao.isValidOrderBy(queryDto.OrderBy) {
+		    // NOCA:sql_injection(在`isValidOrderBy`方法做过排序的白名单校验)
 			db = db.Order(queryDto.OrderBy)
 		}
 	}
