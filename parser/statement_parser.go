@@ -120,6 +120,7 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 		column := model.Column{
 			ColumnName: col.Name.Name.O,
 			Type:       col.Tp.String(),
+			IsNullable: true, // MySQL默认列是可以为NULL的，除非显式声明NOT NULL
 		}
 
 		// 提取列的各种属性
