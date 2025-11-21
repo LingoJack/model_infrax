@@ -10,7 +10,7 @@ import (
 )
 
 // Version 当前版本号
-const Version = "1.0.8"
+const Version = "1.0.9"
 
 // defaultConfigPaths 默认配置文件路径列表
 // 按照优先级顺序查找配置文件，找到第一个可用的就使用
