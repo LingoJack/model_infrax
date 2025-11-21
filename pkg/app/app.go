@@ -190,6 +190,19 @@ func (a *App) Run() error {
 
 	log.Println("✅ DTO 代码生成完成")
 
+	// 开始生成VO代码
+	// VO（View Object）是视图对象，用于API响应的数据展示
+	// 只包含基本字段，JSON tag 带 omitempty，没有扩展字段和 Builder 模式
+	log.Println("👁️ 开始生成 VO 代码...")
+
+	// 生成VO视图对象代码，每个表生成对应的VO结构
+	err = a.Generator.GenerateVOOneByOne(schemas)
+	if err != nil {
+		return fmt.Errorf("生成VO代码失败: %w", err)
+	}
+
+	log.Println("✅ VO 代码生成完成")
+
 	// 开始生成DAO代码
 	// DAO（Data Access Object）是数据访问对象，提供数据库操作方法
 	// 包含增删改查等基本操作，以及复杂查询方法
@@ -215,7 +228,7 @@ func (a *App) Run() error {
 	}
 
 	log.Println("🎉 所有代码生成完成！")
-	log.Printf("📊 生成统计: %d个表 -> Model + DTO + DAO + Tools", len(schemas))
+	log.Printf("📊 生成统计: %d个表 -> Model + DTO + VO + DAO + Tools", len(schemas))
 
 	return nil
 }
