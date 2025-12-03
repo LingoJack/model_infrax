@@ -112,8 +112,9 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 		}
 	}
 
-	// 用于存储列名到列的映射，方便后续索引处理
-	columnMap := make(map[string]*model.Column)
+	// 用于存储列名到列索引的映射，方便后续索引处理
+	// 注意：不能使用指针映射，因为 slice 扩容会导致指针失效
+	columnIndexMap := make(map[string]int)
 
 	// 提取列信息
 	for _, col := range createTableStmt.Cols {
@@ -186,7 +187,8 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 		}
 
 		schema.Columns = append(schema.Columns, column)
-		columnMap[column.ColumnName] = &schema.Columns[len(schema.Columns)-1]
+		// 存储列名到索引的映射，避免使用指针（slice 扩容会导致指针失效）
+		columnIndexMap[column.ColumnName] = len(schema.Columns) - 1
 	}
 	for _, constraint := range createTableStmt.Constraints {
 		switch constraint.Tp {
@@ -195,10 +197,11 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 			var pkColumns []model.Column
 			for _, indexCol := range constraint.Keys {
 				colName := indexCol.Column.Name.O
-				if col, exists := columnMap[colName]; exists {
-					col.IsPrimaryKey = true
-					col.IsIndexed = true
-					pkColumns = append(pkColumns, *col)
+				if colIdx, exists := columnIndexMap[colName]; exists {
+					// 通过索引直接修改 schema.Columns 中的列属性
+					schema.Columns[colIdx].IsPrimaryKey = true
+					schema.Columns[colIdx].IsIndexed = true
+					pkColumns = append(pkColumns, schema.Columns[colIdx])
 				}
 			}
 			schema.PrimaryKey = model.Index{
@@ -211,10 +214,11 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 			var uniqueColumns []model.Column
 			for _, indexCol := range constraint.Keys {
 				colName := indexCol.Column.Name.O
-				if col, exists := columnMap[colName]; exists {
-					col.IsUnique = true
-					col.IsIndexed = true
-					uniqueColumns = append(uniqueColumns, *col)
+				if colIdx, exists := columnIndexMap[colName]; exists {
+					// 通过索引直接修改 schema.Columns 中的列属性
+					schema.Columns[colIdx].IsUnique = true
+					schema.Columns[colIdx].IsIndexed = true
+					uniqueColumns = append(uniqueColumns, schema.Columns[colIdx])
 				}
 			}
 			indexName := constraint.Name
@@ -234,9 +238,10 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 			var indexColumns []model.Column
 			for _, indexCol := range constraint.Keys {
 				colName := indexCol.Column.Name.O
-				if col, exists := columnMap[colName]; exists {
-					col.IsIndexed = true
-					indexColumns = append(indexColumns, *col)
+				if colIdx, exists := columnIndexMap[colName]; exists {
+					// 通过索引直接修改 schema.Columns 中的列属性
+					schema.Columns[colIdx].IsIndexed = true
+					indexColumns = append(indexColumns, schema.Columns[colIdx])
 				}
 			}
 			indexName := constraint.Name

@@ -474,6 +474,32 @@ func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}(ctx context.Context
 	return &resultBean, nil
 }
 
+{{- /* 只为单列唯一索引生成批量查询方法 */ -}}
+{{- if eq (len $indexColumns) 1 }}
+{{- $col := index $indexColumns 0 }}
+{{- $goType := $col | GetGoType }}
+{{- $paramName := $col.ColumnName | ToSafeParamName }}
+
+// SelectBy{{ $methodSuffix }}List 根据唯一索引{{ $index.IndexName }}批量查询
+// 参数:
+//   - ctx: 上下文对象
+//   - {{ $paramName }}List: {{ $col.Comment }}列表
+// 返回:
+//   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
+//   - error: 错误信息
+// 说明:
+//   - 虽然是唯一索引，但支持批量查询多个唯一键对应的记录
+//   - 适用场景: 根据多个唯一键（如用户名列表）批量查询记录
+func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}List(ctx context.Context, {{ $paramName }}List []{{ $goType }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
+	if len({{ $paramName }}List) == 0 {
+		return []*{{ $.PoPackageName }}.{{ $entityName }}{}, nil
+	}
+	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
+	err := dao.WithContext(ctx).Where("{{ $col.ColumnName }} IN ?", {{ $paramName }}List).Find(&resultList).Error
+	return resultList, err
+}
+{{- end }}
+
 // UpdateBy{{ $methodSuffix }} 根据唯一索引{{ $index.IndexName }}更新（不会用零值覆盖）
 // 参数:
 //   - ctx: 上下文对象
