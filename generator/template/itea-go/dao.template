@@ -28,6 +28,54 @@ func (dao *{{ $daoName }} ) Database() string {
 	return ""
 }
 
+// ==================== 事务支持方法 ====================
+
+// WithTx 使用指定的事务对象创建新的 DAO 实例
+// 参数:
+//   - tx: GORM事务对象
+// 返回:
+//   - *{{ $daoName }}: 使用事务的新 DAO 实例
+// 使用示例:
+//   db.Transaction(func(tx *gorm.DB) error {
+//       txDao := dao.WithTx(tx)
+//       return txDao.Insert(ctx, poBean)
+//   })
+func (dao *{{ $daoName }}) WithTx(tx *gorm.DB) *{{ $daoName }} {
+	newDao := &{{ $daoName }}{}
+	newDao.DB = tx
+	return newDao
+}
+
+// Transaction 在事务中执行操作
+// 参数:
+//   - ctx: 上下文对象
+//   - fn: 事务处理函数，接收使用事务的 DAO 实例
+// 返回:
+//   - error: 错误信息
+// 说明:
+//   - 自动管理事务的开始、提交和回滚
+//   - 如果 fn 返回 error，事务会自动回滚
+//   - 如果 fn 执行成功，事务会自动提交
+// 使用示例:
+//   err := dao.Transaction(ctx, func(txDao *{{ $daoName }}) error {
+//       if err := txDao.Insert(ctx, poBean1); err != nil {
+//           return err
+//       }
+//       if err := txDao.Insert(ctx, poBean2); err != nil {
+//           return err
+//       }
+//       return nil
+//   })
+func (dao *{{ $daoName }}) Transaction(ctx context.Context, fn func(*{{ $daoName }}) error) error {
+	return dao.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txDao := &{{ $daoName }}{}
+		txDao.DB = tx
+		return fn(txDao)
+	})
+}
+
+// ==================== 查询条件构建 ====================
+
 // build{{ $entityName }}QueryCondition 构建查询条件
 // 参数:
 //   - db: GORM数据库连接实例
