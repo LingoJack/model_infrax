@@ -85,6 +85,10 @@ func (dao *{{ $daoName }}) Transaction(ctx context.Context, fn func(*{{ $daoName
 // 说明:
 //   - 支持精确匹配、模糊查询、IN查询、范围查询等多种查询方式
 //   - 零值字段会被忽略，不会作为查询条件
+//   - IN 查询条件校验规则:
+//     1. List 为 nil: 不添加该查询条件（正常情况，表示不按此字段过滤）
+//     2. List 不为 nil 且长度 > 0: 添加 IN 查询条件
+//     3. List 不为 nil 但长度 = 0: 返回错误，因为空列表的 IN 查询没有意义，应提前发现此问题
 func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) *gorm.DB {
 	if queryDto == nil {
 		return db
@@ -172,7 +176,11 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 {{- if .IsIndexed }}
 {{- $fieldName := .ColumnName | ToPascalCase }}
 {{- $goType := . | GetGoType }}
-	if len(queryDto.{{ $fieldName }}List) > 0 {
+	// 校验 {{ $fieldName }}List: 如果不为 nil 但长度为 0，则报错
+	if queryDto != nil && queryDto.{{ $fieldName }}List != nil {
+		if len(queryDto.{{ $fieldName }}List) == 0 {
+			return db.AddError(fmt.Errorf("{{ $fieldName }}List 不能为空列表"))
+		}
 		db = db.Where("{{ .ColumnName }} IN ?", queryDto.{{ $fieldName }}List)
 	}
 {{- end }}
@@ -190,6 +198,11 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 // 返回:
 //   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
+// 说明:
+//   - IN 查询条件校验规则:
+//     1. List 为 nil: 不添加该查询条件（正常情况，表示不按此字段过滤）
+//     2. List 不为 nil 且长度 > 0: 添加 IN 查询条件
+//     3. List 不为 nil 但长度 = 0: 返回错误，因为空列表的 IN 查询没有意义，应提前发现此问题
 func (dao *{{ $daoName }}) SelectList(ctx context.Context, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
 	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).WithContext(ctx)
@@ -221,6 +234,11 @@ func (dao *{{ $daoName }}) SelectList(ctx context.Context, queryDto *{{ $.DtoPac
 // 返回:
 //   - int64: 符合条件的记录数量
 //   - error: 错误信息
+// 说明:
+//   - IN 查询条件校验规则:
+//     1. List 为 nil: 不添加该查询条件（正常情况，表示不按此字段过滤）
+//     2. List 不为 nil 且长度 > 0: 添加 IN 查询条件
+//     3. List 不为 nil 但长度 = 0: 返回错误，因为空列表的 IN 查询没有意义，应提前发现此问题
 func (dao *{{ $daoName }}) SelectCount(ctx context.Context, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) (int64, error) {
 	var count int64
 	db := dao.Model(&{{ $.PoPackageName }}.{{ $entityName }}{}).WithContext(ctx)
