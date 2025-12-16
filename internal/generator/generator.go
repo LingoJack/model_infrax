@@ -11,8 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/LingoJack/model_infrax/config"
-	"github.com/LingoJack/model_infrax/model"
+	"github.com/LingoJack/model_infrax/internal/config"
+	"github.com/LingoJack/model_infrax/internal/model"
 )
 
 // Generator 代码生成器

@@ -3,8 +3,8 @@ package parser
 import (
 	"fmt"
 
-	"github.com/LingoJack/model_infrax/config"
-	"github.com/LingoJack/model_infrax/tool"
+	"github.com/LingoJack/model_infrax/internal/config"
+	"github.com/LingoJack/model_infrax/internal/tool"
 
 	"os"
 	"testing"
