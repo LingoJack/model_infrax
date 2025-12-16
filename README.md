@@ -1,6 +1,6 @@
 # 安装 
 ```shell
-curl -LsSf curl -s https://raw.githubusercontent.com/LingoJack/model_infrax/main/install.sh | sh
+curl -sSL https://raw.githubusercontent.com/LingoJack/model_infrax/main/install.sh | sh
 ```
 
 
