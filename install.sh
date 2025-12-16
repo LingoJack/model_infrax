@@ -12,7 +12,8 @@ fi
 
 # 解压到 /Applications/ 目录（需要 sudo 权限）
 echo "Extracting files to /Applications/..."
-sudo tar -xzf model_infrax.tar.gz -C /Applications/
+# 重定向 stdin 到 /dev/tty 以便 sudo 可以读取密码
+sudo tar -xzf model_infrax.tar.gz -C /Applications/ < /dev/tty
 
 # 检查解压是否成功
 if [ ! -d /Applications/model_infrax ]; then
@@ -25,9 +26,8 @@ rm -rf model_infrax.tar.gz
 echo "install success"
 
 echo "setting permissions..."
-# 设置可执行权限
-sudo chmod +x /Applications/model_infrax/jen
-sudo chmod +x /Applications/model_infrax/jcode
+# 设置可执行权限（重定向 stdin 到 /dev/tty 以便 sudo 可以读取密码）
+sudo chmod +x /Applications/model_infrax/jen /Applications/model_infrax/jcode < /dev/tty
 echo "permissions set success"
 
 echo "setting env..."
