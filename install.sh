@@ -20,23 +20,17 @@ echo "============================================"
 echo "Model Infrax Installation"
 echo "============================================"
 
-# 临时文件路径
-TEMP_DIR="/tmp/model_infrax_install"
-TAR_FILE="$TEMP_DIR/model_infrax.tar.gz"
-INSTALL_DIR="/Applications/model_infrax"
+# 文件路径配置
+TAR_FILE="model_infrax.tar.gz"
+EXTRACT_DIR="./model_infrax"
 DOWNLOAD_URL="https://github.com/LingoJack/model_infrax/raw/refs/heads/main/release/model_infrax.tar.gz"
 
-# 创建临时目录
-echo "Creating temporary directory..."
-mkdir -p "$TEMP_DIR"
-
-# 下载压缩包（下载到文件而非管道）
+# 下载压缩包
 echo "Downloading model_infrax..."
 if curl -L --progress-bar -o "$TAR_FILE" "$DOWNLOAD_URL"; then
     echo "Download completed"
 else
     echo "Error: Failed to download model_infrax.tar.gz"
-    rm -rf "$TEMP_DIR"
     exit 1
 fi
 
@@ -44,36 +38,35 @@ fi
 echo "Verifying downloaded file..."
 if ! verify_file "$TAR_FILE"; then
     echo "Error: Downloaded file is invalid or empty"
-    rm -rf "$TEMP_DIR"
+    rm -f "$TAR_FILE"
     exit 1
 fi
 echo "File verification passed"
 
-# 解压到 /Applications/ 目录（需要 sudo 权限）
-echo "Extracting files to /Applications/..."
-echo "Note: You may be prompted for your password"
-if sudo tar -xzf "$TAR_FILE" -C /Applications/; then
+# 解压到当前目录
+echo "Extracting files..."
+if tar -xzf "$TAR_FILE"; then
     echo "Extraction completed"
 else
     echo "Error: Failed to extract files"
-    rm -rf "$TEMP_DIR"
+    rm -f "$TAR_FILE"
     exit 1
 fi
 
 # 检查解压是否成功
-if [ ! -d "$INSTALL_DIR" ]; then
-    echo "Error: Installation directory not found after extraction"
-    rm -rf "$TEMP_DIR"
+if [ ! -d "$EXTRACT_DIR" ]; then
+    echo "Error: Extraction directory not found"
+    rm -f "$TAR_FILE"
     exit 1
 fi
 
-# 清理临时文件
-echo "Cleaning up temporary files..."
-rm -rf "$TEMP_DIR"
+# 清理压缩包
+echo "Cleaning up archive..."
+rm -f "$TAR_FILE"
 
 # 设置可执行权限
 echo "Setting executable permissions..."
-if sudo chmod +x "$INSTALL_DIR/jen" "$INSTALL_DIR/jcode"; then
+if chmod +x "$EXTRACT_DIR/jen" "$EXTRACT_DIR/jcode"; then
     echo "Permissions set successfully"
 else
     echo "Error: Failed to set executable permissions"
@@ -82,15 +75,18 @@ fi
 
 # 验证可执行文件
 echo "Verifying executables..."
-if [ ! -x "$INSTALL_DIR/jen" ]; then
+if [ ! -x "$EXTRACT_DIR/jen" ]; then
     echo "Error: jen is not executable"
     exit 1
 fi
-if [ ! -x "$INSTALL_DIR/jcode" ]; then
+if [ ! -x "$EXTRACT_DIR/jcode" ]; then
     echo "Error: jcode is not executable"
     exit 1
 fi
 echo "Executables verified"
+
+# 获取绝对路径
+INSTALL_DIR="$(cd "$EXTRACT_DIR" && pwd)"
 
 # 检测当前使用的 shell
 echo "Configuring environment variables..."
@@ -144,9 +140,13 @@ echo "Installation directory: $INSTALL_DIR"
 echo "Configuration file: $SHELL_RC"
 echo ""
 echo "Next steps:"
-echo "  1. Restart your terminal or run: source $SHELL_RC"
-echo "  2. Run 'jcode' to open your working directory"
-echo "  3. Run 'jen' to generate code"
+echo "  1. (Optional) Move to /Applications:"
+echo "     sudo mv $INSTALL_DIR /Applications/"
+echo "     Then update PATH in $SHELL_RC to /Applications/model_infrax"
+echo ""
+echo "  2. Restart your terminal or run: source $SHELL_RC"
+echo "  3. Run 'jcode' to open your working directory"
+echo "  4. Run 'jen' to generate code"
 echo ""
 echo "Usage:"
 echo "  - Add table structure in schema.sql"
