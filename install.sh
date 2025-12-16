@@ -7,6 +7,6 @@ cd model_infrax
 
 curl -LsSfO "https://github.com/LingoJack/model_infrax/raw/refs/heads/main/release/model_infrax.tar.gz"
 tar -xzf model_infrax.tar.gz
-rm model_infrax.tar.gz
+rm -rf model_infrax.tar.gz
 
 tree .
