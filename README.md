@@ -1,12 +1,7 @@
 # 安装
 
 ```shell
-curl -sSL https://raw.githubusercontent.com/LingoJack/model_infrax/main/install.sh -o install.sh && bash install.sh
-```
-
-安装后可选择移动到 /Applications：
-```shell
-sudo mv ./model_infrax /Applications/
+curl -sSL https://raw.githubusercontent.com/LingoJack/model_infrax/main/install.sh | bash
 ```
 
 # 使用
