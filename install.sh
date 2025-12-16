@@ -20,4 +20,6 @@ chmod +x /Applications/model_infrax/jcode
 
 echo 'export PATH="/Applications/model_infrax:$PATH"' >> ~/.zshrc
 source ~/.zshrc
+export PATH="/Applications/model_infrax:$PATH"
 
+echo "jen version: $(jen -v)"
