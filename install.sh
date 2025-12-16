@@ -9,4 +9,5 @@ curl -LsSfO "https://github.com/LingoJack/model_infrax/raw/refs/heads/main/relea
 tar -xzf model_infrax.tar.gz
 rm -rf model_infrax.tar.gz
 
-tree .
+mv model_infrax /Applications/
+
