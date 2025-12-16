@@ -7,8 +7,11 @@ echo "install success"
 
 echo "setting env..."
 export PATH="/Applications/model_infrax:$PATH"
-echo "export PATH=\"/Applications/model_infrax:$PATH\"" >> ~/.zshrc
+sudo echo "export PATH=\"/Applications/model_infrax:$PATH\"" >> ~/.zshrc
 source ~/.zshrc
+
+sudo chmod +x /Applications/model_infrax/jen
+sudo chmox +x /Applications/model_infrax/jcode
 echo "env set success"
 
 echo "jen version: $(jen -v)"
