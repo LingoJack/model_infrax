@@ -8,14 +8,14 @@ cp ~/dev/model_infrax/assets/schema.sql ~/dev/model_infrax/target/
 cp ~/dev/model_infrax/assets/install.sh ~/dev/model_infrax/target/
 cp ~/dev/model_infrax/assets/jcode ~/dev/model_infrax/target/
 mkdir -p ~/dev/model_infrax/target/output/
-mkdir -p ~/dev/model_infrax/pack/
+mkdir -p ~/dev/model_infrax/release/
 
 # 创建压缩包，如果文件存在则覆盖
-PACKAGE_NAME="model_infrax.zip"
-PACKAGE_PATH="$HOME/dev/model_infrax/pack/$PACKAGE_NAME"
+PACKAGE_NAME="model_infrax.tar.gz"
+PACKAGE_PATH="$HOME/dev/model_infrax/release/$PACKAGE_NAME"
 
 # 切换到目标目录并创建压缩包
-cd ~/dev/model_infrax/target && zip -r "$PACKAGE_PATH" .
+cd ~/dev/model_infrax/target && tar -czf "$PACKAGE_PATH" .
 
 # 输出打包结果信息
 echo "📦 打包完成: $PACKAGE_NAME"
