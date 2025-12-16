@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/LingoJack/model_infrax/tool"
+	"github.com/LingoJack/model_infrax/internal/tool"
 
 	"gopkg.in/yaml.v3"
 )

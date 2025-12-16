@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/LingoJack/model_infrax/config"
-	"github.com/LingoJack/model_infrax/model"
+	"github.com/LingoJack/model_infrax/internal/config"
+	model2 "github.com/LingoJack/model_infrax/internal/model"
 	"github.com/pingcap/tidb/pkg/parser"
 	"github.com/pingcap/tidb/pkg/parser/ast"
 	"github.com/pingcap/tidb/pkg/parser/test_driver"
@@ -46,7 +46,7 @@ func NewStatementParser(cfg *config.Configger) (*StatementParser, error) {
 	}, nil
 }
 
-func (p *StatementParser) Parse() (schemas []model.Schema, err error) {
+func (p *StatementParser) Parse() (schemas []model2.Schema, err error) {
 	for _, statement := range p.statements {
 		// 跳过空语句
 		trimmed := strings.TrimSpace(statement)
@@ -55,7 +55,7 @@ func (p *StatementParser) Parse() (schemas []model.Schema, err error) {
 		}
 
 		log.Printf("⌛️ parsing statement: %s", statement)
-		var schema model.Schema
+		var schema model2.Schema
 		schema, err = p.parseStatement(statement)
 		if err != nil {
 			return nil, fmt.Errorf("解析语句失败: %w", err)
@@ -65,19 +65,19 @@ func (p *StatementParser) Parse() (schemas []model.Schema, err error) {
 	return
 }
 
-func (p *StatementParser) FilterTables(schemas []model.Schema) (filtered []model.Schema) {
+func (p *StatementParser) FilterTables(schemas []model2.Schema) (filtered []model2.Schema) {
 	if p.configger.GenerateConfig.AllTables {
 		filtered = schemas
 		return
 	}
-	filtered = lo.Filter(schemas, func(schema model.Schema, index int) bool {
+	filtered = lo.Filter(schemas, func(schema model2.Schema, index int) bool {
 		return lo.Contains(p.configger.GenerateConfig.TableNames, schema.Name)
 	})
 	return
 }
 
 // parseStatement 解析单个CREATE TABLE语句，提取表结构信息
-func (p *StatementParser) parseStatement(statement string) (schema model.Schema, err error) {
+func (p *StatementParser) parseStatement(statement string) (schema model2.Schema, err error) {
 	// 创建TiDB parser实例
 	tidbParser := parser.New()
 
@@ -118,7 +118,7 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 
 	// 提取列信息
 	for _, col := range createTableStmt.Cols {
-		column := model.Column{
+		column := model2.Column{
 			ColumnName: col.Name.Name.O,
 			Type:       col.Tp.String(),
 			IsNullable: true, // MySQL默认列是可以为NULL的，除非显式声明NOT NULL
@@ -194,7 +194,7 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 		switch constraint.Tp {
 		case ast.ConstraintPrimaryKey:
 			// 处理主键
-			var pkColumns []model.Column
+			var pkColumns []model2.Column
 			for _, indexCol := range constraint.Keys {
 				colName := indexCol.Column.Name.O
 				if colIdx, exists := columnIndexMap[colName]; exists {
@@ -204,14 +204,14 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 					pkColumns = append(pkColumns, schema.Columns[colIdx])
 				}
 			}
-			schema.PrimaryKey = model.Index{
+			schema.PrimaryKey = model2.Index{
 				IndexName: "PRIMARY",
 				Columns:   pkColumns,
 			}
 
 		case ast.ConstraintUniq, ast.ConstraintUniqKey, ast.ConstraintUniqIndex:
 			// 处理唯一索引
-			var uniqueColumns []model.Column
+			var uniqueColumns []model2.Column
 			for _, indexCol := range constraint.Keys {
 				colName := indexCol.Column.Name.O
 				if colIdx, exists := columnIndexMap[colName]; exists {
@@ -224,18 +224,18 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 			indexName := constraint.Name
 			if indexName == "" {
 				// 如果没有指定索引名，使用列名组合
-				indexName = "uk_" + strings.Join(lo.Map(uniqueColumns, func(c model.Column, _ int) string {
+				indexName = "uk_" + strings.Join(lo.Map(uniqueColumns, func(c model2.Column, _ int) string {
 					return c.ColumnName
 				}), "_")
 			}
-			schema.UniqueIndex = append(schema.UniqueIndex, model.Index{
+			schema.UniqueIndex = append(schema.UniqueIndex, model2.Index{
 				IndexName: indexName,
 				Columns:   uniqueColumns,
 			})
 
 		case ast.ConstraintKey, ast.ConstraintIndex:
 			// 处理普通索引
-			var indexColumns []model.Column
+			var indexColumns []model2.Column
 			for _, indexCol := range constraint.Keys {
 				colName := indexCol.Column.Name.O
 				if colIdx, exists := columnIndexMap[colName]; exists {
@@ -247,11 +247,11 @@ func (p *StatementParser) parseStatement(statement string) (schema model.Schema,
 			indexName := constraint.Name
 			if indexName == "" {
 				// 如果没有指定索引名，使用列名组合
-				indexName = "idx_" + strings.Join(lo.Map(indexColumns, func(c model.Column, _ int) string {
+				indexName = "idx_" + strings.Join(lo.Map(indexColumns, func(c model2.Column, _ int) string {
 					return c.ColumnName
 				}), "_")
 			}
-			schema.Indexes = append(schema.Indexes, model.Index{
+			schema.Indexes = append(schema.Indexes, model2.Index{
 				IndexName: indexName,
 				Columns:   indexColumns,
 			})

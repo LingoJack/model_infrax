@@ -5,9 +5,9 @@ import (
 
 	"strings"
 
-	"github.com/LingoJack/model_infrax/config"
-	"github.com/LingoJack/model_infrax/model"
-	"github.com/LingoJack/model_infrax/tool"
+	"github.com/LingoJack/model_infrax/internal/config"
+	model2 "github.com/LingoJack/model_infrax/internal/model"
+	"github.com/LingoJack/model_infrax/internal/tool"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
@@ -93,7 +93,7 @@ type mysqlIndex struct {
 }
 
 // Parse 获取所有表名
-func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
+func (p *DatabaseParser) Parse() (schemas []model2.Schema, err error) {
 	// 执行 sqlShowTableStatus 拿到所有返回值
 	var tables []mysqlTable
 	if err = p.db.Raw("show table status").Scan(&tables).Error; err != nil {
@@ -101,7 +101,7 @@ func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 	}
 
 	// 使用 lo.Map 遍历所有表并构建 Schema
-	schemas = lo.Map(tables, func(table mysqlTable, index int) model.Schema {
+	schemas = lo.Map(tables, func(table mysqlTable, index int) model2.Schema {
 		tableName := table.Name
 		tableComment := table.Comment
 
@@ -113,10 +113,10 @@ func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 		}
 
 		// 构建列信息和列名到列的映射
-		var columns []model.Column
-		name2Column := make(map[string]model.Column) // 初始化 map
+		var columns []model2.Column
+		name2Column := make(map[string]model2.Column) // 初始化 map
 		lo.ForEach(fields, func(field mysqlField, index int) {
-			column := model.Column{
+			column := model2.Column{
 				ColumnName:      field.Field,
 				Collate:         tool.Stringify(field.Collation), // Stringify 已经处理了 nil 指针
 				Comment:         field.Comment,
@@ -137,20 +137,20 @@ func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 		}
 
 		// 构建索引名到列的映射
-		indexName2Columns := make(map[string][]model.Column)
+		indexName2Columns := make(map[string][]model2.Column)
 		lo.ForEach(mysqlIndexes, func(index mysqlIndex, i int) {
 			indexName2Columns[index.KeyName] = append(indexName2Columns[index.KeyName], name2Column[index.ColumnName])
 		})
 
 		// 构建索引名到索引对象的映射，用于后续查找
-		inexName2Index := make(map[string]model.Index)
+		inexName2Index := make(map[string]model2.Index)
 
-		var primaryKey model.Index
-		var indexes []model.Index
+		var primaryKey model2.Index
+		var indexes []model2.Index
 
 		// 将 map 转换为 Index 切片
-		indexes = lo.MapToSlice(indexName2Columns, func(key string, value []model.Column) model.Index {
-			idx := model.Index{
+		indexes = lo.MapToSlice(indexName2Columns, func(key string, value []model2.Column) model2.Index {
+			idx := model2.Index{
 				IndexName: key,
 				Columns:   value,
 			}
@@ -163,7 +163,7 @@ func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 		})
 
 		// 提取唯一索引
-		var uniqueIndexes []model.Index
+		var uniqueIndexes []model2.Index
 		lo.ForEach(mysqlIndexes, func(index mysqlIndex, i int) {
 			if index.NonUnique == 0 {
 				uniqueIndexes = append(uniqueIndexes, inexName2Index[index.KeyName])
@@ -171,20 +171,20 @@ func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 		})
 
 		// 找到所有索引的列
-		var indexedColumns []model.Column
-		lo.ForEach(indexes, func(index model.Index, i int) {
+		var indexedColumns []model2.Column
+		lo.ForEach(indexes, func(index model2.Index, i int) {
 			indexedColumns = append(indexedColumns, index.Columns...)
 		})
 
 		// 找到所有唯一索引的列
-		var uniqueIndexedColumns []model.Column
-		lo.ForEach(uniqueIndexes, func(index model.Index, i int) {
+		var uniqueIndexedColumns []model2.Column
+		lo.ForEach(uniqueIndexes, func(index model2.Index, i int) {
 			uniqueIndexedColumns = append(uniqueIndexedColumns, index.Columns...)
 		})
 
 		// 找到所有主键的列
-		var primaryKeyColumns []model.Column
-		lo.ForEach(primaryKey.Columns, func(column model.Column, i int) {
+		var primaryKeyColumns []model2.Column
+		lo.ForEach(primaryKey.Columns, func(column model2.Column, i int) {
 			primaryKeyColumns = append(primaryKeyColumns, column)
 		})
 
@@ -218,7 +218,7 @@ func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 		}
 
 		// 构建 Schema 对象
-		return model.Schema{
+		return model2.Schema{
 			Name:        tableName,
 			Comment:     tableComment,
 			Columns:     columns,
@@ -232,12 +232,12 @@ func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 }
 
 // FilterTables 根据配置文件过滤表
-func (p *DatabaseParser) FilterTables(schemas []model.Schema) (filtered []model.Schema) {
+func (p *DatabaseParser) FilterTables(schemas []model2.Schema) (filtered []model2.Schema) {
 	if p.configger.GenerateConfig.AllTables {
 		filtered = schemas
 		return
 	}
-	filtered = lo.Filter(schemas, func(schema model.Schema, index int) bool {
+	filtered = lo.Filter(schemas, func(schema model2.Schema, index int) bool {
 		return lo.Contains(p.configger.GenerateConfig.TableNames, schema.Name)
 	})
 	return

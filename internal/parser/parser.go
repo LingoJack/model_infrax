@@ -1,6 +1,8 @@
 package parser
 
-import "github.com/LingoJack/model_infrax/model"
+import (
+	"github.com/LingoJack/model_infrax/internal/model"
+)
 
 type Parser interface {
 	Parse() (schemas []model.Schema, err error)

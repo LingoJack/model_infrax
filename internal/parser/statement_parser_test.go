@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/LingoJack/model_infrax/config"
-	"github.com/LingoJack/model_infrax/tool"
+	"github.com/LingoJack/model_infrax/internal/config"
+	"github.com/LingoJack/model_infrax/internal/tool"
 	"github.com/pingcap/tidb/pkg/parser"
 	"github.com/pingcap/tidb/pkg/parser/ast"
 	_ "github.com/pingcap/tidb/pkg/parser/test_driver"
