@@ -45,7 +45,7 @@ echo "File verification passed"
 
 # 解压到当前目录
 echo "Extracting files..."
-if tar -xzf "$TAR_FILE"; then
+if tar -xzf "$TAR_FILE" -C $EXTRACT_DIR; then
     echo "Extraction completed"
 else
     echo "Error: Failed to extract files"
