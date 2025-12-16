@@ -18,3 +18,6 @@ echo "model_infrax installed"
 chmod +x /Applications/model_infrax/jen
 chmod +x /Applications/model_infrax/jcode
 
+echo 'export PATH="/Applications/model_infrax:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
