@@ -43,6 +43,9 @@ if ! verify_file "$TAR_FILE"; then
 fi
 echo "File verification passed"
 
+mkdir -p "$EXTRACT_DIR"
+cd "$EXTRACT_DIR"
+
 # 解压到当前目录
 echo "Extracting files..."
 if tar -xzf "$TAR_FILE" -C $EXTRACT_DIR; then
