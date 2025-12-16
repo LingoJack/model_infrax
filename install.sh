@@ -1,6 +1,6 @@
 #!bin/bash
 echo "installing..."
-curl -LO https://github.com/LingoJack/model_infrax/blob/main/release/model_infrax.tar.gz
+curl -LO https://github.com/LingoJack/model_infrax/raw/refs/heads/main/release/model_infrax.tar.gz
 tar -xzf model_infrax.tar.gz -C /Applications/
 rm -rf model_infrax.tar.gz
 echo "install success"
