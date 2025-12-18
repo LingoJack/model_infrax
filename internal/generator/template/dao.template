@@ -869,6 +869,53 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(ctx context.Context
 {{- end }}
 {{- end }}
 
+// ==================== 原生SQL执行方法 ====================
+
+// ExecSql 执行原生SQL查询
+// 参数:
+//   - ctx: 上下文对象
+//   - recvPtr: 接收查询结果的指针（必须是指针类型）
+//     - 查询单条记录时传入结构体指针，如 &entity.TNode{}
+//     - 查询多条记录时传入 slice 指针，如 &[]*entity.TNode{}
+//   - sql: SQL语句，支持占位符 ?
+//   - args: SQL参数，按顺序对应 SQL 中的占位符
+// 返回:
+//   - error: 错误信息，查询失败或记录不存在时返回错误
+// 使用示例:
+//   // 示例1: 查询单条记录
+//   var result entity.{{ $entityName }}
+//   err := dao.ExecSql(ctx, &result, "SELECT * FROM {{ $schema.Name }} WHERE id = ?", 1)
+//   if err != nil {
+//       // 处理错误（包括记录不存在的情况）
+//       return err
+//   }
+//
+//   // 示例2: 查询多条记录
+//   var resultList []*entity.{{ $entityName }}
+//   err := dao.ExecSql(ctx, &resultList, "SELECT * FROM {{ $schema.Name }} WHERE skill_id = ?", "skill123")
+//   if err != nil {
+//       return err
+//   }
+//
+//   // 示例3: 查询聚合结果
+//   type CountResult struct {
+//       SkillId string `gorm:"column:skill_id"`
+//       Count   int64  `gorm:"column:count"`
+//   }
+//   var countList []*CountResult
+//   err := dao.ExecSql(ctx, &countList, "SELECT skill_id, COUNT(*) as count FROM {{ $schema.Name }} GROUP BY skill_id")
+//
+// 注意事项:
+//   - recvPtr 必须传指针，否则无法接收查询结果
+//   - 查询单条记录时，如果返回多行，只会取第一行
+//   - 查询多条记录时，如果没有结果，会返回空 slice（不是 nil）
+//   - 结构体字段需要通过 gorm 标签与数据库列名匹配
+//   - 如果取了别名，gorm 的 column 标签需要和 SQL 取的别名一致
+//   - gorm 的 column 标签默认为下划线格式
+func (dao *{{ $daoName }}) ExecSql(ctx context.Context, recvPtr any, sql string, args ...any) error {
+	return dao.WithContext(ctx).Raw(sql, args...).Scan(recvPtr).Error
+}
+
 // ==================== 辅助方法 ====================
 
 // getValidOrderByFields 获取允许排序的字段白名单
