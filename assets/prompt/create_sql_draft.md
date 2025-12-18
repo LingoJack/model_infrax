@@ -2,70 +2,27 @@
 
 [sql规范]
 ```sql
-CREATE TABLE IF NOT EXISTS `t_user`
+CREATE TABLE IF NOT EXISTS `t_robot_instance`
 (
-    `id`         bigint(20) unsigned                     NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `userId`     varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户ID',
-    `userName`   varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户名称',
-    `createTime` datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updateTime` datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `id`                  bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `robot_id`            varchar(128)        NOT NULL DEFAULT '' COMMENT '机器人ID',
+    `robot_name`          varchar(256)        NOT NULL DEFAULT '' COMMENT '机器人名称',
+    `robot_key`           varchar(256)        NOT NULL DEFAULT '' COMMENT '机器人密钥',
+    `status`              varchar(20)         NOT NULL DEFAULT 'enable' COMMENT '状态: enable-启用, disable-停用',
+    `owner_uin`           varchar(128)        NOT NULL DEFAULT '' COMMENT '主账号',
+    `uin`                 varchar(128)        NOT NULL DEFAULT '' COMMENT 'UIN',
+    `robot_model_id`      varchar(128)        NOT NULL DEFAULT '' COMMENT '机器人型号ID',
+    `robot_model_name`    varchar(128)        NOT NULL DEFAULT '' COMMENT '机器人型号名称',
+    `robot_model_version` varchar(128)        NOT NULL DEFAULT '' COMMENT '机器人型号版本',
+    `create_time`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`         datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_userId` (`userId`),
-    KEY `idx_userId_userName` (`userId`, `userName`)
+    UNIQUE KEY `uk_robot_id` (`robot_id`),
+    KEY `idx_robot_model_id` (`robot_model_id`),
+    KEY `idx_owner_uin_uin` (`owner_uin`, `uin`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='用户表';
-
-CREATE TABLE IF NOT EXISTS `t_memory`
-(
-    `id`               bigint(20) unsigned                     NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `memoryId`         varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '记忆ID',
-    `userId`           varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户ID',
-    `summary`          text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '摘要',
-    `raw_dialog_array` text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '对话的JSON格式，包括了节点的输入输出等',
-    `createTime`       datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updateTime`       datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_memoryId` (`memoryId`),
-    KEY `idx_userId` (`userId`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='记忆表';
-
-CREATE TABLE IF NOT EXISTS `t_llm_history`
-(
-    `id`         bigint(20) unsigned                     NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `model`      varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '模型名称',
-    `input`      text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '输入内容',
-    `output`     text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '输出内容',
-    `createTime` datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updateTime` datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`id`),
-    KEY `idx_model_createTime` (`model`, `createTime`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='LLM历史记录表';
-
-CREATE TABLE IF NOT EXISTS `t_work_node`
-(
-    `id`           bigint(20) unsigned                     NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `nodeId`       varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '节点ID',
-    `nodeName`     varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '节点名称',
-    `executor`     varchar(50) COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '执行器: robot / brain',
-    `type`         varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '节点类型',
-    `description`  text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '描述',
-    `inputSchema`  text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '输入模式',
-    `outputSchema` text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '输出模式',
-    `timeout`      int(11)                                NOT NULL DEFAULT '-1' COMMENT '超时时间(秒)，-1表示无超时',
-    `extra`        text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '附加信息，是map的json表达',
-    `createTime`   datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updateTime`   datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_nodeId` (`nodeId`),
-    KEY `idx_nodeId_nodeName` (`nodeId`, `nodeName`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci COMMENT ='工作节点表';
+  COLLATE = utf8mb4_unicode_ci COMMENT ='机器人实例表';
 ```
 
 [表设计手稿]
