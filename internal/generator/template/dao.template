@@ -23,7 +23,7 @@ type {{ $daoName }} struct {
 
 func (dao *{{ $daoName }} ) Database() string {
     // TODO 补全 db 名称
-	return ""
+	return "<database_name>"
 }
 
 // New{{ $daoName }} 创建{{ $daoName }}实例
