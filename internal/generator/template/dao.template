@@ -252,6 +252,97 @@ func (dao *{{ $daoName }}) SelectCount(ctx context.Context, queryDto *{{ $.DtoPa
 	return count, err
 }
 
+// SelectListWithAppendConditionFunc 查询列表（支持自定义条件函数）
+// 参数:
+//   - ctx: 上下文对象
+//   - queryDto: 查询条件Dto对象，支持分页、排序、多条件查询
+//   - appendConditionFunc: 自定义条件函数，用于添加额外的查询条件
+//     - 如果为 nil，则不添加额外条件
+//     - 函数签名: func(ctx context.Context, db *gorm.DB) *gorm.DB
+// 返回:
+//   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
+//   - error: 错误信息
+// 使用示例:
+//   // 示例1: 添加复杂的自定义条件
+//   resultList, err := dao.SelectListWithAppendConditionFunc(ctx, queryDto, func(ctx context.Context, db *gorm.DB) *gorm.DB {
+//       return db.Where("status IN (?, ?)", "active", "pending").
+//                 Where("created_at > ?", time.Now().AddDate(0, -1, 0))
+//   })
+//
+//   // 示例2: 不添加额外条件
+//   resultList, err := dao.SelectListWithAppendConditionFunc(ctx, queryDto, nil)
+//
+// 说明:
+//   - 自定义条件函数在基础查询条件、排序和分页之后执行
+//   - 适用于需要动态添加复杂查询条件的场景
+//   - IN 查询条件校验规则同 SelectList 方法
+func (dao *{{ $daoName }}) SelectListWithAppendConditionFunc(ctx context.Context, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}, appendConditionFunc func(ctx context.Context, db *gorm.DB) *gorm.DB) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
+	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
+	db := dao.WithContext(ctx).Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
+
+	// 应用查询条件
+	db = dao.build{{ $entityName }}QueryCondition(db, queryDto)
+
+	// 排序
+	if queryDto != nil && queryDto.OrderBy != "" {
+		if dao.isValidOrderBy(queryDto.OrderBy) {
+			db = db.Order(queryDto.OrderBy)
+		}
+	}
+
+	// 分页
+	if queryDto != nil && queryDto.PageSize > 0 {
+		db = db.Offset(queryDto.PageOffset * queryDto.PageSize).Limit(queryDto.PageSize)
+	}
+
+	// 应用自定义条件函数
+	if appendConditionFunc != nil {
+		db = appendConditionFunc(ctx, db)
+	}
+
+	err := db.Find(&resultList).Error
+	return resultList, err
+}
+
+// SelectCountWithAppendConditionFunc 查询数量（支持自定义条件函数）
+// 参数:
+//   - ctx: 上下文对象
+//   - queryDto: 查询条件Dto对象
+//   - appendConditionFunc: 自定义条件函数，用于添加额外的查询条件
+//     - 如果为 nil，则不添加额外条件
+//     - 函数签名: func(ctx context.Context, db *gorm.DB) *gorm.DB
+// 返回:
+//   - int64: 符合条件的记录数量
+//   - error: 错误信息
+// 使用示例:
+//   // 示例1: 添加自定义条件统计
+//   count, err := dao.SelectCountWithAppendConditionFunc(ctx, queryDto, func(ctx context.Context, db *gorm.DB) *gorm.DB {
+//       return db.Where("status = ?", "active")
+//   })
+//
+//   // 示例2: 不添加额外条件
+//   count, err := dao.SelectCountWithAppendConditionFunc(ctx, queryDto, nil)
+//
+// 说明:
+//   - 自定义条件函数在基础查询条件之后执行
+//   - 适用于需要动态添加复杂查询条件的统计场景
+//   - IN 查询条件校验规则同 SelectCount 方法
+func (dao *{{ $daoName }}) SelectCountWithAppendConditionFunc(ctx context.Context, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}, appendConditionFunc func(ctx context.Context, db *gorm.DB) *gorm.DB) (int64, error) {
+	var count int64
+	db := dao.WithContext(ctx).Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
+
+	// 应用查询条件
+	db = dao.build{{ $entityName }}QueryCondition(db, queryDto)
+
+	// 应用自定义条件函数
+	if appendConditionFunc != nil {
+		db = appendConditionFunc(ctx, db)
+	}
+
+	err := db.Count(&count).Error
+	return count, err
+}
+
 // ==================== 基础插入方法 ====================
 
 // Insert 单行插入
