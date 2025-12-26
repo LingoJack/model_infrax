@@ -67,9 +67,9 @@ func (app *App) Run() error {
 
 	log.Println("🏗️ 开始生成 Model 代码...")
 	if app.Config.GenerateOption.ModelAllInOneFile {
-		err = app.Generator.GenerateModel(schemas, app.Config.GenerateOption.ModelAllInOneFileName)
+		err = app.Generator.GenerateModelAllInOne(schemas, app.Config.GenerateOption.ModelAllInOneFileName)
 	} else {
-		err = app.Generator.GenerateModelOneByOne(schemas)
+		err = app.Generator.GenerateModelToEachFile(schemas)
 	}
 	if err != nil {
 		return fmt.Errorf("生成Model代码失败: %w", err)
@@ -84,7 +84,7 @@ func (app *App) Run() error {
 	log.Println("✅ DTO 代码生成完成")
 
 	log.Println("👁️ 开始生成 VO 代码...")
-	err = app.Generator.GenerateVOOneByOne(schemas)
+	err = app.Generator.GenerateVoToEachFile(schemas)
 	if err != nil {
 		return fmt.Errorf("生成VO代码失败: %w", err)
 	}

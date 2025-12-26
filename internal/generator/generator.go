@@ -67,16 +67,10 @@ func NewGenerator(cfg *config.Configger) *Generator {
 	return &generator
 }
 
-// GenerateModelOneByOne 根据模板生成代码，每个表生成一个文件
-// 参数:
-//   - schemas: 表结构列表
-//
-// 返回:
-//   - error: 生成过程中的错误
-func (g *Generator) GenerateModelOneByOne(schemas []model.Schema) (err error) {
+func (g *Generator) GenerateModelToEachFile(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s.go", schema.Name)
-		err = g.GenerateModel([]model.Schema{schema}, fileName)
+		err = g.GenerateModelAllInOne([]model.Schema{schema}, fileName)
 		if err != nil {
 			return err
 		}
@@ -84,14 +78,14 @@ func (g *Generator) GenerateModelOneByOne(schemas []model.Schema) (err error) {
 	return nil
 }
 
-// GenerateModel 生成所有表到一个文件
+// GenerateModelAllInOne 生成所有表到一个文件
 // 参数:
 //   - schemas: 表结构列表
 //   - outputFileName: 输出文件名
 //
 // 返回:
 //   - error: 生成过程中的错误
-func (g *Generator) GenerateModel(schemas []model.Schema, outputFileName string) (err error) {
+func (g *Generator) GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err error) {
 
 	// 从嵌入的文件系统中读取模板文件
 	tmplContent, err := templateFS.ReadFile(g.modelTemplatePath)
@@ -522,13 +516,13 @@ func (g *Generator) GenerateVO(schemas []model.Schema, outputFileName string) (e
 	return nil
 }
 
-// GenerateVOOneByOne 根据模板生成 VO 代码，每个表生成一个文件
+// GenerateVoToEachFile 根据模板生成 VO 代码，每个表生成一个文件
 // 参数:
 //   - schemas: 表结构列表
 //
 // 返回:
 //   - error: 生成过程中的错误
-func (g *Generator) GenerateVOOneByOne(schemas []model.Schema) (err error) {
+func (g *Generator) GenerateVoToEachFile(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s_vo.go", schema.Name)
 		err = g.GenerateVO([]model.Schema{schema}, fileName)
