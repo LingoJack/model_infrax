@@ -22,14 +22,14 @@ func NewApp(cfg *config.Configger, g *generator.Generator) *App {
 	}
 }
 
-func (a *App) Run() error {
+func (app *App) Run() error {
 	var schemas []model.Schema
 	var err error
-	switch a.Config.GenerateConfig.GenerateMode {
+	switch app.Config.GenerateConfig.GenerateMode {
 	case "database":
 		log.Println("🚀 开始从数据库解析表结构...")
 		var databaseParser *parser.DatabaseParser
-		databaseParser, err = parser.NewDatabaseParser(a.Config)
+		databaseParser, err = parser.NewDatabaseParser(app.Config)
 		if err != nil {
 			return fmt.Errorf("初始化数据库解析器失败: %w", err)
 		}
@@ -44,7 +44,7 @@ func (a *App) Run() error {
 		// 从SQL文件解析表结构模式
 		log.Println("🚀 开始从SQL文件解析表结构...")
 		var statementParser *parser.StatementParser
-		statementParser, err = parser.NewStatementParser(a.Config)
+		statementParser, err = parser.NewStatementParser(app.Config)
 		if err != nil {
 			return fmt.Errorf("初始化SQL文件解析器失败: %w", err)
 		}
@@ -55,7 +55,7 @@ func (a *App) Run() error {
 		log.Printf("✅ SQL文件解析完成，共获取到 %d 个表", len(schemas))
 		schemas = statementParser.FilterTables(schemas)
 	default:
-		return fmt.Errorf("不支持的生成模式: %s，请使用 'database' 或 'statement'", a.Config.GenerateConfig.GenerateMode)
+		return fmt.Errorf("不支持的生成模式: %s，请使用 'database' 或 'statement'", app.Config.GenerateConfig.GenerateMode)
 	}
 
 	log.Printf("🔍 过滤后需要处理的表数量: %d", len(schemas))
@@ -66,10 +66,10 @@ func (a *App) Run() error {
 	}
 
 	log.Println("🏗️ 开始生成 Model 代码...")
-	if a.Config.GenerateOption.ModelAllInOneFile {
-		err = a.Generator.GenerateModel(schemas, a.Config.GenerateOption.ModelAllInOneFileName)
+	if app.Config.GenerateOption.ModelAllInOneFile {
+		err = app.Generator.GenerateModel(schemas, app.Config.GenerateOption.ModelAllInOneFileName)
 	} else {
-		err = a.Generator.GenerateModelOneByOne(schemas)
+		err = app.Generator.GenerateModelOneByOne(schemas)
 	}
 	if err != nil {
 		return fmt.Errorf("生成Model代码失败: %w", err)
@@ -77,28 +77,28 @@ func (a *App) Run() error {
 	log.Println("✅ Model 代码生成完成")
 
 	log.Println("📝 开始生成 DTO 代码...")
-	err = a.Generator.GenerateDTOOneByOne(schemas)
+	err = app.Generator.GenerateDTOOneByOne(schemas)
 	if err != nil {
 		return fmt.Errorf("生成DTO代码失败: %w", err)
 	}
 	log.Println("✅ DTO 代码生成完成")
 
 	log.Println("👁️ 开始生成 VO 代码...")
-	err = a.Generator.GenerateVOOneByOne(schemas)
+	err = app.Generator.GenerateVOOneByOne(schemas)
 	if err != nil {
 		return fmt.Errorf("生成VO代码失败: %w", err)
 	}
 	log.Println("✅ VO 代码生成完成")
 
 	log.Println("🗄️ 开始生成 DAO 代码...")
-	err = a.Generator.GenerateDAOOneByOne(schemas)
+	err = app.Generator.GenerateDAOOneByOne(schemas)
 	if err != nil {
 		return fmt.Errorf("生成DAO代码失败: %w", err)
 	}
 	log.Println("✅ DAO 代码生成完成")
 
 	log.Println("🛠️ 开始生成 Tool 工具代码...")
-	err = a.Generator.GenerateAllTools()
+	err = app.Generator.GenerateAllTools()
 	if err != nil {
 		return fmt.Errorf("生成Tool代码失败: %w", err)
 	}
