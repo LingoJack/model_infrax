@@ -44,10 +44,10 @@ func NewGenerator(cfg *config.Configger) *Generator {
 	// 使用嵌入式模板路径（相对于 embed.FS 的根路径）
 	// 由于 embed.go 在 generator 目录下，需要使用 ../assert/template/ 前缀
 	generator := Generator{
-		modelTemplatePath: templatePathPrefix + "po.template",
-		daoTemplatePath:   templatePathPrefix + "dao.template",
-		dtoTemplatePath:   templatePathPrefix + "dto.template",
-		voTemplatePath:    templatePathPrefix + "vo.template",
+		modelTemplatePath: templatePathPrefix + "gorm/po.template",
+		daoTemplatePath:   templatePathPrefix + "gorm/dao.template",
+		dtoTemplatePath:   templatePathPrefix + "gorm/dto.template",
+		voTemplatePath:    templatePathPrefix + "gorm/vo.template",
 		toolTemplateDir:   templatePathPrefix + "tools",
 		configger:         cfg,
 	}
