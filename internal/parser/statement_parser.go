@@ -56,7 +56,7 @@ func (p *StatementParser) Parse() (schemas []model.Schema, err error) {
 
 		log.Printf("⌛️ parsing statement: %s", statement)
 		var schema model.Schema
-		schema, err = p.parseStatement(statement)
+		schema, err = parseStatement(statement)
 		if err != nil {
 			return nil, fmt.Errorf("解析语句失败: %w", err)
 		}
@@ -77,7 +77,7 @@ func (p *StatementParser) FilterTables(schemas []model.Schema) (filtered []model
 }
 
 // parseStatement 解析单个CREATE TABLE语句，提取表结构信息
-func (p *StatementParser) parseStatement(statement string) (schema model.Schema, err error) {
+func parseStatement(statement string) (schema model.Schema, err error) {
 	// 创建TiDB parser实例
 	tidbParser := parser.New()
 
