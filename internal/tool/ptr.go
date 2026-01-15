@@ -18,6 +18,22 @@ func StringPtr(v string) *string {
 	return &v
 }
 
+// DeStringPtr 将 *string 指针转换为 string 值
+// 参数:
+//   - v: *string 指针
+//
+// 返回:
+//   - string: 指针指向的字符串值
+//
+// 示例:
+//   - tool.DeStringPtr(builder.Name)
+func DeStringPtr(v *string) string {
+	if v == nil {
+		return ""
+	}
+	return *v
+}
+
 // IntPtr 将 int 值转换为 *int 指针
 // 参数:
 //   - v: 整数值
@@ -178,5 +194,22 @@ func BytePtr(v byte) *byte {
 // 返回:
 //   - *rune: 指向该值的指针
 func RunePtr(v rune) *rune {
+	return &v
+}
+
+// Of 将任意值转换为指针
+// 参数:
+//   - v: 任意值
+//
+// 返回:
+//   - *T: 指向该值的指针
+//
+// 示例:
+//   - strPtr := tool.Of("hello")
+//   - intPtr := tool.Of(42)
+//   - boolPtr := tool.Of(true)
+//   - structPtr := tool.Of(User{Name: "test"})
+//   - 与特定类型函数对比: tool.StringPtr("test") 等价于 tool.Of("test")
+func Of[T any](v T) *T {
 	return &v
 }
