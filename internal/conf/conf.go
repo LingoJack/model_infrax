@@ -545,6 +545,17 @@ func ValueSlice(key string) []interface{} {
 	return nil
 }
 
+func ValueStrSlice(key string) []string {
+	val, exists := Value(key)
+	if !exists || val == nil {
+		return nil
+	}
+	if slice, ok := val.([]string); ok {
+		return slice
+	}
+	return nil
+}
+
 // ValueMap 获取 map 类型的配置值
 // 用于获取对象、字典等配置
 //
