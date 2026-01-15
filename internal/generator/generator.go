@@ -21,6 +21,14 @@ var (
 	voPackage   = conf.ValueStr("generate_option.package.vo")
 	toolPackage = conf.ValueStr("generate_option.package.tool")
 	outputPath  = conf.ValueStr("generate_option.output_path")
+
+	funcMap = template.FuncMap{
+		"ToPascalCase":    ToPascalCase,
+		"ToCamelCase":     ToCamelCase,
+		"ToSafeParamName": ToSafeParamName,
+		"TrimPointer":     TrimPointer,
+		"GetGoType":       GetGoType,
+	}
 )
 
 // TemplateData 传递给模板的数据结构
@@ -61,13 +69,7 @@ func GenerateModel(schemas []model.Schema, outputDir, outputFileName string) (er
 
 	// 创建模板并注册函数
 	logger.Infof("[GenerateModel]开始解析模板")
-	tmpl, err := template.New("model").Funcs(template.FuncMap{
-		"ToPascalCase":    ToPascalCase,
-		"ToCamelCase":     ToCamelCase,
-		"ToSafeParamName": ToSafeParamName,
-		"TrimPointer":     TrimPointer,
-		"GetGoType":       GetGoType,
-	}).Parse(string(tmplContent))
+	tmpl, err := template.New("model").Funcs(funcMap).Parse(string(tmplContent))
 	if err != nil {
 		logger.Errorf("[GenerateModel]解析模板失败, 错误: %v", err)
 		return fmt.Errorf("解析模板失败: %w", err)
@@ -135,13 +137,7 @@ func GenerateDto(schemas []model.Schema, outputDir, outputFileName string) (err 
 
 	// 创建模板并注册函数
 	logger.Infof("[GenerateDTO]开始解析模板")
-	tmpl, err := template.New("dto").Funcs(template.FuncMap{
-		"ToPascalCase":    ToPascalCase,
-		"ToCamelCase":     ToCamelCase,
-		"ToSafeParamName": ToSafeParamName,
-		"TrimPointer":     TrimPointer,
-		"GetGoType":       GetGoType,
-	}).Parse(string(tmplContent))
+	tmpl, err := template.New("dto").Funcs(funcMap).Parse(string(tmplContent))
 	if err != nil {
 		logger.Errorf("[GenerateDTO]解析 DTO 模板失败, 错误: %v", err)
 		return fmt.Errorf("解析 DTO 模板失败: %w", err)
@@ -210,13 +206,7 @@ func GenerateDao(schemas []model.Schema, outputDir, outputFileName string) (err 
 
 	// 创建模板并注册函数
 	logger.Infof("[GenerateDao]开始解析模板")
-	tmpl, err := template.New("dao").Funcs(template.FuncMap{
-		"ToPascalCase":    ToPascalCase,
-		"ToCamelCase":     ToCamelCase,
-		"ToSafeParamName": ToSafeParamName,
-		"TrimPointer":     TrimPointer,
-		"GetGoType":       GetGoType,
-	}).Parse(string(tmplContent))
+	tmpl, err := template.New("dao").Funcs(funcMap).Parse(string(tmplContent))
 	if err != nil {
 		logger.Errorf("[GenerateDao]解析 DAO 模板失败, 错误: %v", err)
 		return fmt.Errorf("解析 DAO 模板失败: %w", err)
@@ -288,24 +278,16 @@ func GenerateVO(schemas []model.Schema, outputDir, outputFileName string) (err e
 	logger.Infof("[GenerateVO]开始生成 VO, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
 
 	// 从嵌入的文件系统中读取 VO 模板文件
-	templatePath := VoTemplatePath()
-	logger.Infof("[GenerateVO]读取模板文件: %s", templatePath)
-	tmplContent, err := fs.ReadFile(templatePath)
+	tmplContent, err := fs.ReadFile(VoTemplatePath())
 	if err != nil {
-		logger.Errorf("[GenerateVO]读取嵌入式 VO 模板文件失败, 模板路径: %s, 错误: %v", templatePath, err)
+		logger.Errorf("[GenerateVO]读取嵌入式 VO 模板文件失败, 模板路径: %s, 错误: %v", VoTemplatePath(), err)
 		return fmt.Errorf("读取嵌入式 VO 模板文件失败: %w", err)
 	}
 	logger.Infof("[GenerateVO]模板文件读取成功, 大小: %d 字节", len(tmplContent))
 
 	// 创建模板并注册函数
 	logger.Infof("[GenerateVO]开始解析模板")
-	tmpl, err := template.New("vo").Funcs(template.FuncMap{
-		"ToPascalCase":    ToPascalCase,
-		"ToCamelCase":     ToCamelCase,
-		"ToSafeParamName": ToSafeParamName,
-		"TrimPointer":     TrimPointer,
-		"GetGoType":       GetGoType,
-	}).Parse(string(tmplContent))
+	tmpl, err := template.New("vo").Funcs(funcMap).Parse(string(tmplContent))
 	if err != nil {
 		logger.Errorf("[GenerateVO]解析 VO 模板失败, 错误: %v", err)
 		return fmt.Errorf("解析 VO 模板失败: %w", err)
@@ -367,21 +349,19 @@ func GenerateTools() (err error) {
 		}
 
 		// 只处理 templatePathSuffix 文件
-		templateFileName := entry.Name()
-		if !strings.HasSuffix(templateFileName, templatePathSuffix) {
-			logger.Infof("[GenerateAllTools]跳过非模板文件: %s", templateFileName)
+		tplFileName := entry.Name()
+		if !strings.HasSuffix(tplFileName, templatePathSuffix) {
+			logger.Infof("[GenerateAllTools]跳过非模板文件: %s", tplFileName)
 			continue
 		}
 
-		// 生成输出文件名（将 templatePathSuffix 替换为 .go ）
-		outputFileName := strings.TrimSuffix(templateFileName, templatePathSuffix) + ".go"
-		logger.Infof("[GenerateAllTools]准备生成工具文件 [%d]: %s -> %s", generatedCount+1, templateFileName, outputFileName)
+		goFileName := strings.TrimSuffix(tplFileName, templatePathSuffix) + ".go"
+		logger.Infof("[GenerateAllTools]准备生成工具文件 [%d]: %s -> %s", generatedCount+1, tplFileName, goFileName)
 
-		// 生成工具文件
-		err = GenerateTool(ToolTemplatePath(templateFileName), outputPath, outputFileName)
+		err = GenerateTool(ToolTemplatePath(tplFileName), outputPath, goFileName)
 		if err != nil {
-			logger.Errorf("[GenerateAllTools]生成工具文件失败, 模板: %s, 输出: %s, 错误: %v", templateFileName, outputFileName, err)
-			return fmt.Errorf("生成工具文件 %s 失败: %w", outputFileName, err)
+			logger.Errorf("[GenerateAllTools]生成工具文件失败, 模板: %s, 输出: %s, 错误: %v", tplFileName, goFileName, err)
+			return fmt.Errorf("生成工具文件 %s 失败: %w", goFileName, err)
 		}
 		generatedCount++
 	}
@@ -403,13 +383,7 @@ func GenerateTool(templatePath, outputDir, outputFileName string) (err error) {
 
 	// 创建模板并注册函数
 	logger.Infof("[GenerateTool]开始解析模板")
-	tmpl, err := template.New("tool").Funcs(template.FuncMap{
-		"ToPascalCase":    ToPascalCase,
-		"ToCamelCase":     ToCamelCase,
-		"ToSafeParamName": ToSafeParamName,
-		"TrimPointer":     TrimPointer,
-		"GetGoType":       GetGoType,
-	}).Parse(string(tmplContent))
+	tmpl, err := template.New("tool").Funcs(funcMap).Parse(string(tmplContent))
 	if err != nil {
 		logger.Errorf("[GenerateTool]解析工具模板失败, 错误: %v", err)
 		return fmt.Errorf("解析工具模板失败: %w", err)
