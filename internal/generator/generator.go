@@ -3,7 +3,6 @@ package generator
 import (
 	"bytes"
 	"fmt"
-	"go/format"
 	"log"
 
 	"os"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/model"
+	"github.com/LingoJack/model_infrax/internal/tool"
 )
 
 var (
@@ -89,16 +89,8 @@ func GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err e
 		return fmt.Errorf("执行模板失败: %w", err)
 	}
 
-	// 使用 go/format 格式化代码
-	formattedCode, err := format.Source(buf.Bytes())
-	if err != nil {
-		// 如果格式化失败，记录警告但仍然写入未格式化的代码
-		log.Printf("警告: 格式化代码失败: %v，将写入未格式化的代码\n", err)
-		formattedCode = buf.Bytes()
-	}
-
 	// 创建输出文件并写入格式化后的代码
-	err = os.WriteFile(filePath, formattedCode, 0644)
+	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
 		return fmt.Errorf("写入输出文件失败: %w", err)
 	}
@@ -162,16 +154,8 @@ func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("执行 DTO 模板失败: %w", err)
 	}
 
-	// 使用 go/format 格式化代码
-	formattedCode, err := format.Source(buf.Bytes())
-	if err != nil {
-		// 如果格式化失败，记录警告但仍然写入未格式化的代码
-		log.Printf("警告: 格式化 DTO 代码失败: %v，将写入未格式化的代码\n", err)
-		formattedCode = buf.Bytes()
-	}
-
 	// 创建输出文件并写入格式化后的代码
-	err = os.WriteFile(filePath, formattedCode, 0644)
+	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
 		return fmt.Errorf("写入 DTO 输出文件失败: %w", err)
 	}
@@ -227,16 +211,8 @@ func GenerateTool(templateFileName, outputFileName string) (err error) {
 		return fmt.Errorf("执行工具模板失败: %w", err)
 	}
 
-	// 使用 go/format 格式化代码
-	formattedCode, err := format.Source(buf.Bytes())
-	if err != nil {
-		// 如果格式化失败，记录警告但仍然写入未格式化的代码
-		log.Printf("警告: 格式化工具代码失败: %v，将写入未格式化的代码\n", err)
-		formattedCode = buf.Bytes()
-	}
-
 	// 创建输出文件并写入格式化后的代码
-	err = os.WriteFile(filePath, formattedCode, 0644)
+	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
 		return fmt.Errorf("写入工具输出文件失败: %w", err)
 	}
@@ -314,16 +290,8 @@ func GenerateDAO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("执行 DAO 模板失败: %w", err)
 	}
 
-	// 使用 go/format 格式化代码
-	formattedCode, err := format.Source(buf.Bytes())
-	if err != nil {
-		// 如果格式化失败，记录警告但仍然写入未格式化的代码
-		log.Printf("警告: 格式化 DAO 代码失败: %v，将写入未格式化的代码\n", err)
-		formattedCode = buf.Bytes()
-	}
-
 	// 创建输出文件并写入格式化后的代码
-	err = os.WriteFile(filePath, formattedCode, 0644)
+	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
 		return fmt.Errorf("写入 DAO 输出文件失败: %w", err)
 	}
@@ -442,16 +410,8 @@ func GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("执行模板失败: %w", err)
 	}
 
-	// 使用 go/format 格式化代码
-	formattedCode, err := format.Source(buf.Bytes())
-	if err != nil {
-		// 如果格式化失败，记录警告但仍然写入未格式化的代码
-		log.Printf("警告: 格式化代码失败: %v，将写入未格式化的代码\n", err)
-		formattedCode = buf.Bytes()
-	}
-
 	// 创建输出文件并写入格式化后的代码
-	err = os.WriteFile(filePath, formattedCode, 0644)
+	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
 		return fmt.Errorf("写入输出文件失败: %w", err)
 	}
