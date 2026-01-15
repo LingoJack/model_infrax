@@ -1,4 +1,4 @@
-package parser
+package statement_parser
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
-	"github.com/LingoJack/model_infrax/internal/config"
 	"github.com/LingoJack/model_infrax/internal/model"
 	"github.com/LingoJack/model_infrax/internal/tool"
 	"github.com/pingcap/tidb/pkg/parser"
@@ -16,31 +15,7 @@ import (
 	"github.com/samber/lo"
 )
 
-type StatementParser struct {
-	configger  *config.Configger
-	statements []string
-}
-
-// NewStatementParser 创建SQL语句解析器
-// 从配置文件中读取SQL文件路径，解析SQL文件内容
-func NewStatementParser(cfg *config.Configger) (parser *StatementParser, err error) {
-	path := conf.ValueStr("generate_config.sql_file_path")
-	if !tool.IsValidFilePath(path) {
-		err = fmt.Errorf("SQL文件路径无效: %s", path)
-		return
-	}
-
-	statements := strings.Split(tool.MustReadText(path), ";")
-
-	log.Printf("📄 成功加载SQL文件: %s, 共 %d 条语句", path, len(statements))
-
-	return &StatementParser{
-		configger:  cfg,
-		statements: statements,
-	}, nil
-}
-
-func GetStatements() (statements []string, err error) {
+func SqlStatements() (statements []string, err error) {
 	path := conf.ValueStr("generate_config.sql_file_path")
 	if !tool.IsValidFilePath(path) {
 		err = fmt.Errorf("SQL文件路径无效: %s", path)
@@ -50,8 +25,8 @@ func GetStatements() (statements []string, err error) {
 	return
 }
 
-func ParseCreateTableStatements() (schemas []model.Schema, err error) {
-	statements, err := GetStatements()
+func Parse() (schemas []model.Schema, err error) {
+	statements, err := SqlStatements()
 	if err != nil {
 		return
 	}
@@ -60,7 +35,7 @@ func ParseCreateTableStatements() (schemas []model.Schema, err error) {
 			continue
 		}
 		var schema model.Schema
-		schema, err = ParseCreateTableStatement(statement)
+		schema, err = ParseSqlStatement(statement)
 		if err != nil {
 			return nil, fmt.Errorf("解析语句失败: %w", err)
 		}
@@ -69,7 +44,7 @@ func ParseCreateTableStatements() (schemas []model.Schema, err error) {
 	return
 }
 
-func FilterTables(schemas []model.Schema) (filtered []model.Schema) {
+func Filter(schemas []model.Schema) (filtered []model.Schema) {
 	if conf.ValueBool("generate_config.all_tables") {
 		filtered = schemas
 		return
@@ -81,8 +56,8 @@ func FilterTables(schemas []model.Schema) (filtered []model.Schema) {
 	return
 }
 
-// ParseCreateTableStatement 解析单个CREATE TABLE语句，提取表结构信息
-func ParseCreateTableStatement(statement string) (schema model.Schema, err error) {
+// ParseSqlStatement 解析单个CREATE TABLE语句，提取表结构信息
+func ParseSqlStatement(statement string) (schema model.Schema, err error) {
 	// 创建TiDB parser实例
 	tidbParser := parser.New()
 

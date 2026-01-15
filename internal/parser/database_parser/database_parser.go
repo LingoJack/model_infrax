@@ -1,4 +1,4 @@
-package parser
+package database_parser
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 
 	"strings"
 
+	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/config"
 	"github.com/LingoJack/model_infrax/internal/infra/db_infra"
 	"github.com/LingoJack/model_infrax/internal/model"
@@ -95,7 +96,7 @@ type mysqlIndex struct {
 }
 
 // Parse 获取所有表名
-func (p *DatabaseParser) Parse(ctx context.Context) (schemas []model.Schema, err error) {
+func Parse(ctx context.Context) (schemas []model.Schema, err error) {
 	var tables []mysqlTable
 	err = db_infra.ExecSql(ctx, &tables, "show table status")
 	if err != nil {
@@ -233,14 +234,15 @@ func (p *DatabaseParser) Parse(ctx context.Context) (schemas []model.Schema, err
 	return
 }
 
-// FilterTables 根据配置文件过滤表
-func (p *DatabaseParser) FilterTables(schemas []model.Schema) (filtered []model.Schema) {
-	if p.configger.GenerateConfig.AllTables {
+// Filter 根据配置文件过滤表
+func Filter(schemas []model.Schema) (filtered []model.Schema) {
+	if conf.ValueBool("generate_config.all_tables") {
 		filtered = schemas
 		return
 	}
+	neededTableNames := conf.ValueStrSlice("generate_config.table_names")
 	filtered = lo.Filter(schemas, func(schema model.Schema, index int) bool {
-		return lo.Contains(p.configger.GenerateConfig.TableNames, schema.Name)
+		return lo.Contains(neededTableNames, schema.Name)
 	})
 	return
 }
