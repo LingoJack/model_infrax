@@ -23,3 +23,31 @@ func IsValidFilePath(path string) bool {
 	}
 	return !info.IsDir()
 }
+
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
+}
+
+func IsDir(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return info.IsDir()
+}
+
+func MustReadText(path string) string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
+}

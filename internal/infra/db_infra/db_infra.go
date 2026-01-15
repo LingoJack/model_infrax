@@ -39,6 +39,6 @@ func init() {
 	}
 }
 
-func ExecuteSql(ctx context.Context, sql string, recvPtr interface{}) error {
-	return db.WithContext(ctx).Raw(sql).Scan(recvPtr).Error
+func ExecSql(ctx context.Context, recvPtr any, sql string, args ...any) error {
+	return db.WithContext(ctx).Raw(sql, args).Scan(recvPtr).Error
 }

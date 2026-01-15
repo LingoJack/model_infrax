@@ -94,7 +94,7 @@ func TestStatementParser_Parse(t *testing.T) {
 	}
 
 	// 解析SQL文件
-	schemas, err := p.Parse()
+	schemas, err := p.ParseCreateTableStatements()
 	if err != nil {
 		panic(err)
 	}

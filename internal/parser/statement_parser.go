@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	"os"
 	"strings"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/config"
 	"github.com/LingoJack/model_infrax/internal/model"
+	"github.com/LingoJack/model_infrax/internal/tool"
 	"github.com/pingcap/tidb/pkg/parser"
 	"github.com/pingcap/tidb/pkg/parser/ast"
 	"github.com/pingcap/tidb/pkg/parser/test_driver"
@@ -23,23 +23,16 @@ type StatementParser struct {
 
 // NewStatementParser 创建SQL语句解析器
 // 从配置文件中读取SQL文件路径，解析SQL文件内容
-func NewStatementParser(cfg *config.Configger) (*StatementParser, error) {
-	// 从配置中获取SQL文件路径
-	sqlFilePath := cfg.GenerateConfig.SqlFilePath
-	if sqlFilePath == "" {
-		return nil, fmt.Errorf("statement模式下必须配置sql_file_path")
+func NewStatementParser(cfg *config.Configger) (parser *StatementParser, err error) {
+	path := conf.ValueStr("generate_config.sql_file_path")
+	if tool.IsValidFilePath(path) {
+		err = fmt.Errorf("SQL文件路径无效: %s", path)
+		return
 	}
 
-	// 读取SQL文件内容
-	byts, err := os.ReadFile(sqlFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("读取SQL文件失败 [%s]: %w", sqlFilePath, err)
-	}
+	statements := strings.Split(tool.MustReadText(path), ";")
 
-	// 按分号分割SQL语句
-	statements := strings.Split(string(byts), ";")
-
-	log.Printf("📄 成功加载SQL文件: %s, 共 %d 条语句", sqlFilePath, len(statements))
+	log.Printf("📄 成功加载SQL文件: %s, 共 %d 条语句", path, len(statements))
 
 	return &StatementParser{
 		configger:  cfg,
@@ -47,15 +40,25 @@ func NewStatementParser(cfg *config.Configger) (*StatementParser, error) {
 	}, nil
 }
 
-func (p *StatementParser) Parse() (schemas []model.Schema, err error) {
-	for _, statement := range p.statements {
-		// 跳过空语句
-		trimmed := strings.TrimSpace(statement)
-		if trimmed == "" {
+func GetStatements() (statements []string, err error) {
+	path := conf.ValueStr("generate_config.sql_file_path")
+	if tool.IsValidFilePath(path) {
+		err = fmt.Errorf("SQL文件路径无效: %s", path)
+		return
+	}
+	statements = strings.Split(tool.MustReadText(path), ";")
+	return
+}
+
+func ParseCreateTableStatements() (schemas []model.Schema, err error) {
+	statements, err := GetStatements()
+	if err != nil {
+		return
+	}
+	for _, statement := range statements {
+		if len(strings.TrimSpace(statement)) == 0 {
 			continue
 		}
-
-		log.Printf("⌛️ parsing statement: %s", statement)
 		var schema model.Schema
 		schema, err = ParseCreateTableStatement(statement)
 		if err != nil {
@@ -66,11 +69,12 @@ func (p *StatementParser) Parse() (schemas []model.Schema, err error) {
 	return
 }
 
-func FilterTables(schemas []model.Schema, neededTableNames []string) (filtered []model.Schema) {
+func FilterTables(schemas []model.Schema) (filtered []model.Schema) {
 	if conf.ValueBool("generate_config.all_tables") {
 		filtered = schemas
 		return
 	}
+	neededTableNames := conf.ValueStrSlice("generate_config.table_names")
 	filtered = lo.Filter(schemas, func(schema model.Schema, index int) bool {
 		return lo.Contains(neededTableNames, schema.Name)
 	})

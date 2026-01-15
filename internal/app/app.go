@@ -41,19 +41,11 @@ func (app *App) Run() error {
 		schemas = databaseParser.FilterTables(schemas)
 
 	case "statement":
-		// 从SQL文件解析表结构模式
-		log.Println("🚀 开始从SQL文件解析表结构...")
-		var statementParser *parser.StatementParser
-		statementParser, err = parser.NewStatementParser(app.Config)
-		if err != nil {
-			return fmt.Errorf("初始化SQL文件解析器失败: %w", err)
-		}
-		schemas, err = statementParser.Parse()
+		schemas, err = parser.ParseCreateTableStatements()
 		if err != nil {
 			return err
 		}
-		log.Printf("✅ SQL文件解析完成，共获取到 %d 个表", len(schemas))
-		schemas = statementParser.FilterTables(schemas)
+		schemas = parser.FilterTables(schemas)
 	default:
 		return fmt.Errorf("不支持的生成模式: %s，请使用 'database' 或 'statement'", app.Config.GenerateConfig.GenerateMode)
 	}

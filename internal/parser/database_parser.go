@@ -95,10 +95,9 @@ type mysqlIndex struct {
 }
 
 // Parse 获取所有表名
-func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
-	// 执行 sqlShowTableStatus 拿到所有返回值
+func (p *DatabaseParser) Parse(ctx context.Context) (schemas []model.Schema, err error) {
 	var tables []mysqlTable
-	err = db_infra.ExecuteSql(context.Background(), "show table status", &tables)
+	err = db_infra.ExecSql(ctx, &tables, "show table status")
 	if err != nil {
 		return nil, fmt.Errorf("查询数据库表失败: %w", err)
 	}
@@ -110,7 +109,7 @@ func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 
 		// 查询表的所有字段信息
 		var fields []mysqlField
-		err = p.db.Raw(fmt.Sprintf("show full fields from `%s`", tableName)).Scan(&fields).Error
+		err = db_infra.ExecSql(ctx, &fields, "show full fields from ?", tableName)
 		if err != nil {
 			panic(err)
 		}
@@ -134,7 +133,7 @@ func (p *DatabaseParser) Parse() (schemas []model.Schema, err error) {
 
 		// 查询表的所有索引信息
 		var mysqlIndexes []mysqlIndex
-		err = p.db.Raw(fmt.Sprintf("show index from `%s`", tableName)).Scan(&mysqlIndexes).Error
+		err = db_infra.ExecSql(ctx, &mysqlIndexes, "show index from ?", tableName)
 		if err != nil {
 			panic(err)
 		}
