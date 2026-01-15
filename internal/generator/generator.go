@@ -21,7 +21,9 @@ var (
 	voPackage   = conf.ValueStr("generate_option.package.vo")
 	toolPackage = conf.ValueStr("generate_option.package.tool")
 	outputPath  = conf.ValueStr("generate_option.output_path")
+)
 
+var (
 	funcMap = template.FuncMap{
 		"ToPascalCase":    ToPascalCase,
 		"ToCamelCase":     ToCamelCase,
