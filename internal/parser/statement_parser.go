@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/config"
 	"github.com/LingoJack/model_infrax/internal/model"
 	"github.com/pingcap/tidb/pkg/parser"
@@ -56,7 +57,7 @@ func (p *StatementParser) Parse() (schemas []model.Schema, err error) {
 
 		log.Printf("⌛️ parsing statement: %s", statement)
 		var schema model.Schema
-		schema, err = parseStatement(statement)
+		schema, err = ParseCreateTableStatement(statement)
 		if err != nil {
 			return nil, fmt.Errorf("解析语句失败: %w", err)
 		}
@@ -65,19 +66,19 @@ func (p *StatementParser) Parse() (schemas []model.Schema, err error) {
 	return
 }
 
-func (p *StatementParser) FilterTables(schemas []model.Schema) (filtered []model.Schema) {
-	if p.configger.GenerateConfig.AllTables {
+func FilterTables(schemas []model.Schema, neededTableNames []string) (filtered []model.Schema) {
+	if conf.ValueBool("generate_config.all_tables") {
 		filtered = schemas
 		return
 	}
 	filtered = lo.Filter(schemas, func(schema model.Schema, index int) bool {
-		return lo.Contains(p.configger.GenerateConfig.TableNames, schema.Name)
+		return lo.Contains(neededTableNames, schema.Name)
 	})
 	return
 }
 
-// parseStatement 解析单个CREATE TABLE语句，提取表结构信息
-func parseStatement(statement string) (schema model.Schema, err error) {
+// ParseCreateTableStatement 解析单个CREATE TABLE语句，提取表结构信息
+func ParseCreateTableStatement(statement string) (schema model.Schema, err error) {
 	// 创建TiDB parser实例
 	tidbParser := parser.New()
 
