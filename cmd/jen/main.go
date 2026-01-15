@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/LingoJack/model_infrax/internal/app"
-	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/tool"
 	flag "github.com/spf13/pflag"
 )
