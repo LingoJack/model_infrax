@@ -2,8 +2,6 @@ package statement_parser
 
 import (
 	"fmt"
-	"log"
-
 	"strings"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
@@ -16,13 +14,28 @@ import (
 	"github.com/samber/lo"
 )
 
+var (
+	err        error
+	sqlPath    string
+	tableNames []string
+	all        bool
+)
+
+func init() {
+	all = conf.ValueBool("generate_config.all_tables")
+	sqlPath = tool.EscapeHomeDir(conf.ValueStr("generate_config.sql_file_path"))
+	tableNames, err = conf.ValueStrSlice("generate_config.table_names")
+	if err != nil {
+		panic(err)
+	}
+}
+
 func SqlStatements() (statements []string, err error) {
-	path := tool.EscapeHomeDir(conf.ValueStr("generate_config.sql_file_path"))
-	if !tool.IsValidFilePath(path) {
-		err = fmt.Errorf("SQL文件路径无效: %s", path)
+	if !tool.IsValidFilePath(sqlPath) {
+		err = fmt.Errorf("SQL文件路径无效: %s", sqlPath)
 		return
 	}
-	statements = strings.Split(tool.MustReadText(path), ";")
+	statements = strings.Split(tool.MustReadText(sqlPath), ";")
 	return
 }
 
@@ -46,17 +59,13 @@ func Parse() (schemas []model.Schema, err error) {
 }
 
 func Filter(schemas []model.Schema) (filtered []model.Schema) {
-	if conf.ValueBool("generate_config.all_tables") {
+	if all {
 		filtered = schemas
 		return
 	}
-	neededTableNames, err := conf.ValueStrSlice("generate_config.table_names")
-	if err != nil {
-		panic(err)
-	}
-	logger.Infof("neededTableNames: %v", neededTableNames)
+	logger.Infof("neededTableNames: %v", tableNames)
 	filtered = lo.Filter(schemas, func(schema model.Schema, index int) bool {
-		return lo.Contains(neededTableNames, schema.Name)
+		return lo.Contains(tableNames, schema.Name)
 	})
 	return
 }
@@ -245,6 +254,6 @@ func ParseSqlStatement(statement string) (schema model.Schema, err error) {
 		}
 	}
 
-	log.Printf("✅ 成功解析表: %s, 列数: %d, 索引数: %d", schema.Name, len(schema.Columns), len(schema.Indexes))
+	logger.Infof("✅ 成功解析表: %s, 列数: %d, 索引数: %d", schema.Name, len(schema.Columns), len(schema.Indexes))
 	return schema, nil
 }
