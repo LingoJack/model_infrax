@@ -25,7 +25,7 @@ type StatementParser struct {
 // 从配置文件中读取SQL文件路径，解析SQL文件内容
 func NewStatementParser(cfg *config.Configger) (parser *StatementParser, err error) {
 	path := conf.ValueStr("generate_config.sql_file_path")
-	if tool.IsValidFilePath(path) {
+	if !tool.IsValidFilePath(path) {
 		err = fmt.Errorf("SQL文件路径无效: %s", path)
 		return
 	}
@@ -42,7 +42,7 @@ func NewStatementParser(cfg *config.Configger) (parser *StatementParser, err err
 
 func GetStatements() (statements []string, err error) {
 	path := conf.ValueStr("generate_config.sql_file_path")
-	if tool.IsValidFilePath(path) {
+	if !tool.IsValidFilePath(path) {
 		err = fmt.Errorf("SQL文件路径无效: %s", path)
 		return
 	}
