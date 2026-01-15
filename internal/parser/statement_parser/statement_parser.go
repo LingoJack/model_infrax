@@ -16,7 +16,7 @@ import (
 )
 
 func SqlStatements() (statements []string, err error) {
-	path := conf.ValueStr("generate_config.sql_file_path")
+	path := tool.EscapeHomeDir(conf.ValueStr("generate_config.sql_file_path"))
 	if !tool.IsValidFilePath(path) {
 		err = fmt.Errorf("SQL文件路径无效: %s", path)
 		return
