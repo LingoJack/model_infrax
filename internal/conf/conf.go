@@ -46,6 +46,8 @@ func init() {
 	}
 
 	config.data["config_path"] = path
+
+	log.Println(tool.JsonifyIndent(config.data))
 }
 
 // Load 加载配置文件（只能加载一次）
