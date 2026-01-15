@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/config"
 	"github.com/LingoJack/model_infrax/internal/constant"
 	"github.com/LingoJack/model_infrax/internal/generator"
@@ -25,51 +26,48 @@ func NewApp(cfg *config.Configger, g *generator.Generator) *App {
 	}
 }
 
-func (app *App) Run(ctx context.Context) error {
+func (app *App) Run(ctx context.Context) (err error) {
 	var schemas []model.Schema
-	var err error
-	switch app.Config.GenerateConfig.GenerateMode {
+	switch conf.ValueStr("generate_config.generate_mode") {
 	case constant.GenerateModeDatabase:
 		schemas, err = database_parser.Parse(ctx)
 		if err != nil {
-			return err
+			return
 		}
 		schemas = database_parser.Filter(schemas)
 	case constant.GenerateModeStatement:
 		schemas, err = statement_parser.Parse()
 		if err != nil {
-			return err
+			return
 		}
 		schemas = statement_parser.Filter(schemas)
 	default:
-		return fmt.Errorf("不支持的生成模式: %s，请使用 '%s' 或 '%s'", app.Config.GenerateConfig.GenerateMode, constant.GenerateModeDatabase, constant.GenerateModeStatement)
+		err = fmt.Errorf("不支持的生成模式: %s，请使用 '%s' 或 '%s'", app.Config.GenerateConfig.GenerateMode, constant.GenerateModeDatabase, constant.GenerateModeStatement)
+		return
 	}
 
 	if len(schemas) == 0 {
-		log.Println("⚠️ 没有找到需要处理的表，请检查配置文件中的表过滤规则")
+		err = fmt.Errorf("没有找到任何表结构")
 		return nil
 	}
 
-	log.Println("🏗️ 开始生成 Model 代码...")
-	if app.Config.GenerateOption.ModelAllInOneFile {
-		err = app.Generator.GenerateModelAllInOne(schemas, app.Config.GenerateOption.ModelAllInOneFileName)
+	if conf.ValueBool("generate_option.model_all_in_one_file") {
+		err = generator.GenerateModelAllInOne(schemas, app.Config.GenerateOption.ModelAllInOneFileName)
 	} else {
-		err = app.Generator.GenerateModelToEachFile(schemas)
+		err = generator.GenerateModelToEachFile(schemas)
 	}
 	if err != nil {
-		return fmt.Errorf("生成Model代码失败: %w", err)
+		err = fmt.Errorf("生成Model代码失败: %w", err)
+		return
 	}
-	log.Println("✅ Model 代码生成完成")
 
-	log.Println("📝 开始生成 DTO 代码...")
-	err = app.Generator.GenerateDTOOneByOne(schemas)
+	err = generator.GenerateDTOOneByOne(schemas)
 	if err != nil {
 		return fmt.Errorf("生成DTO代码失败: %w", err)
 	}
 	log.Println("✅ DTO 代码生成完成")
 
-	log.Println("👁️ 开始生成 VO 代码...")
-	err = app.Generator.GenerateVoToEachFile(schemas)
+	err = generator.GenerateVoToEachFile(schemas)
 	if err != nil {
 		return fmt.Errorf("生成VO代码失败: %w", err)
 	}
