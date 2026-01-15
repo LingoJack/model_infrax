@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-// Render 渲染Go模板并返回渲染后的字符串
+// RenderWithName 渲染Go模板并返回渲染后的字符串
 //
 // 该函数使用Go标准库的text/template包来解析和执行模板，将数据填充到模板中。
 //
@@ -59,7 +59,7 @@ import (
 //   - 模板中引用的变量必须在data map中存在，否则会导致执行错误
 //   - 模板语法严格遵循Go text/template规范
 //   - 对于复杂的模板，建议先进行充分测试
-func Render(templateName string, templateToRender string, data map[string]interface{}) (result string, err error) {
+func RenderWithName(templateName string, templateToRender string, data map[string]interface{}) (result string, err error) {
 	// 创建新模板并解析模板字符串
 	tmpl, err := template.New(templateName).Parse(templateToRender)
 	if err != nil {
@@ -80,4 +80,18 @@ func Render(templateName string, templateToRender string, data map[string]interf
 	// 将缓冲区内容转换为字符串返回
 	result = buf.String()
 	return
+}
+
+// Render 渲染模板
+func Render(templateToRender string, data map[string]interface{}) (result string, err error) {
+	return RenderWithName("", templateToRender, data)
+}
+
+// MustRender 渲染模板，如果失败则panic
+func MustRender(templateToRender string, data map[string]interface{}) (result string) {
+	result, err := Render(templateToRender, data)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }
