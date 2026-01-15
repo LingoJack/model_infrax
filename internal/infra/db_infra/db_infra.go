@@ -16,7 +16,8 @@ var (
 
 func init() {
 	var err error
-	if conf.ValueStr("generate_config.generate_mode") == constant.GenerateModeDatabase {
+	generateMode := conf.ValueStr("generate_config.generate_mode")
+	if generateMode == constant.GenerateModeDatabase {
 		username := conf.ValueStr("generate_config.username")
 		password := conf.ValueStr("generate_config.password")
 		host := conf.ValueStr("generate_config.host")
@@ -33,7 +34,6 @@ func init() {
 
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		if err != nil {
-			// TODO
 			panic(err)
 		}
 	}
