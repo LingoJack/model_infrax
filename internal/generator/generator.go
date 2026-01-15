@@ -37,7 +37,7 @@ func GenerateModelOneByOne(schemas []model.Schema) (err error) {
 	for i, schema := range schemas {
 		fileName := fmt.Sprintf("%s.go", schema.Name)
 		logger.Infof("[GenerateModelOneByOne]正在生成第 %d/%d 个模型: %s", i+1, len(schemas), schema.Name)
-		err = GenerateModel([]model.Schema{schema}, fileName)
+		err = GenerateModel([]model.Schema{schema}, outputPath, fileName)
 		if err != nil {
 			logger.Errorf("[GenerateModelOneByOne]生成模型失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
 			return err
@@ -47,9 +47,9 @@ func GenerateModelOneByOne(schemas []model.Schema) (err error) {
 	return nil
 }
 
-func GenerateModel(schemas []model.Schema, outputFileName string) (err error) {
+func GenerateModel(schemas []model.Schema, outputDir, outputFileName string) (err error) {
 	logger.Infof("[GenerateModel]开始生成模型, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
-	
+
 	templatePath := FrameworkPrefix() + "po.template"
 	logger.Infof("[GenerateModel]读取模板文件: %s", templatePath)
 	tmplContent, err := fs.ReadFile(templatePath)
@@ -81,7 +81,7 @@ func GenerateModel(schemas []model.Schema, outputFileName string) (err error) {
 		DtoPackageName: getPackageName(dtoPackage),
 		Schemas:        schemas,
 	}
-	logger.Infof("[GenerateModel]模板数据准备完成, PoPackage: %s, DaoPackage: %s, DtoPackage: %s", 
+	logger.Infof("[GenerateModel]模板数据准备完成, PoPackage: %s, DaoPackage: %s, DtoPackage: %s",
 		templateData.PoPackageName, templateData.DaoPackageName, templateData.DtoPackageName)
 
 	// 先将模板执行结果写入缓冲区
@@ -94,7 +94,7 @@ func GenerateModel(schemas []model.Schema, outputFileName string) (err error) {
 	}
 	logger.Infof("[GenerateModel]模板执行成功, 生成代码大小: %d 字节", buf.Len())
 
-	filePath := filepath.Join(outputPath, poPackage, outputFileName)
+	filePath := filepath.Join(outputDir, poPackage, outputFileName)
 	logger.Infof("[GenerateModel]开始写入文件: %s", filePath)
 	err = tool.WriteFileWithDir(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
@@ -111,7 +111,7 @@ func GenerateDtoOneByOne(schemas []model.Schema) (err error) {
 	for i, schema := range schemas {
 		fileName := fmt.Sprintf("%s_dto.go", schema.Name)
 		logger.Infof("[GenerateDtoOneByOne]正在生成第 %d/%d 个 DTO: %s", i+1, len(schemas), schema.Name)
-		err = GenerateDTO([]model.Schema{schema}, fileName)
+		err = GenerateDTO([]model.Schema{schema}, outputPath, fileName)
 		if err != nil {
 			logger.Errorf("[GenerateDtoOneByOne]生成 DTO 失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
 			return err
@@ -121,9 +121,9 @@ func GenerateDtoOneByOne(schemas []model.Schema) (err error) {
 	return nil
 }
 
-func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
+func GenerateDTO(schemas []model.Schema, outputDir, outputFileName string) (err error) {
 	logger.Infof("[GenerateDTO]开始生成 DTO, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
-	
+
 	templatePath := FrameworkPrefix() + "dto.template"
 	logger.Infof("[GenerateDTO]读取模板文件: %s", templatePath)
 	tmplContent, err := fs.ReadFile(templatePath)
@@ -155,7 +155,7 @@ func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 		DtoPackageName: getPackageName(dtoPackage),
 		Schemas:        schemas,
 	}
-	logger.Infof("[GenerateDTO]模板数据准备完成, DtoPackage: %s, PoPackage: %s, DaoPackage: %s", 
+	logger.Infof("[GenerateDTO]模板数据准备完成, DtoPackage: %s, PoPackage: %s, DaoPackage: %s",
 		templateData.DtoPackageName, templateData.PoPackageName, templateData.DaoPackageName)
 
 	// 先将模板执行结果写入缓冲区
@@ -168,7 +168,7 @@ func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 	}
 	logger.Infof("[GenerateDTO]模板执行成功, 生成代码大小: %d 字节", buf.Len())
 
-	filePath := filepath.Join(outputPath, dtoPackage, outputFileName)
+	filePath := filepath.Join(outputDir, dtoPackage, outputFileName)
 	logger.Infof("[GenerateDTO]开始写入文件: %s", filePath)
 	err = tool.WriteFileWithDir(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
@@ -180,6 +180,156 @@ func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 	return nil
 }
 
+// GenerateDaoOneByOne 根据模板生成 DAO 代码，每个表生成一个文件
+// 参数:
+//   - schemas: 表结构列表
+//
+// 返回:
+//   - error: 生成过程中的错误
+func GenerateDaoOneByOne(schemas []model.Schema) (err error) {
+	logger.Infof("[GenerateDaoOneByOne]开始生成 DAO, 共 %d 个表", len(schemas))
+	for i, schema := range schemas {
+		fileName := fmt.Sprintf("%s_dao.go", schema.Name)
+		logger.Infof("[GenerateDaoOneByOne]正在生成第 %d/%d 个 DAO: %s", i+1, len(schemas), schema.Name)
+		err = GenerateDao([]model.Schema{schema}, outputPath, fileName)
+		if err != nil {
+			logger.Errorf("[GenerateDaoOneByOne]生成 DAO 失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
+			return err
+		}
+	}
+	logger.Infof("[GenerateDaoOneByOne]所有 DAO 生成完成, 共 %d 个", len(schemas))
+	return nil
+}
+
+// GenerateDao 生成 DAO 文件
+// 参数:
+//   - schemas: 表结构列表
+//   - outputFileName: 输出文件名
+//
+// 返回:
+//   - error: 生成过程中的错误
+func GenerateDao(schemas []model.Schema, outputDir, outputFileName string) (err error) {
+	logger.Infof("[GenerateDao]开始生成 DAO, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
+
+	// 从嵌入的文件系统中读取 DAO 模板文件
+	templatePath := FrameworkPrefix() + "dao.template"
+	logger.Infof("[GenerateDao]读取模板文件: %s", templatePath)
+	tmplContent, err := fs.ReadFile(templatePath)
+	if err != nil {
+		logger.Errorf("[GenerateDao]读取嵌入式 DAO 模板文件失败, 模板路径: %s, 错误: %v", templatePath, err)
+		return fmt.Errorf("读取嵌入式 DAO 模板文件失败: %w", err)
+	}
+	logger.Infof("[GenerateDao]模板文件读取成功, 大小: %d 字节", len(tmplContent))
+
+	// 创建模板并注册函数
+	logger.Infof("[GenerateDao]开始解析模板")
+	tmpl, err := template.New("dao").Funcs(template.FuncMap{
+		"ToPascalCase":    ToPascalCase,
+		"ToCamelCase":     ToCamelCase,
+		"ToSafeParamName": ToSafeParamName,
+		"TrimPointer":     TrimPointer,
+		"GetGoType":       GetGoType,
+	}).Parse(string(tmplContent))
+	if err != nil {
+		logger.Errorf("[GenerateDao]解析 DAO 模板失败, 错误: %v", err)
+		return fmt.Errorf("解析 DAO 模板失败: %w", err)
+	}
+	logger.Infof("[GenerateDao]模板解析成功")
+
+	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
+	o := filepath.Join(outputDir, daoPackage)
+	logger.Infof("[GenerateDao]输出目录: %s", o)
+
+	// 确保输出目录存在
+	if err = os.MkdirAll(o, 0755); err != nil {
+		logger.Errorf("[GenerateDao]创建 DAO 输出目录失败, 目录: %s, 错误: %v", o, err)
+		return fmt.Errorf("创建 DAO 输出目录失败: %w", err)
+	}
+	logger.Infof("[GenerateDao]输出目录创建成功")
+
+	// 生成文件路径
+	filePath := filepath.Join(o, outputFileName)
+
+	// 准备模板数据，包含包名和表结构
+	templateData := TemplateData{
+		DaoPackageName: getPackageName(daoPackage),
+		PoPackageName:  getPackageName(poPackage),
+		DtoPackageName: getPackageName(dtoPackage),
+		Schemas:        schemas,
+	}
+	logger.Infof("[GenerateDao]模板数据准备完成, DaoPackage: %s, PoPackage: %s, DtoPackage: %s",
+		templateData.DaoPackageName, templateData.PoPackageName, templateData.DtoPackageName)
+
+	// 先将模板执行结果写入缓冲区
+	logger.Infof("[GenerateDao]开始执行模板")
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, templateData)
+	if err != nil {
+		logger.Errorf("[GenerateDao]执行 DAO 模板失败, 错误: %v", err)
+		return fmt.Errorf("执行 DAO 模板失败: %w", err)
+	}
+	logger.Infof("[GenerateDao]模板执行成功, 生成代码大小: %d 字节", buf.Len())
+
+	// 创建输出文件并写入格式化后的代码
+	logger.Infof("[GenerateDao]开始写入文件: %s", filePath)
+	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
+	if err != nil {
+		logger.Errorf("[GenerateDao]写入 DAO 输出文件失败, 文件路径: %s, 错误: %v", filePath, err)
+		return fmt.Errorf("写入 DAO 输出文件失败: %w", err)
+	}
+
+	logger.Infof("[GenerateDao]成功生成 DAO 文件: %s", filePath)
+	return nil
+}
+
+// GenerateAllTools 生成所有工具文件
+// 返回:
+//   - error: 生成过程中的错误
+func GenerateAllTools() (err error) {
+	logger.Infof("[GenerateAllTools]开始生成所有工具文件")
+
+	// 从嵌入的文件系统中读取工具模板目录
+	toolTemplatePath := templatePathPrefix + "tool"
+	logger.Infof("[GenerateAllTools]读取工具模板目录: %s", toolTemplatePath)
+	entries, err := fs.ReadDir(toolTemplatePath)
+	if err != nil {
+		logger.Errorf("[GenerateAllTools]读取嵌入式工具模板目录失败, 目录: %s, 错误: %v", toolTemplatePath, err)
+		return fmt.Errorf("读取嵌入式工具模板目录失败: %w", err)
+	}
+	logger.Infof("[GenerateAllTools]找到 %d 个文件/目录", len(entries))
+
+	// 遍历所有模板文件
+	generatedCount := 0
+	for _, entry := range entries {
+		if entry.IsDir() {
+			logger.Infof("[GenerateAllTools]跳过目录: %s", entry.Name())
+			continue
+		}
+
+		// 只处理 .template 文件
+		templateFileName := entry.Name()
+		if !strings.HasSuffix(templateFileName, ".template") {
+			logger.Infof("[GenerateAllTools]跳过非模板文件: %s", templateFileName)
+			continue
+		}
+
+		// 生成输出文件名（将 .template 替换为 .go）
+		outputFileName := strings.TrimSuffix(templateFileName, ".template") + ".go"
+		logger.Infof("[GenerateAllTools]准备生成工具文件 [%d]: %s -> %s", generatedCount+1, templateFileName, outputFileName)
+
+		// 生成工具文件
+		err = GenerateTool(templateFileName, outputPath, outputFileName)
+		if err != nil {
+			logger.Errorf("[GenerateAllTools]生成工具文件失败, 模板: %s, 输出: %s, 错误: %v", templateFileName, outputFileName, err)
+			return fmt.Errorf("生成工具文件 %s 失败: %w", outputFileName, err)
+		}
+		generatedCount++
+	}
+
+	logger.Infof("[GenerateAllTools]所有工具文件生成完成, 共生成 %d 个文件", generatedCount)
+	return nil
+}
+
 // GenerateTool 生成工具文件
 // 参数:
 //   - templateFileName: 模板文件名（如 "ptr.template"）
@@ -187,9 +337,9 @@ func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 //
 // 返回:
 //   - error: 生成过程中的错误
-func GenerateTool(templateFileName, outputFileName string) (err error) {
+func GenerateTool(templateFileName, outputDir, outputFileName string) (err error) {
 	logger.Infof("[GenerateTool]开始生成工具文件, 模板: %s, 输出: %s", templateFileName, outputFileName)
-	
+
 	// 构建嵌入式模板文件路径
 	templatePath := filepath.Join(templatePathPrefix+"tool", templateFileName)
 	logger.Infof("[GenerateTool]读取模板文件: %s", templatePath)
@@ -228,7 +378,7 @@ func GenerateTool(templateFileName, outputFileName string) (err error) {
 	logger.Infof("[GenerateTool]模板执行成功, 生成代码大小: %d 字节", buf.Len())
 
 	// 创建输出文件并写入格式化后的代码
-	filePath := filepath.Join(outputPath, toolPackage, outputFileName)
+	filePath := filepath.Join(outputDir, toolPackage, outputFileName)
 	logger.Infof("[GenerateTool]开始写入文件: %s", filePath)
 	err = tool.WriteFileWithDir(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
@@ -237,156 +387,6 @@ func GenerateTool(templateFileName, outputFileName string) (err error) {
 	}
 
 	logger.Infof("[GenerateTool]成功生成工具文件: %s", filePath)
-	return nil
-}
-
-// GenerateDaoOneByOne 根据模板生成 DAO 代码，每个表生成一个文件
-// 参数:
-//   - schemas: 表结构列表
-//
-// 返回:
-//   - error: 生成过程中的错误
-func GenerateDaoOneByOne(schemas []model.Schema) (err error) {
-	logger.Infof("[GenerateDaoOneByOne]开始生成 DAO, 共 %d 个表", len(schemas))
-	for i, schema := range schemas {
-		fileName := fmt.Sprintf("%s_dao.go", schema.Name)
-		logger.Infof("[GenerateDaoOneByOne]正在生成第 %d/%d 个 DAO: %s", i+1, len(schemas), schema.Name)
-		err = GenerateDao([]model.Schema{schema}, fileName)
-		if err != nil {
-			logger.Errorf("[GenerateDaoOneByOne]生成 DAO 失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
-			return err
-		}
-	}
-	logger.Infof("[GenerateDaoOneByOne]所有 DAO 生成完成, 共 %d 个", len(schemas))
-	return nil
-}
-
-// GenerateDao 生成 DAO 文件
-// 参数:
-//   - schemas: 表结构列表
-//   - outputFileName: 输出文件名
-//
-// 返回:
-//   - error: 生成过程中的错误
-func GenerateDao(schemas []model.Schema, outputFileName string) (err error) {
-	logger.Infof("[GenerateDao]开始生成 DAO, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
-	
-	// 从嵌入的文件系统中读取 DAO 模板文件
-	templatePath := FrameworkPrefix() + "dao.template"
-	logger.Infof("[GenerateDao]读取模板文件: %s", templatePath)
-	tmplContent, err := fs.ReadFile(templatePath)
-	if err != nil {
-		logger.Errorf("[GenerateDao]读取嵌入式 DAO 模板文件失败, 模板路径: %s, 错误: %v", templatePath, err)
-		return fmt.Errorf("读取嵌入式 DAO 模板文件失败: %w", err)
-	}
-	logger.Infof("[GenerateDao]模板文件读取成功, 大小: %d 字节", len(tmplContent))
-
-	// 创建模板并注册函数
-	logger.Infof("[GenerateDao]开始解析模板")
-	tmpl, err := template.New("dao").Funcs(template.FuncMap{
-		"ToPascalCase":    ToPascalCase,
-		"ToCamelCase":     ToCamelCase,
-		"ToSafeParamName": ToSafeParamName,
-		"TrimPointer":     TrimPointer,
-		"GetGoType":       GetGoType,
-	}).Parse(string(tmplContent))
-	if err != nil {
-		logger.Errorf("[GenerateDao]解析 DAO 模板失败, 错误: %v", err)
-		return fmt.Errorf("解析 DAO 模板失败: %w", err)
-	}
-	logger.Infof("[GenerateDao]模板解析成功")
-
-	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-	o := filepath.Join(outputPath, daoPackage)
-	logger.Infof("[GenerateDao]输出目录: %s", o)
-
-	// 确保输出目录存在
-	if err = os.MkdirAll(o, 0755); err != nil {
-		logger.Errorf("[GenerateDao]创建 DAO 输出目录失败, 目录: %s, 错误: %v", o, err)
-		return fmt.Errorf("创建 DAO 输出目录失败: %w", err)
-	}
-	logger.Infof("[GenerateDao]输出目录创建成功")
-
-	// 生成文件路径
-	filePath := filepath.Join(o, outputFileName)
-
-	// 准备模板数据，包含包名和表结构
-	templateData := TemplateData{
-		DaoPackageName: getPackageName(daoPackage),
-		PoPackageName:  getPackageName(poPackage),
-		DtoPackageName: getPackageName(dtoPackage),
-		Schemas:        schemas,
-	}
-	logger.Infof("[GenerateDao]模板数据准备完成, DaoPackage: %s, PoPackage: %s, DtoPackage: %s", 
-		templateData.DaoPackageName, templateData.PoPackageName, templateData.DtoPackageName)
-
-	// 先将模板执行结果写入缓冲区
-	logger.Infof("[GenerateDao]开始执行模板")
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, templateData)
-	if err != nil {
-		logger.Errorf("[GenerateDao]执行 DAO 模板失败, 错误: %v", err)
-		return fmt.Errorf("执行 DAO 模板失败: %w", err)
-	}
-	logger.Infof("[GenerateDao]模板执行成功, 生成代码大小: %d 字节", buf.Len())
-
-	// 创建输出文件并写入格式化后的代码
-	logger.Infof("[GenerateDao]开始写入文件: %s", filePath)
-	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
-	if err != nil {
-		logger.Errorf("[GenerateDao]写入 DAO 输出文件失败, 文件路径: %s, 错误: %v", filePath, err)
-		return fmt.Errorf("写入 DAO 输出文件失败: %w", err)
-	}
-
-	logger.Infof("[GenerateDao]成功生成 DAO 文件: %s", filePath)
-	return nil
-}
-
-// GenerateAllTools 生成所有工具文件
-// 返回:
-//   - error: 生成过程中的错误
-func GenerateAllTools() (err error) {
-	logger.Infof("[GenerateAllTools]开始生成所有工具文件")
-	
-	// 从嵌入的文件系统中读取工具模板目录
-	toolTemplatePath := templatePathPrefix + "tool"
-	logger.Infof("[GenerateAllTools]读取工具模板目录: %s", toolTemplatePath)
-	entries, err := fs.ReadDir(toolTemplatePath)
-	if err != nil {
-		logger.Errorf("[GenerateAllTools]读取嵌入式工具模板目录失败, 目录: %s, 错误: %v", toolTemplatePath, err)
-		return fmt.Errorf("读取嵌入式工具模板目录失败: %w", err)
-	}
-	logger.Infof("[GenerateAllTools]找到 %d 个文件/目录", len(entries))
-
-	// 遍历所有模板文件
-	generatedCount := 0
-	for _, entry := range entries {
-		if entry.IsDir() {
-			logger.Infof("[GenerateAllTools]跳过目录: %s", entry.Name())
-			continue
-		}
-
-		// 只处理 .template 文件
-		templateFileName := entry.Name()
-		if !strings.HasSuffix(templateFileName, ".template") {
-			logger.Infof("[GenerateAllTools]跳过非模板文件: %s", templateFileName)
-			continue
-		}
-
-		// 生成输出文件名（将 .template 替换为 .go）
-		outputFileName := strings.TrimSuffix(templateFileName, ".template") + ".go"
-		logger.Infof("[GenerateAllTools]准备生成工具文件 [%d]: %s -> %s", generatedCount+1, templateFileName, outputFileName)
-
-		// 生成工具文件
-		err = GenerateTool(templateFileName, outputFileName)
-		if err != nil {
-			logger.Errorf("[GenerateAllTools]生成工具文件失败, 模板: %s, 输出: %s, 错误: %v", templateFileName, outputFileName, err)
-			return fmt.Errorf("生成工具文件 %s 失败: %w", outputFileName, err)
-		}
-		generatedCount++
-	}
-
-	logger.Infof("[GenerateAllTools]所有工具文件生成完成, 共生成 %d 个文件", generatedCount)
 	return nil
 }
 
@@ -419,9 +419,9 @@ func getPackageName(path string) string {
 //
 // 返回:
 //   - error: 生成过程中的错误
-func GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
+func GenerateVO(schemas []model.Schema, outputDir, outputFileName string) (err error) {
 	logger.Infof("[GenerateVO]开始生成 VO, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
-	
+
 	// 从嵌入的文件系统中读取 VO 模板文件
 	templatePath := FrameworkPrefix() + "vo.template"
 	logger.Infof("[GenerateVO]读取模板文件: %s", templatePath)
@@ -455,7 +455,7 @@ func GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
 		VoPackageName:  getPackageName(voPackage),
 		Schemas:        schemas,
 	}
-	logger.Infof("[GenerateVO]模板数据准备完成, VoPackage: %s, PoPackage: %s, DtoPackage: %s, DaoPackage: %s", 
+	logger.Infof("[GenerateVO]模板数据准备完成, VoPackage: %s, PoPackage: %s, DtoPackage: %s, DaoPackage: %s",
 		templateData.VoPackageName, templateData.PoPackageName, templateData.DtoPackageName, templateData.DaoPackageName)
 
 	// 先将模板执行结果写入缓冲区
@@ -468,7 +468,7 @@ func GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
 	}
 	logger.Infof("[GenerateVO]模板执行成功, 生成代码大小: %d 字节", buf.Len())
 
-	filePath := filepath.Join(outputPath, voPackage, outputFileName)
+	filePath := filepath.Join(outputDir, voPackage, outputFileName)
 	logger.Infof("[GenerateVO]开始写入文件: %s", filePath)
 	err = tool.WriteFileWithDir(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
@@ -491,7 +491,7 @@ func GenerateVoOneByOne(schemas []model.Schema) (err error) {
 	for i, schema := range schemas {
 		fileName := fmt.Sprintf("%s_vo.go", schema.Name)
 		logger.Infof("[GenerateVoOneByOne]正在生成第 %d/%d 个 VO: %s", i+1, len(schemas), schema.Name)
-		err = GenerateVO([]model.Schema{schema}, fileName)
+		err = GenerateVO([]model.Schema{schema}, outputPath, fileName)
 		if err != nil {
 			logger.Errorf("[GenerateVoOneByOne]生成 VO 失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
 			return err
