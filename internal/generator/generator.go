@@ -88,7 +88,7 @@ func (g *Generator) GenerateModelToEachFile(schemas []model.Schema) (err error) 
 func (g *Generator) GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err error) {
 
 	// 从嵌入的文件系统中读取模板文件
-	tmplContent, err := templateFS.ReadFile(g.modelTemplatePath)
+	tmplContent, err := fs.ReadFile(g.modelTemplatePath)
 	if err != nil {
 		return fmt.Errorf("读取嵌入式模板文件失败: %w", err)
 	}
@@ -175,7 +175,7 @@ func (g *Generator) GenerateDTOOneByOne(schemas []model.Schema) (err error) {
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 	// 从嵌入的文件系统中读取 DTO 模板文件
-	tmplContent, err := templateFS.ReadFile(g.dtoTemplatePath)
+	tmplContent, err := fs.ReadFile(g.dtoTemplatePath)
 	if err != nil {
 		return fmt.Errorf("读取嵌入式 DTO 模板文件失败: %w", err)
 	}
@@ -248,7 +248,7 @@ func (g *Generator) GenerateTool(templateFileName, outputFileName string) (err e
 	templatePath := filepath.Join(g.toolTemplateDir, templateFileName)
 
 	// 从嵌入的文件系统中读取模板文件
-	tmplContent, err := templateFS.ReadFile(templatePath)
+	tmplContent, err := fs.ReadFile(templatePath)
 	if err != nil {
 		return fmt.Errorf("读取嵌入式工具模板文件失败: %w", err)
 	}
@@ -327,7 +327,7 @@ func (g *Generator) GenerateDAOOneByOne(schemas []model.Schema) (err error) {
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateDAO(schemas []model.Schema, outputFileName string) (err error) {
 	// 从嵌入的文件系统中读取 DAO 模板文件
-	tmplContent, err := templateFS.ReadFile(g.daoTemplatePath)
+	tmplContent, err := fs.ReadFile(g.daoTemplatePath)
 	if err != nil {
 		return fmt.Errorf("读取嵌入式 DAO 模板文件失败: %w", err)
 	}
@@ -393,7 +393,7 @@ func (g *Generator) GenerateDAO(schemas []model.Schema, outputFileName string) (
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateAllTools() (err error) {
 	// 从嵌入的文件系统中读取工具模板目录
-	entries, err := templateFS.ReadDir(g.toolTemplateDir)
+	entries, err := fs.ReadDir(g.toolTemplateDir)
 	if err != nil {
 		return fmt.Errorf("读取嵌入式工具模板目录失败: %w", err)
 	}
@@ -454,7 +454,7 @@ func getPackageName(path string) string {
 //   - error: 生成过程中的错误
 func (g *Generator) GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
 	// 从嵌入的文件系统中读取 VO 模板文件
-	tmplContent, err := templateFS.ReadFile(g.voTemplatePath)
+	tmplContent, err := fs.ReadFile(g.voTemplatePath)
 	if err != nil {
 		return fmt.Errorf("读取嵌入式 VO 模板文件失败: %w", err)
 	}
