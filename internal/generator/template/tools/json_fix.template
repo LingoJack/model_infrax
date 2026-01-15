@@ -1,0 +1,68 @@
+package tool
+
+import (
+	"encoding/json"
+	"strings"
+
+	"github.com/kaptinlin/jsonrepair"
+)
+
+// JsonRepair 修复格式错误的 JSON 字符串。
+// 该函数会尝试最小化工作量，首先进行有效性检查和区域隔离，
+// 仅在必要时才使用 jsonrepair 进行强力修复。
+//
+// 参数：
+//   - input: 待修复的 JSON 字符串
+//
+// 返回值：
+//   - 修复后的 JSON 字符串
+func JsonRepair(input string) string {
+	// 去除首尾空白字符
+	s := strings.TrimSpace(input)
+
+	// 快速路径：如果已经是有效的 JSON，直接返回
+	if strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}") && json.Valid([]byte(s)) {
+		return s
+	}
+
+	// 如果存在 JSON 对象区域，则隔离该区域；如果仅对象部分有效，则剥离噪音
+	i := strings.IndexByte(s, '{')
+	j := strings.LastIndexByte(s, '}')
+	if i >= 0 && j >= i {
+		// 提取从第一个 '{' 到最后一个 '}' 的子串
+		sub := s[i : j+1]
+		// 如果提取的子串是有效的 JSON，直接返回
+		if json.Valid([]byte(sub)) {
+			return sub
+		}
+		// 否则继续处理这个子串
+		s = sub
+	}
+
+	// 移除常见的大模型生成的标记符号
+	s = strings.TrimPrefix(s, "<|FunctionCallBegin|>")
+	s = strings.TrimSuffix(s, "<|FunctionCallEnd|>")
+	s = strings.TrimPrefix(s, "<think>")
+
+	// 如果此时已经是有效的 JSON，直接返回
+	if json.Valid([]byte(s)) {
+		return s
+	}
+
+	// 启发式修复：如果缺少开头或结尾的大括号，尝试补全
+	if !strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}") {
+		// 缺少开头的 '{'
+		s = "{" + s
+	} else if strings.HasPrefix(s, "{") && !strings.HasSuffix(s, "}") {
+		// 缺少结尾的 '}'
+		s = s + "}"
+	}
+
+	// 仅在无效时尝试强力修复
+	out, err := jsonrepair.JSONRepair(s)
+	if err != nil {
+		// 如果修复失败，返回原始字符串
+		return s
+	}
+	return out
+}
