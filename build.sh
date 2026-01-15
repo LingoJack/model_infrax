@@ -1,4 +1,4 @@
-go build -o jen cmd/jen/main.go cmd/jen/wire_gen.go
+go build -o jen cmd/jen/main.go
 mkdir -p ~/dev/model_infrax/target/
 mkdir -p ~/dev/model_infrax/target/assets/
 mv jen ~/dev/model_infrax/target/
