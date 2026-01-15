@@ -50,7 +50,7 @@ func GenerateModels(schemas []model.Schema) (err error) {
 func GenerateModel(schemas []model.Schema, outputDir, outputFileName string) (err error) {
 	logger.Infof("[GenerateModel]开始生成模型, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
 
-	templatePath := FrameworkPrefix() + "po.template"
+	templatePath := PoTemplatePath()
 	logger.Infof("[GenerateModel]读取模板文件: %s", templatePath)
 	tmplContent, err := fs.ReadFile(templatePath)
 	if err != nil {
@@ -124,7 +124,7 @@ func GenerateDtos(schemas []model.Schema) (err error) {
 func GenerateDto(schemas []model.Schema, outputDir, outputFileName string) (err error) {
 	logger.Infof("[GenerateDTO]开始生成 DTO, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
 
-	templatePath := FrameworkPrefix() + "dto.template"
+	templatePath := DtoTemplatePath()
 	logger.Infof("[GenerateDTO]读取模板文件: %s", templatePath)
 	tmplContent, err := fs.ReadFile(templatePath)
 	if err != nil {
@@ -199,7 +199,7 @@ func GenerateDao(schemas []model.Schema, outputDir, outputFileName string) (err 
 	logger.Infof("[GenerateDao]开始生成 DAO, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
 
 	// 从嵌入的文件系统中读取 DAO 模板文件
-	templatePath := FrameworkPrefix() + "dao.template"
+	templatePath := DaoTemplatePath()
 	logger.Infof("[GenerateDao]读取模板文件: %s", templatePath)
 	tmplContent, err := fs.ReadFile(templatePath)
 	if err != nil {
@@ -288,7 +288,7 @@ func GenerateVO(schemas []model.Schema, outputDir, outputFileName string) (err e
 	logger.Infof("[GenerateVO]开始生成 VO, 文件名: %s, 表数量: %d", outputFileName, len(schemas))
 
 	// 从嵌入的文件系统中读取 VO 模板文件
-	templatePath := FrameworkPrefix() + "vo.template"
+	templatePath := VoTemplatePath()
 	logger.Infof("[GenerateVO]读取模板文件: %s", templatePath)
 	tmplContent, err := fs.ReadFile(templatePath)
 	if err != nil {
@@ -349,7 +349,7 @@ func GenerateTools() (err error) {
 	logger.Infof("[GenerateAllTools]开始生成所有工具文件")
 
 	// 从嵌入的文件系统中读取工具模板目录
-	toolDir := templatePathPrefix + "tool"
+	toolDir := ToolTemplateDir()
 	logger.Infof("[GenerateAllTools]读取工具模板目录: %s", toolDir)
 	entries, err := fs.ReadDir(toolDir)
 	if err != nil {
@@ -366,19 +366,19 @@ func GenerateTools() (err error) {
 			continue
 		}
 
-		// 只处理 .template 文件
+		// 只处理 templatePathSuffix 文件
 		templateFileName := entry.Name()
-		if !strings.HasSuffix(templateFileName, ".template") {
+		if !strings.HasSuffix(templateFileName, templatePathSuffix) {
 			logger.Infof("[GenerateAllTools]跳过非模板文件: %s", templateFileName)
 			continue
 		}
 
-		// 生成输出文件名（将 .template 替换为 .go）
-		outputFileName := strings.TrimSuffix(templateFileName, ".template") + ".go"
+		// 生成输出文件名（将 templatePathSuffix 替换为 .go ）
+		outputFileName := strings.TrimSuffix(templateFileName, templatePathSuffix) + ".go"
 		logger.Infof("[GenerateAllTools]准备生成工具文件 [%d]: %s -> %s", generatedCount+1, templateFileName, outputFileName)
 
 		// 生成工具文件
-		err = GenerateTool(filepath.Join(templatePathPrefix, "tool", templateFileName), outputPath, outputFileName)
+		err = GenerateTool(ToolTemplatePath(templateFileName), outputPath, outputFileName)
 		if err != nil {
 			logger.Errorf("[GenerateAllTools]生成工具文件失败, 模板: %s, 输出: %s, 错误: %v", templateFileName, outputFileName, err)
 			return fmt.Errorf("生成工具文件 %s 失败: %w", outputFileName, err)
