@@ -25,7 +25,7 @@ func NewApp(cfg *config.Configger, g *generator.Generator) *App {
 	}
 }
 
-func (app *App) Run(ctx context.Context) (err error) {
+func Run(ctx context.Context) (err error) {
 	var schemas []model.Schema
 	switch conf.ValueStr("generate_config.generate_mode") {
 	case constant.GenerateModeDatabase:
