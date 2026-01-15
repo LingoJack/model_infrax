@@ -3,7 +3,6 @@ package conf
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"sync"
@@ -35,15 +34,15 @@ func init() {
 		}
 	}
 
-	log.Printf("当前生效配置文件(%s)", path)
+	logger.Infof("当前生效配置文件(%s)", path)
 	if len(path) == 0 {
-		log.Println("未找到有效的配置文件")
+		logger.Errorf("未找到有效的配置文件")
 		return
 	}
 
 	err := Load(path)
 	if err != nil {
-		log.Fatalf("加载配置文件失败: %v", err)
+		logger.Errorf("加载配置文件失败: %v", err)
 		return
 	}
 
@@ -120,6 +119,7 @@ func Load(file string) (err error) {
 func Reload(file string) error {
 	c, err := NewConfig(file)
 	if err != nil {
+		logger.Errorf("[Reload] 重新加载配置失败: %v", err)
 		return err
 	}
 	configLock.Lock()
