@@ -60,6 +60,7 @@ func process(ctx context.Context) (err error) {
 			logger.Errorf("解析语句失败: %v", err)
 			return
 		}
+		logger.Infof("过滤前，找到 %d 张表", len(schemas))
 		schemas = statement_parser.Filter(schemas)
 	default:
 		err = fmt.Errorf("不支持的生成模式: %s，请使用 '%s' 或 '%s'", generateMode, constant.GenerateModeDatabase, constant.GenerateModeStatement)
@@ -67,7 +68,7 @@ func process(ctx context.Context) (err error) {
 		return
 	}
 
-	logger.Infof("找到 %d 张表", len(schemas))
+	logger.Infof("过滤后，找到 %d 张表", len(schemas))
 
 	if len(schemas) == 0 {
 		logger.Infof("未找到任何表")
