@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/LingoJack/model_infrax/internal/tool"
 	flag "github.com/spf13/pflag"
@@ -29,7 +28,7 @@ func main() {
 
 	path := ""
 	if *configPath != "" {
-		log.Printf("📋 使用用户指定的配置文件: %s", *configPath)
+		log.Printf("使用用户指定的配置文件: %s", *configPath)
 		path = tool.DeStringPtr(configPath)
 	} else {
 		for _, p := range defaultConfigPaths {
@@ -45,17 +44,13 @@ func main() {
 		log.Println("未找到有效的配置文件")
 		return
 	}
-	if err := StartGenerateWithConf(path); err != nil {
+	if err := GenerateCode(path); err != nil {
 		log.Fatalf("使用配置文件 %s 失败: %v", path, err)
 	}
-
-	os.Exit(1)
 }
 
-func StartGenerateWithConf(configPath string) error {
-	log.Println("🚀 开始执行代码生成...")
-
-	appInstance, err := InitializeApp(configPath)
+func GenerateCode(path string) error {
+	appInstance, err := InitializeApp(path)
 	if err != nil {
 		return err
 	}
