@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/config"
@@ -51,43 +50,31 @@ func (app *App) Run(ctx context.Context) (err error) {
 		return nil
 	}
 
-	if conf.ValueBool("generate_option.model_all_in_one_file") {
-		err = generator.GenerateModelAllInOne(schemas, app.Config.GenerateOption.ModelAllInOneFileName)
-	} else {
-		err = generator.GenerateModelToEachFile(schemas)
-	}
+	err = generator.GenerateModelOneByOne(schemas)
 	if err != nil {
 		err = fmt.Errorf("生成Model代码失败: %w", err)
 		return
 	}
 
-	err = generator.GenerateDTOOneByOne(schemas)
+	err = generator.GenerateDtoOneByOne(schemas)
 	if err != nil {
 		return fmt.Errorf("生成DTO代码失败: %w", err)
 	}
-	log.Println("✅ DTO 代码生成完成")
 
-	err = generator.GenerateVoToEachFile(schemas)
+	err = generator.GenerateVoOneByOne(schemas)
 	if err != nil {
 		return fmt.Errorf("生成VO代码失败: %w", err)
 	}
-	log.Println("✅ VO 代码生成完成")
 
-	log.Println("🗄️ 开始生成 DAO 代码...")
-	err = app.Generator.GenerateDAOOneByOne(schemas)
+	err = generator.GenerateDaoOneByOne(schemas)
 	if err != nil {
 		return fmt.Errorf("生成DAO代码失败: %w", err)
 	}
-	log.Println("✅ DAO 代码生成完成")
 
-	log.Println("🛠️ 开始生成 Tool 工具代码...")
-	err = app.Generator.GenerateAllTools()
+	err = generator.GenerateAllTools()
 	if err != nil {
 		return fmt.Errorf("生成Tool代码失败: %w", err)
 	}
-
-	log.Println("🎉 所有代码生成完成！")
-	log.Printf("📊 生成统计: %d个表 -> Model + DTO + VO + DAO + Tools", len(schemas))
 
 	return nil
 }

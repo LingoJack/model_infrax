@@ -17,11 +17,12 @@ import (
 )
 
 var (
-	poPackage  = conf.ValueStr("generate_option.package.po_package")
-	daoPackage = conf.ValueStr("generate_option.package.dao_package")
-	dtoPackage = conf.ValueStr("generate_option.package.dto_package")
-	voPackage  = conf.ValueStr("generate_option.package.vo_package")
-	outputPath = conf.ValueStr("generate_option.output_path")
+	poPackage   = conf.ValueStr("generate_option.package.po_package")
+	daoPackage  = conf.ValueStr("generate_option.package.dao_package")
+	dtoPackage  = conf.ValueStr("generate_option.package.dto_package")
+	voPackage   = conf.ValueStr("generate_option.package.vo_package")
+	toolPackage = conf.ValueStr("generate_option.package.tool_package")
+	outputPath  = conf.ValueStr("generate_option.output_path")
 )
 
 // Generator 代码生成器
@@ -57,7 +58,7 @@ func NewGenerator(cfg *config.Configger) *Generator {
 		daoTemplatePath:   templatePathPrefix + "gorm/dao.template",
 		dtoTemplatePath:   templatePathPrefix + "gorm/dto.template",
 		voTemplatePath:    templatePathPrefix + "gorm/vo.template",
-		toolTemplateDir:   templatePathPrefix + "tools",
+		toolTemplateDir:   templatePathPrefix + "tool",
 		configger:         cfg,
 	}
 
@@ -68,7 +69,7 @@ func NewGenerator(cfg *config.Configger) *Generator {
 			daoTemplatePath:   templatePathPrefix + "itea-go/dao.template",
 			dtoTemplatePath:   templatePathPrefix + "itea-go/dto.template",
 			voTemplatePath:    templatePathPrefix + "itea-go/vo.template",
-			toolTemplateDir:   templatePathPrefix + "tools",
+			toolTemplateDir:   templatePathPrefix + "tool",
 			configger:         cfg,
 		}
 	}
@@ -76,7 +77,7 @@ func NewGenerator(cfg *config.Configger) *Generator {
 	return &generator
 }
 
-func GenerateModelToEachFile(schemas []model.Schema) (err error) {
+func GenerateModelOneByOne(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s.go", schema.Name)
 		err = GenerateModelAllInOne([]model.Schema{schema}, fileName)
@@ -150,7 +151,7 @@ func GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err e
 	return nil
 }
 
-func GenerateDTOOneByOne(schemas []model.Schema) (err error) {
+func GenerateDtoOneByOne(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s_dto.go", schema.Name)
 		err = GenerateDTO([]model.Schema{schema}, fileName)
@@ -230,9 +231,9 @@ func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 //
 // 返回:
 //   - error: 生成过程中的错误
-func (g *Generator) GenerateTool(templateFileName, outputFileName string) (err error) {
+func GenerateTool(templateFileName, outputFileName string) (err error) {
 	// 构建嵌入式模板文件路径
-	templatePath := filepath.Join(g.toolTemplateDir, templateFileName)
+	templatePath := filepath.Join(templatePathPrefix+"tool", templateFileName)
 
 	// 从嵌入的文件系统中读取模板文件
 	tmplContent, err := fs.ReadFile(templatePath)
@@ -253,15 +254,15 @@ func (g *Generator) GenerateTool(templateFileName, outputFileName string) (err e
 	}
 
 	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-	outputPath := filepath.Join(g.configger.GenerateOption.OutputPath, g.configger.GenerateOption.Package.ToolPackage)
+	o := filepath.Join(outputPath, toolPackage)
 
 	// 确保输出目录存在
-	if err = os.MkdirAll(outputPath, 0755); err != nil {
+	if err = os.MkdirAll(o, 0755); err != nil {
 		return fmt.Errorf("创建工具输出目录失败: %w", err)
 	}
 
 	// 生成文件路径
-	filePath := filepath.Join(outputPath, outputFileName)
+	filePath := filepath.Join(o, outputFileName)
 
 	// 先将模板执行结果写入缓冲区
 	var buf bytes.Buffer
@@ -288,13 +289,13 @@ func (g *Generator) GenerateTool(templateFileName, outputFileName string) (err e
 	return nil
 }
 
-// GenerateDAOOneByOne 根据模板生成 DAO 代码，每个表生成一个文件
+// GenerateDaoOneByOne 根据模板生成 DAO 代码，每个表生成一个文件
 // 参数:
 //   - schemas: 表结构列表
 //
 // 返回:
 //   - error: 生成过程中的错误
-func GenerateDAOOneByOne(schemas []model.Schema) (err error) {
+func GenerateDaoOneByOne(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s_dao.go", schema.Name)
 		err = GenerateDAO([]model.Schema{schema}, fileName)
@@ -378,9 +379,9 @@ func GenerateDAO(schemas []model.Schema, outputFileName string) (err error) {
 // GenerateAllTools 生成所有工具文件
 // 返回:
 //   - error: 生成过程中的错误
-func (g *Generator) GenerateAllTools() (err error) {
+func GenerateAllTools() (err error) {
 	// 从嵌入的文件系统中读取工具模板目录
-	entries, err := fs.ReadDir(g.toolTemplateDir)
+	entries, err := fs.ReadDir(templatePathPrefix + "tool")
 	if err != nil {
 		return fmt.Errorf("读取嵌入式工具模板目录失败: %w", err)
 	}
@@ -401,7 +402,7 @@ func (g *Generator) GenerateAllTools() (err error) {
 		outputFileName := strings.TrimSuffix(templateFileName, ".template") + ".go"
 
 		// 生成工具文件
-		err = g.GenerateTool(templateFileName, outputFileName)
+		err = GenerateTool(templateFileName, outputFileName)
 		if err != nil {
 			return fmt.Errorf("生成工具文件 %s 失败: %w", outputFileName, err)
 		}
@@ -503,13 +504,13 @@ func GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
 	return nil
 }
 
-// GenerateVoToEachFile 根据模板生成 VO 代码，每个表生成一个文件
+// GenerateVoOneByOne 根据模板生成 VO 代码，每个表生成一个文件
 // 参数:
 //   - schemas: 表结构列表
 //
 // 返回:
 //   - error: 生成过程中的错误
-func GenerateVoToEachFile(schemas []model.Schema) (err error) {
+func GenerateVoOneByOne(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s_vo.go", schema.Name)
 		err = GenerateVO([]model.Schema{schema}, fileName)
