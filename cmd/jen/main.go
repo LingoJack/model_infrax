@@ -19,26 +19,16 @@ var defaultConfigPaths = []string{
 	"/Applications/model_infrax/assets/application.yml",
 }
 
-func main() {
-	configPath := flag.StringP("config", "c", "", "配置文件路径")
-	showVersion := flag.BoolP("version", "v", false, "显示版本号")
-	flag.Parse()
+var (
+	path string
+)
 
-	if *showVersion {
-		log.Printf("jen version %s", Version)
-		return
-	}
-
-	path := ""
-	if *configPath != "" {
-		log.Printf("使用用户指定的配置文件: %s", *configPath)
-		path = tool.DeStringPtr(configPath)
-	} else {
-		for _, p := range defaultConfigPaths {
-			if tool.IsValidFilePath(p) {
-				path = p
-				break
-			}
+func init() {
+	path = ""
+	for _, p := range defaultConfigPaths {
+		if tool.IsValidFilePath(p) {
+			path = p
+			break
 		}
 	}
 
@@ -54,7 +44,18 @@ func main() {
 		return
 	}
 
-	if err = GenerateCode(context.Background()); err != nil {
+}
+
+func main() {
+	showVersion := flag.BoolP("version", "v", false, "显示版本号")
+	flag.Parse()
+
+	if *showVersion {
+		log.Printf("jen version %s", Version)
+		return
+	}
+
+	if err := GenerateCode(context.Background()); err != nil {
 		log.Fatalf("使用配置文件 %s 失败: %v", path, err)
 		return
 	}
