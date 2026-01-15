@@ -431,8 +431,8 @@ func getPackageName(path string) string {
 	// 同时处理 Windows 和 Unix 风格的路径分隔符
 	path = filepath.ToSlash(path) // 统一转换为 / 分隔符
 	parts := strings.Split(path, "/")
-	if len(parts) > 0 {
-		return parts[len(parts)-1]
+	if len(parts) == 0 {
+		panic("invalid path")
 	}
-	return "model" // 默认返回 model
+	return parts[len(parts)-1]
 }
