@@ -62,18 +62,6 @@ func GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err e
 		return fmt.Errorf("解析模板失败: %w", err)
 	}
 
-	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-
-	o := filepath.Join(outputPath, poPackage)
-
-	// 确保输出目录存在
-	if err = os.MkdirAll(o, 0755); err != nil {
-		return fmt.Errorf("创建输出目录失败: %w", err)
-	}
-
-	// 生成文件路径
-	filePath := filepath.Join(o, outputFileName)
-
 	// 准备模板数据，包含包名和表结构
 	templateData := TemplateData{
 		DaoPackageName: getPackageName(daoPackage),
@@ -89,8 +77,8 @@ func GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err e
 		return fmt.Errorf("执行模板失败: %w", err)
 	}
 
-	// 创建输出文件并写入格式化后的代码
-	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
+	filePath := filepath.Join(outputPath, poPackage, outputFileName)
+	err = tool.WriteFileWithDir(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
 		return fmt.Errorf("写入输出文件失败: %w", err)
 	}
@@ -128,17 +116,6 @@ func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("解析 DTO 模板失败: %w", err)
 	}
 
-	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-	o := filepath.Join(outputPath, dtoPackage)
-
-	// 确保输出目录存在
-	if err = os.MkdirAll(o, 0755); err != nil {
-		return fmt.Errorf("创建 DTO 输出目录失败: %w", err)
-	}
-
-	// 生成文件路径
-	filePath := filepath.Join(o, outputFileName)
-
 	// 准备模板数据，包含包名和表结构
 	templateData := TemplateData{
 		DaoPackageName: getPackageName(daoPackage),
@@ -154,8 +131,8 @@ func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("执行 DTO 模板失败: %w", err)
 	}
 
-	// 创建输出文件并写入格式化后的代码
-	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
+	filePath := filepath.Join(outputPath, dtoPackage, outputFileName)
+	err = tool.WriteFileWithDir(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
 		return fmt.Errorf("写入 DTO 输出文件失败: %w", err)
 	}
@@ -193,17 +170,6 @@ func GenerateTool(templateFileName, outputFileName string) (err error) {
 		return fmt.Errorf("解析工具模板失败: %w", err)
 	}
 
-	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-	o := filepath.Join(outputPath, toolPackage)
-
-	// 确保输出目录存在
-	if err = os.MkdirAll(o, 0755); err != nil {
-		return fmt.Errorf("创建工具输出目录失败: %w", err)
-	}
-
-	// 生成文件路径
-	filePath := filepath.Join(o, outputFileName)
-
 	// 先将模板执行结果写入缓冲区
 	var buf bytes.Buffer
 	err = tmpl.Execute(&buf, nil)
@@ -212,7 +178,8 @@ func GenerateTool(templateFileName, outputFileName string) (err error) {
 	}
 
 	// 创建输出文件并写入格式化后的代码
-	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
+	filePath := filepath.Join(outputPath, toolPackage, outputFileName)
+	err = tool.WriteFileWithDir(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
 		return fmt.Errorf("写入工具输出文件失败: %w", err)
 	}
@@ -383,17 +350,6 @@ func GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("解析 VO 模板失败: %w", err)
 	}
 
-	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-	o := filepath.Join(outputPath, voPackage)
-
-	// 确保输出目录存在
-	if err = os.MkdirAll(o, 0755); err != nil {
-		return fmt.Errorf("创建 VO 输出目录失败: %w", err)
-	}
-
-	// 生成文件路径
-	filePath := filepath.Join(o, outputFileName)
-
 	// 准备模板数据，包含包名和表结构
 	templateData := TemplateData{
 		DaoPackageName: getPackageName(daoPackage),
@@ -410,8 +366,8 @@ func GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("执行模板失败: %w", err)
 	}
 
-	// 创建输出文件并写入格式化后的代码
-	err = os.WriteFile(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
+	filePath := filepath.Join(outputPath, voPackage, outputFileName)
+	err = tool.WriteFileWithDir(filePath, []byte(tool.FormatGoCode(buf.String())), 0644)
 	if err != nil {
 		return fmt.Errorf("写入输出文件失败: %w", err)
 	}
