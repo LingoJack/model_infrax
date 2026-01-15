@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
@@ -53,19 +54,19 @@ func main() {
 		return
 	}
 
-	if err = GenerateCode(path); err != nil {
+	if err = GenerateCode(context.Background(), path); err != nil {
 		log.Fatalf("使用配置文件 %s 失败: %v", path, err)
 		return
 	}
 }
 
-func GenerateCode(path string) error {
+func GenerateCode(ctx context.Context, path string) error {
 	appInstance, err := InitializeApp(path)
 	if err != nil {
 		return err
 	}
 
-	if err = appInstance.Run(); err != nil {
+	if err = appInstance.Run(ctx); err != nil {
 		return err
 	}
 

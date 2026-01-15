@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -22,7 +23,7 @@ func NewApp(cfg *config.Configger, g *generator.Generator) *App {
 	}
 }
 
-func (app *App) Run() error {
+func (app *App) Run(ctx context.Context) error {
 	var schemas []model.Schema
 	var err error
 	switch app.Config.GenerateConfig.GenerateMode {
@@ -33,13 +34,12 @@ func (app *App) Run() error {
 		if err != nil {
 			return fmt.Errorf("初始化数据库解析器失败: %w", err)
 		}
-		schemas, err = databaseParser.Parse()
+		schemas, err = databaseParser.Parse(ctx)
 		if err != nil {
 			return err
 		}
 		log.Printf("✅ 数据库解析完成，共获取到 %d 个表", len(schemas))
 		schemas = databaseParser.FilterTables(schemas)
-
 	case "statement":
 		schemas, err = parser.ParseCreateTableStatements()
 		if err != nil {
