@@ -45,7 +45,7 @@ func PoTemplatePath() string {
 }
 
 func ToolTemplateDir() string {
-	return filepath.Join(FrameworkPrefix(), "tool")
+	return filepath.Join(templatePathPrefix, "tool")
 }
 
 func ToolTemplatePath(templateName string) string {
