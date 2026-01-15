@@ -16,11 +16,11 @@ import (
 )
 
 var (
-	poPackage   = conf.ValueStr("generate_option.package.po_package")
-	daoPackage  = conf.ValueStr("generate_option.package.dao_package")
-	dtoPackage  = conf.ValueStr("generate_option.package.dto_package")
-	voPackage   = conf.ValueStr("generate_option.package.vo_package")
-	toolPackage = conf.ValueStr("generate_option.package.tool_package")
+	poPackage   = conf.ValueStr("generate_option.package.po")
+	daoPackage  = conf.ValueStr("generate_option.package.dao")
+	dtoPackage  = conf.ValueStr("generate_option.package.dto")
+	voPackage   = conf.ValueStr("generate_option.package.vo")
+	toolPackage = conf.ValueStr("generate_option.package.tool")
 	outputPath  = conf.ValueStr("generate_option.output_path")
 )
 
