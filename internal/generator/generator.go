@@ -11,8 +11,17 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/config"
 	"github.com/LingoJack/model_infrax/internal/model"
+)
+
+var (
+	poPackage  = conf.ValueStr("generate_option.package.po_package")
+	daoPackage = conf.ValueStr("generate_option.package.dao_package")
+	dtoPackage = conf.ValueStr("generate_option.package.dto_package")
+	voPackage  = conf.ValueStr("generate_option.package.vo_package")
+	outputPath = conf.ValueStr("generate_option.output_path")
 )
 
 // Generator 代码生成器
@@ -67,10 +76,10 @@ func NewGenerator(cfg *config.Configger) *Generator {
 	return &generator
 }
 
-func (g *Generator) GenerateModelToEachFile(schemas []model.Schema) (err error) {
+func GenerateModelToEachFile(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s.go", schema.Name)
-		err = g.GenerateModelAllInOne([]model.Schema{schema}, fileName)
+		err = GenerateModelAllInOne([]model.Schema{schema}, fileName)
 		if err != nil {
 			return err
 		}
@@ -78,17 +87,8 @@ func (g *Generator) GenerateModelToEachFile(schemas []model.Schema) (err error) 
 	return nil
 }
 
-// GenerateModelAllInOne 生成所有表到一个文件
-// 参数:
-//   - schemas: 表结构列表
-//   - outputFileName: 输出文件名
-//
-// 返回:
-//   - error: 生成过程中的错误
-func (g *Generator) GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err error) {
-
-	// 从嵌入的文件系统中读取模板文件
-	tmplContent, err := fs.ReadFile(g.modelTemplatePath)
+func GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err error) {
+	tmplContent, err := fs.ReadFile(FrameworkPrefix() + "po.template")
 	if err != nil {
 		return fmt.Errorf("读取嵌入式模板文件失败: %w", err)
 	}
@@ -106,21 +106,22 @@ func (g *Generator) GenerateModelAllInOne(schemas []model.Schema, outputFileName
 	}
 
 	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-	outputPath := filepath.Join(g.configger.GenerateOption.OutputPath, g.configger.GenerateOption.Package.PoPackage)
+
+	o := filepath.Join(outputPath, poPackage)
 
 	// 确保输出目录存在
-	if err = os.MkdirAll(outputPath, 0755); err != nil {
+	if err = os.MkdirAll(o, 0755); err != nil {
 		return fmt.Errorf("创建输出目录失败: %w", err)
 	}
 
 	// 生成文件路径
-	filePath := filepath.Join(outputPath, outputFileName)
+	filePath := filepath.Join(o, outputFileName)
 
 	// 准备模板数据，包含包名和表结构
 	templateData := TemplateData{
-		DaoPackageName: getPackageName(g.configger.GenerateOption.Package.DaoPackage),
-		PoPackageName:  getPackageName(g.configger.GenerateOption.Package.PoPackage),
-		DtoPackageName: getPackageName(g.configger.GenerateOption.Package.DtoPackage),
+		DaoPackageName: getPackageName(daoPackage),
+		PoPackageName:  getPackageName(poPackage),
+		DtoPackageName: getPackageName(dtoPackage),
 		Schemas:        schemas,
 	}
 
@@ -149,16 +150,10 @@ func (g *Generator) GenerateModelAllInOne(schemas []model.Schema, outputFileName
 	return nil
 }
 
-// GenerateDTOOneByOne 根据模板生成 DTO 代码，每个表生成一个文件
-// 参数:
-//   - schemas: 表结构列表
-//
-// 返回:
-//   - error: 生成过程中的错误
-func (g *Generator) GenerateDTOOneByOne(schemas []model.Schema) (err error) {
+func GenerateDTOOneByOne(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s_dto.go", schema.Name)
-		err = g.GenerateDTO([]model.Schema{schema}, fileName)
+		err = GenerateDTO([]model.Schema{schema}, fileName)
 		if err != nil {
 			return err
 		}
@@ -166,16 +161,8 @@ func (g *Generator) GenerateDTOOneByOne(schemas []model.Schema) (err error) {
 	return nil
 }
 
-// GenerateDTO 生成 DTO 文件
-// 参数:
-//   - schemas: 表结构列表
-//   - outputFileName: 输出文件名
-//
-// 返回:
-//   - error: 生成过程中的错误
-func (g *Generator) GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
-	// 从嵌入的文件系统中读取 DTO 模板文件
-	tmplContent, err := fs.ReadFile(g.dtoTemplatePath)
+func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
+	tmplContent, err := fs.ReadFile(FrameworkPrefix() + "dto.template")
 	if err != nil {
 		return fmt.Errorf("读取嵌入式 DTO 模板文件失败: %w", err)
 	}
@@ -193,21 +180,21 @@ func (g *Generator) GenerateDTO(schemas []model.Schema, outputFileName string) (
 	}
 
 	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-	outputPath := filepath.Join(g.configger.GenerateOption.OutputPath, g.configger.GenerateOption.Package.DtoPackage)
+	o := filepath.Join(outputPath, dtoPackage)
 
 	// 确保输出目录存在
-	if err = os.MkdirAll(outputPath, 0755); err != nil {
+	if err = os.MkdirAll(o, 0755); err != nil {
 		return fmt.Errorf("创建 DTO 输出目录失败: %w", err)
 	}
 
 	// 生成文件路径
-	filePath := filepath.Join(outputPath, outputFileName)
+	filePath := filepath.Join(o, outputFileName)
 
 	// 准备模板数据，包含包名和表结构
 	templateData := TemplateData{
-		DaoPackageName: getPackageName(g.configger.GenerateOption.Package.DaoPackage),
-		PoPackageName:  getPackageName(g.configger.GenerateOption.Package.PoPackage),
-		DtoPackageName: getPackageName(g.configger.GenerateOption.Package.DtoPackage),
+		DaoPackageName: getPackageName(daoPackage),
+		PoPackageName:  getPackageName(poPackage),
+		DtoPackageName: getPackageName(dtoPackage),
 		Schemas:        schemas,
 	}
 
@@ -307,10 +294,10 @@ func (g *Generator) GenerateTool(templateFileName, outputFileName string) (err e
 //
 // 返回:
 //   - error: 生成过程中的错误
-func (g *Generator) GenerateDAOOneByOne(schemas []model.Schema) (err error) {
+func GenerateDAOOneByOne(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s_dao.go", schema.Name)
-		err = g.GenerateDAO([]model.Schema{schema}, fileName)
+		err = GenerateDAO([]model.Schema{schema}, fileName)
 		if err != nil {
 			return err
 		}
@@ -325,9 +312,9 @@ func (g *Generator) GenerateDAOOneByOne(schemas []model.Schema) (err error) {
 //
 // 返回:
 //   - error: 生成过程中的错误
-func (g *Generator) GenerateDAO(schemas []model.Schema, outputFileName string) (err error) {
+func GenerateDAO(schemas []model.Schema, outputFileName string) (err error) {
 	// 从嵌入的文件系统中读取 DAO 模板文件
-	tmplContent, err := fs.ReadFile(g.daoTemplatePath)
+	tmplContent, err := fs.ReadFile(FrameworkPrefix() + "dao.template")
 	if err != nil {
 		return fmt.Errorf("读取嵌入式 DAO 模板文件失败: %w", err)
 	}
@@ -345,21 +332,21 @@ func (g *Generator) GenerateDAO(schemas []model.Schema, outputFileName string) (
 	}
 
 	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-	outputPath := filepath.Join(g.configger.GenerateOption.OutputPath, g.configger.GenerateOption.Package.DaoPackage)
+	o := filepath.Join(outputPath, daoPackage)
 
 	// 确保输出目录存在
-	if err = os.MkdirAll(outputPath, 0755); err != nil {
+	if err = os.MkdirAll(o, 0755); err != nil {
 		return fmt.Errorf("创建 DAO 输出目录失败: %w", err)
 	}
 
 	// 生成文件路径
-	filePath := filepath.Join(outputPath, outputFileName)
+	filePath := filepath.Join(o, outputFileName)
 
 	// 准备模板数据，包含包名和表结构
 	templateData := TemplateData{
-		DaoPackageName: getPackageName(g.configger.GenerateOption.Package.DaoPackage),
-		PoPackageName:  getPackageName(g.configger.GenerateOption.Package.PoPackage),
-		DtoPackageName: getPackageName(g.configger.GenerateOption.Package.DtoPackage),
+		DaoPackageName: getPackageName(daoPackage),
+		PoPackageName:  getPackageName(poPackage),
+		DtoPackageName: getPackageName(dtoPackage),
 		Schemas:        schemas,
 	}
 
@@ -452,9 +439,9 @@ func getPackageName(path string) string {
 //
 // 返回:
 //   - error: 生成过程中的错误
-func (g *Generator) GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
+func GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
 	// 从嵌入的文件系统中读取 VO 模板文件
-	tmplContent, err := fs.ReadFile(g.voTemplatePath)
+	tmplContent, err := fs.ReadFile(FrameworkPrefix() + "vo.template")
 	if err != nil {
 		return fmt.Errorf("读取嵌入式 VO 模板文件失败: %w", err)
 	}
@@ -472,22 +459,22 @@ func (g *Generator) GenerateVO(schemas []model.Schema, outputFileName string) (e
 	}
 
 	// 从配置中获取输出路径（已在配置解析时展开 ~ 符号）
-	outputPath := filepath.Join(g.configger.GenerateOption.OutputPath, g.configger.GenerateOption.Package.VoPackage)
+	o := filepath.Join(outputPath, voPackage)
 
 	// 确保输出目录存在
-	if err = os.MkdirAll(outputPath, 0755); err != nil {
+	if err = os.MkdirAll(o, 0755); err != nil {
 		return fmt.Errorf("创建 VO 输出目录失败: %w", err)
 	}
 
 	// 生成文件路径
-	filePath := filepath.Join(outputPath, outputFileName)
+	filePath := filepath.Join(o, outputFileName)
 
 	// 准备模板数据，包含包名和表结构
 	templateData := TemplateData{
-		DaoPackageName: getPackageName(g.configger.GenerateOption.Package.DaoPackage),
-		PoPackageName:  getPackageName(g.configger.GenerateOption.Package.PoPackage),
-		DtoPackageName: getPackageName(g.configger.GenerateOption.Package.DtoPackage),
-		VoPackageName:  getPackageName(g.configger.GenerateOption.Package.VoPackage),
+		DaoPackageName: getPackageName(daoPackage),
+		PoPackageName:  getPackageName(poPackage),
+		DtoPackageName: getPackageName(dtoPackage),
+		VoPackageName:  getPackageName(voPackage),
 		Schemas:        schemas,
 	}
 
@@ -522,10 +509,10 @@ func (g *Generator) GenerateVO(schemas []model.Schema, outputFileName string) (e
 //
 // 返回:
 //   - error: 生成过程中的错误
-func (g *Generator) GenerateVoToEachFile(schemas []model.Schema) (err error) {
+func GenerateVoToEachFile(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s_vo.go", schema.Name)
-		err = g.GenerateVO([]model.Schema{schema}, fileName)
+		err = GenerateVO([]model.Schema{schema}, fileName)
 		if err != nil {
 			return err
 		}
