@@ -3,14 +3,13 @@ package generator
 import (
 	"bytes"
 	"fmt"
-	"log"
-
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
+	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/model"
 	"github.com/LingoJack/model_infrax/internal/tool"
 )
@@ -36,17 +35,20 @@ type TemplateData struct {
 func GenerateModelOneByOne(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s.go", schema.Name)
-		err = GenerateModelAllInOne([]model.Schema{schema}, fileName)
+		err = GenerateModel([]model.Schema{schema}, fileName)
 		if err != nil {
+			logger.Errorf("[GenerateModelOneByOne]生成模型失败: %v", err)
 			return err
 		}
 	}
 	return nil
 }
 
-func GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err error) {
+func GenerateModel(schemas []model.Schema, outputFileName string) (err error) {
+	logger.Infof("[GenerateModel]生成模型: %s", outputFileName)
 	tmplContent, err := fs.ReadFile(FrameworkPrefix() + "po.template")
 	if err != nil {
+		logger.Errorf("[GenerateModel]读取嵌入模板文件失败: %v", err)
 		return fmt.Errorf("读取嵌入式模板文件失败: %w", err)
 	}
 
@@ -59,7 +61,8 @@ func GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err e
 		"GetGoType":       GetGoType,
 	}).Parse(string(tmplContent))
 	if err != nil {
-		return fmt.Errorf("解析模板失败: %w", err)
+		logger.Errorf("[GenerateModel]解析模板失败: %v", err)
+		return
 	}
 
 	// 准备模板数据，包含包名和表结构
@@ -83,7 +86,7 @@ func GenerateModelAllInOne(schemas []model.Schema, outputFileName string) (err e
 		return fmt.Errorf("写入输出文件失败: %w", err)
 	}
 
-	log.Printf("成功生成文件: %s\n", filePath)
+	logger.Infof("[GenerateModel]成功生成模型文件: %s", filePath)
 	return nil
 }
 
@@ -137,7 +140,7 @@ func GenerateDTO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("写入 DTO 输出文件失败: %w", err)
 	}
 
-	log.Printf("成功生成 DTO 文件: %s\n", filePath)
+	logger.Infof("[GenerateDTO]成功生成 DTO 文件: %s", filePath)
 	return nil
 }
 
@@ -184,7 +187,7 @@ func GenerateTool(templateFileName, outputFileName string) (err error) {
 		return fmt.Errorf("写入工具输出文件失败: %w", err)
 	}
 
-	log.Printf("成功生成工具文件: %s\n", filePath)
+	logger.Infof("[GenerateTool]成功生成工具文件: %s", filePath)
 	return nil
 }
 
@@ -197,7 +200,7 @@ func GenerateTool(templateFileName, outputFileName string) (err error) {
 func GenerateDaoOneByOne(schemas []model.Schema) (err error) {
 	for _, schema := range schemas {
 		fileName := fmt.Sprintf("%s_dao.go", schema.Name)
-		err = GenerateDAO([]model.Schema{schema}, fileName)
+		err = GenerateDao([]model.Schema{schema}, fileName)
 		if err != nil {
 			return err
 		}
@@ -205,14 +208,14 @@ func GenerateDaoOneByOne(schemas []model.Schema) (err error) {
 	return nil
 }
 
-// GenerateDAO 生成 DAO 文件
+// GenerateDao 生成 DAO 文件
 // 参数:
 //   - schemas: 表结构列表
 //   - outputFileName: 输出文件名
 //
 // 返回:
 //   - error: 生成过程中的错误
-func GenerateDAO(schemas []model.Schema, outputFileName string) (err error) {
+func GenerateDao(schemas []model.Schema, outputFileName string) (err error) {
 	// 从嵌入的文件系统中读取 DAO 模板文件
 	tmplContent, err := fs.ReadFile(FrameworkPrefix() + "dao.template")
 	if err != nil {
@@ -263,7 +266,7 @@ func GenerateDAO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("写入 DAO 输出文件失败: %w", err)
 	}
 
-	log.Printf("成功生成 DAO 文件: %s\n", filePath)
+	logger.Infof("[GenerateDao]成功生成 DAO 文件: %s", filePath)
 	return nil
 }
 
@@ -372,7 +375,7 @@ func GenerateVO(schemas []model.Schema, outputFileName string) (err error) {
 		return fmt.Errorf("写入输出文件失败: %w", err)
 	}
 
-	log.Printf("成功生成文件: %s\n", filePath)
+	logger.Infof("[GenerateVO]成功生成文件: %s", filePath)
 	return nil
 }
 
