@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/LingoJack/model_infrax/internal/app"
+	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/tool"
 	flag "github.com/spf13/pflag"
 )
@@ -37,7 +38,7 @@ func init() {
 		return
 	}
 
-	err := Load(path)
+	err := conf.Load(path)
 	if err != nil {
 		log.Fatalf("加载配置文件失败: %v", err)
 		return
