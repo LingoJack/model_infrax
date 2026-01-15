@@ -2,10 +2,12 @@ package conf
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"sync"
 
+	"github.com/LingoJack/model_infrax/internal/tool"
 	"gopkg.in/yaml.v3"
 )
 
@@ -14,6 +16,37 @@ var (
 	configLock sync.RWMutex
 	loadOnce   sync.Once
 )
+
+func init() {
+	var defaultConfigPaths = []string{
+		"./application.yml",
+		"./assets/application.yml",
+		"/Applications/model_infrax/application.yml",
+		"/Applications/model_infrax/assets/application.yml",
+	}
+
+	path := ""
+	for _, p := range defaultConfigPaths {
+		if tool.IsValidFilePath(p) {
+			path = p
+			break
+		}
+	}
+
+	log.Printf("当前生效配置文件(%s)", path)
+	if len(path) == 0 {
+		log.Println("未找到有效的配置文件")
+		return
+	}
+
+	err := Load(path)
+	if err != nil {
+		log.Fatalf("加载配置文件失败: %v", err)
+		return
+	}
+
+	config.data["config_path"] = path
+}
 
 // Load 加载配置文件（只能加载一次）
 // 使用 sync.Once 确保配置只加载一次，即使多次调用也只会执行一次
