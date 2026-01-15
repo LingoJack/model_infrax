@@ -12,7 +12,6 @@ import (
 	"text/template"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
-	"github.com/LingoJack/model_infrax/internal/config"
 	"github.com/LingoJack/model_infrax/internal/model"
 )
 
@@ -25,16 +24,6 @@ var (
 	outputPath  = conf.ValueStr("generate_option.output_path")
 )
 
-// Generator 代码生成器
-type Generator struct {
-	modelTemplatePath string            // 模板文件路径（嵌入式路径）
-	daoTemplatePath   string            // dao文件路径（嵌入式路径）
-	dtoTemplatePath   string            // dto文件路径（嵌入式路径）
-	voTemplatePath    string            // vo文件路径（嵌入式路径）
-	toolTemplateDir   string            // tool文件路径（嵌入式路径）
-	configger         *config.Configger // 配置对象
-}
-
 // TemplateData 传递给模板的数据结构
 type TemplateData struct {
 	PoPackageName  string         // po 包名（从路径最后一段提取）
@@ -42,39 +31,6 @@ type TemplateData struct {
 	VoPackageName  string         // vo 包名（从路径最后一段提取）
 	DaoPackageName string         // dao 包名（从路径最后一段提取）
 	Schemas        []model.Schema // 表结构列表
-}
-
-// NewGenerator 创建新的生成器实例
-// 参数:
-//   - cfg: 配置对象，用于获取模板路径和输出路径等配置信息
-//
-// 返回:
-//   - *Generator: 生成器实例
-func NewGenerator(cfg *config.Configger) *Generator {
-	// 使用嵌入式模板路径（相对于 embed.FS 的根路径）
-	// 由于 embed.go 在 generator 目录下，需要使用 ../assert/template/ 前缀
-	generator := Generator{
-		modelTemplatePath: templatePathPrefix + "gorm/po.template",
-		daoTemplatePath:   templatePathPrefix + "gorm/dao.template",
-		dtoTemplatePath:   templatePathPrefix + "gorm/dto.template",
-		voTemplatePath:    templatePathPrefix + "gorm/vo.template",
-		toolTemplateDir:   templatePathPrefix + "tool",
-		configger:         cfg,
-	}
-
-	// 如果使用 itea-go 框架，切换到对应的模板路径
-	if cfg.GenerateOption.UseFramework == "itea-go" {
-		generator = Generator{
-			modelTemplatePath: templatePathPrefix + "itea-go/po.template",
-			daoTemplatePath:   templatePathPrefix + "itea-go/dao.template",
-			dtoTemplatePath:   templatePathPrefix + "itea-go/dto.template",
-			voTemplatePath:    templatePathPrefix + "itea-go/vo.template",
-			toolTemplateDir:   templatePathPrefix + "tool",
-			configger:         cfg,
-		}
-	}
-
-	return &generator
 }
 
 func GenerateModelOneByOne(schemas []model.Schema) (err error) {
