@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/tool"
 	"gopkg.in/yaml.v3"
 )
@@ -47,7 +48,7 @@ func init() {
 
 	config.data["config_path"] = path
 
-	log.Println(tool.JsonifyIndent(config.data))
+	logger.Infof("当前生效配置文件(%s), 读取到内容:\n%s", path, tool.JsonifyIndent(config.data))
 }
 
 // Load 加载配置文件（只能加载一次）
