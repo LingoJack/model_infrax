@@ -76,7 +76,7 @@ func process(ctx context.Context) (err error) {
 	}
 
 	logger.Infof("生成 model 代码")
-	err = generator.GenerateModelOneByOne(schemas)
+	err = generator.GenerateModels(schemas)
 	if err != nil {
 		logger.Errorf("生成Model代码失败: %v", err)
 		err = fmt.Errorf("生成Model代码失败: %w", err)
@@ -84,7 +84,7 @@ func process(ctx context.Context) (err error) {
 	}
 
 	logger.Infof("生成 dto 代码")
-	err = generator.GenerateDtoOneByOne(schemas)
+	err = generator.GenerateDtos(schemas)
 	if err != nil {
 		logger.Errorf("生成DTO代码失败: %v", err)
 		err = fmt.Errorf("生成DTO代码失败: %w", err)
@@ -92,7 +92,7 @@ func process(ctx context.Context) (err error) {
 	}
 
 	logger.Infof("生成 vo 代码")
-	err = generator.GenerateVoOneByOne(schemas)
+	err = generator.GenerateVos(schemas)
 	if err != nil {
 		logger.Errorf("生成VO代码失败: %v", err)
 		err = fmt.Errorf("生成VO代码失败: %w", err)
@@ -100,7 +100,7 @@ func process(ctx context.Context) (err error) {
 	}
 
 	logger.Infof("生成 dao 代码")
-	err = generator.GenerateDaoOneByOne(schemas)
+	err = generator.GenerateDaos(schemas)
 	if err != nil {
 		err = fmt.Errorf("生成DAO代码失败: %w", err)
 		logger.Errorf("生成DAO代码失败: %v", err)
@@ -108,7 +108,7 @@ func process(ctx context.Context) (err error) {
 	}
 
 	logger.Infof("生成 tool 代码")
-	err = generator.GenerateAllTools()
+	err = generator.GenerateTools()
 	if err != nil {
 		err = fmt.Errorf("生成工具代码失败: %w", err)
 		logger.Errorf("生成工具代码失败: %v", err)
