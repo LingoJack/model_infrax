@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
+	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/model"
 	"github.com/LingoJack/model_infrax/internal/tool"
 	"github.com/pingcap/tidb/pkg/parser"
@@ -49,7 +50,11 @@ func Filter(schemas []model.Schema) (filtered []model.Schema) {
 		filtered = schemas
 		return
 	}
-	neededTableNames := conf.ValueStrSlice("generate_config.table_names")
+	neededTableNames, err := conf.ValueStrSlice("generate_config.table_names")
+	if err != nil {
+		panic(err)
+	}
+	logger.Infof("neededTableNames: %v", neededTableNames)
 	filtered = lo.Filter(schemas, func(schema model.Schema, index int) bool {
 		return lo.Contains(neededTableNames, schema.Name)
 	})

@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -581,15 +582,35 @@ func ValueSlice(key string) []interface{} {
 	return nil
 }
 
-func ValueStrSlice(key string) []string {
+func ValueStrSlice(key string) (res []string, err error) {
 	val, exists := Value(key)
 	if !exists || val == nil {
-		return nil
+		return nil, errors.New("配置不存在")
 	}
+
+	// 先尝试直接断言为 []string
 	if slice, ok := val.([]string); ok {
-		return slice
+		return slice, nil
 	}
-	return nil
+
+	// YAML 解析后通常是 []interface{}，需要转换
+	slice, ok := val.([]interface{})
+	if !ok {
+		return nil, errors.New("配置不是切片")
+	}
+
+	res = make([]string, 0, len(slice))
+	for _, item := range slice {
+		var str string
+		if str, ok = item.(string); ok {
+			res = append(res, str)
+		} else {
+			// 如果不是字符串，使用 fmt.Sprintf 转换
+			res = append(res, fmt.Sprintf("%v", item))
+		}
+	}
+
+	return
 }
 
 // ValueMap 获取 map 类型的配置值
