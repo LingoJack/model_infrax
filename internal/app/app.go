@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
-	"github.com/LingoJack/model_infrax/internal/config"
 	"github.com/LingoJack/model_infrax/internal/constant"
 	"github.com/LingoJack/model_infrax/internal/generator"
 	"github.com/LingoJack/model_infrax/internal/model"
@@ -13,21 +12,13 @@ import (
 	"github.com/LingoJack/model_infrax/internal/parser/statement_parser"
 )
 
-type App struct {
-	Config    *config.Configger
-	Generator *generator.Generator
-}
-
-func NewApp(cfg *config.Configger, g *generator.Generator) *App {
-	return &App{
-		Config:    cfg,
-		Generator: g,
-	}
-}
+var (
+	generateMode = conf.ValueStr("generate_config.generate_mode")
+)
 
 func Run(ctx context.Context) (err error) {
 	var schemas []model.Schema
-	switch conf.ValueStr("generate_config.generate_mode") {
+	switch generateMode {
 	case constant.GenerateModeDatabase:
 		schemas, err = database_parser.Parse(ctx)
 		if err != nil {
@@ -41,7 +32,7 @@ func Run(ctx context.Context) (err error) {
 		}
 		schemas = statement_parser.Filter(schemas)
 	default:
-		err = fmt.Errorf("不支持的生成模式: %s，请使用 '%s' 或 '%s'", app.Config.GenerateConfig.GenerateMode, constant.GenerateModeDatabase, constant.GenerateModeStatement)
+		err = fmt.Errorf("不支持的生成模式: %s，请使用 '%s' 或 '%s'", generateMode, constant.GenerateModeDatabase, constant.GenerateModeStatement)
 		return
 	}
 

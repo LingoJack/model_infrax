@@ -7,41 +7,11 @@ import (
 	"strings"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
-	"github.com/LingoJack/model_infrax/internal/config"
 	"github.com/LingoJack/model_infrax/internal/infra/db_infra"
 	"github.com/LingoJack/model_infrax/internal/model"
 	"github.com/LingoJack/model_infrax/internal/tool"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-
 	"github.com/samber/lo"
 )
-
-// DatabaseParser SQL解析器，用于解析数据库表结构
-type DatabaseParser struct {
-	db        *gorm.DB
-	configger *config.Configger
-}
-
-func NewDatabaseParser(cfg *config.Configger) (*DatabaseParser, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		cfg.GenerateConfig.Username,
-		cfg.GenerateConfig.Password,
-		cfg.GenerateConfig.Host,
-		cfg.GenerateConfig.Port,
-		cfg.GenerateConfig.DatabaseName,
-	)
-
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return nil, fmt.Errorf("连接数据库失败: %w", err)
-	}
-
-	return &DatabaseParser{
-		db:        db,
-		configger: cfg,
-	}, nil
-}
 
 type mysqlTable struct {
 	Name          string  `json:"ColumnName"`      // 表名
