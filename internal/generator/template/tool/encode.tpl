@@ -14,10 +14,10 @@ func Jsonify(v interface{}) string {
 	return string(byts)
 }
 
-func JsonifyBytes(v interface{}) []byte {
+func JsonifyBytes(v interface{}) [] byte {
 	byts, err := json.Marshal(v)
 	if err != nil {
-		return []byte(fmt.Sprintf(`{"error": "%s"}`, err.Error()))
+		return [] byte(fmt.Sprintf(`{"error": "%s"}`, err.Error()))
 	}
 	return byts
 }
@@ -30,10 +30,10 @@ func JsonifyIndent(v interface{}) string {
 	return string(byts)
 }
 
-func JsonifyIndentBytes(v interface{}) []byte {
+func JsonifyIndentBytes(v interface{}) [] byte {
 	byts, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
-		return []byte(fmt.Sprintf(`{"error": "%s"}`, err.Error()))
+		return [] byte(fmt.Sprintf(`{"error": "%s"}`, err.Error()))
 	}
 	return byts
 }
@@ -70,7 +70,7 @@ func parseLLMAnswer(data string, fmtType string) string {
 	}
 
 	// 返回```json和```之间的内容
-	return strings.TrimSpace(data[startIdx+prefixLen : endIdx])
+	return strings.TrimSpace(data[startIdx+prefixLen : endIdx] )
 }
 
 func ParseLLMRespJson(data string) string {

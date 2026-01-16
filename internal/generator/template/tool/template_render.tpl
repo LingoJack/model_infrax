@@ -27,7 +27,7 @@ import (
 //
 // 使用示例:
 //
-//	data := map[string]interface{}{
+//	data := map[string] interface{}{
 //	    "Name": "张三",
 //	    "Age":  25,
 //	    "City": "北京",
@@ -41,9 +41,9 @@ import (
 //
 // 复杂示例（使用条件和循环）:
 //
-//	data := map[string]interface{}{
+//	data := map[string] interface{}{
 //	    "Title": "购物清单",
-//	    "Items": []string{"苹果", "香蕉", "橙子"},
+//	    "Items": [] string{"苹果", "香蕉", "橙子"},
 //	    "Total": 3,
 //	}
 //	tmpl := `{{.Title}}:
@@ -59,7 +59,7 @@ import (
 //   - 模板中引用的变量必须在data map中存在，否则会导致执行错误
 //   - 模板语法严格遵循Go text/template规范
 //   - 对于复杂的模板，建议先进行充分测试
-func RenderWithName(templateName string, templateToRender string, data map[string]interface{}) (result string, err error) {
+func RenderWithName(templateName string, templateToRender string, data map[string] interface{}) (result string, err error) {
 	// 创建新模板并解析模板字符串
 	tmpl, err := template.New(templateName).Parse(templateToRender)
 	if err != nil {
@@ -83,12 +83,12 @@ func RenderWithName(templateName string, templateToRender string, data map[strin
 }
 
 // Render 渲染模板
-func Render(templateToRender string, data map[string]interface{}) (result string, err error) {
+func Render(templateToRender string, data map[string] interface{}) (result string, err error) {
 	return RenderWithName("", templateToRender, data)
 }
 
 // MustRender 渲染模板，如果失败则panic
-func MustRender(templateToRender string, data map[string]interface{}) (result string) {
+func MustRender(templateToRender string, data map[string] interface{}) (result string) {
 	result, err := Render(templateToRender, data)
 	if err != nil {
 		panic(err)

@@ -18,26 +18,26 @@ type {{ $schema.Name | ToPascalCase }}Dto struct {
 	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ .ColumnName }}Start"` // {{ .Comment }} 开始时间
 	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ .ColumnName }}End"` // {{ .Comment }} 结束时间
 {{- if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List []{{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- else if eq (. | GetGoType) "string" }}
 	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ .ColumnName }}Fuzzy"` // {{ .Comment }} 模糊查询
 {{- if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List []{{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- else if eq (. | GetGoType) "*time.Time" }}
 	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ .ColumnName }}Start"` // {{ .Comment }} 开始时间
 	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ .ColumnName }}End"` // {{ .Comment }} 结束时间
 {{- if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List []{{ . | GetGoType | TrimPointer }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType | TrimPointer }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- else if eq (. | GetGoType) "*string" }}
 	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ .ColumnName }}Fuzzy"` // {{ .Comment }} 模糊查询
 {{- if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List []string `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] string `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- else if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List []{{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- end }}
 	OrderBy    string `json:"orderBy"`    // 排序字段
@@ -139,7 +139,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName 
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
 //   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
-func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []{{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List [] {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
 	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
 	return b
 }
@@ -162,7 +162,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName 
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
 //   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
-func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []{{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List [] {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
 	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
 	return b
 }
@@ -195,7 +195,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName 
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
 //   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
-func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []{{ $column | GetGoType | TrimPointer }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List [] {{ $column | GetGoType | TrimPointer }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
 	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
 	return b
 }
@@ -218,7 +218,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName 
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
 //   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
-func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []string) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List [] string) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
 	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
 	return b
 }
@@ -230,7 +230,7 @@ func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName 
 //   - {{ $column.ColumnName | ToSafeParamName }}List: {{ $column.Comment }} IN 查询
 // 返回:
 //   - *{{ $schema.Name | ToPascalCase }}DtoBuilder: 返回 Builder 实例，支持链式调用
-func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List []{{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
+func (b *{{ $schema.Name | ToPascalCase }}DtoBuilder) With{{ $column.ColumnName | ToPascalCase }}List({{ $column.ColumnName | ToSafeParamName }}List [] {{ $column | GetGoType }}) *{{ $schema.Name | ToPascalCase }}DtoBuilder {
 	b.instance.{{ $column.ColumnName | ToPascalCase }}List = {{ $column.ColumnName | ToSafeParamName }}List
 	return b
 }
