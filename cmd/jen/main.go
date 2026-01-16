@@ -12,6 +12,7 @@ import (
 	"github.com/LingoJack/model_infrax/internal/parser/database_parser"
 	"github.com/LingoJack/model_infrax/internal/parser/statement_parser"
 	"github.com/LingoJack/model_infrax/internal/tool"
+	"github.com/fatih/color"
 	"github.com/samber/lo"
 	flag "github.com/spf13/pflag"
 )
@@ -27,19 +28,30 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		infos := []map[string]string{
-			{"版本": Version},
-			{"github": "https://github.com/LingoJack/model_infrax"},
-			{"email": "3065225677@qq.com"},
-			{"作者": "达不溜勾勾"},
-			{"配置文件路径(优先级逆序)": tool.JsonifyIndent(conf.DefaultConfigPaths)},
+		logger.ColorPrintf(logger.ColorHiGreen, "═══════════════════════════════════════\n")
+		logger.ColorPrintf(logger.ColorHiGreen, "        Model Infrax 代码生成器\n")
+		logger.ColorPrintf(logger.ColorHiGreen, "═══════════════════════════════════════\n")
+		fmt.Println()
+
+		infos := []struct {
+			key   string
+			value string
+			color color.Attribute
+		}{
+			{"版本", Version, logger.ColorHiGreen},
+			{"github", "https://github.com/LingoJack/model_infrax", logger.ColorHiBlue},
+			{"email", "3065225677@qq.com", logger.ColorCyan},
+			{"作者", "达不溜勾勾", logger.ColorHiYellow},
+			{"配置文件路径(优先级逆序)", tool.JsonifyIndent(conf.DefaultConfigPaths), logger.ColorHiMagenta},
 		}
 
-		for _, i := range infos {
-			for k, v := range i {
-				logger.ColorPrintf(logger.ColorWhite, "%s: %s\n", k, v)
-			}
+		for _, info := range infos {
+			logger.ColorPrintf(logger.ColorHiWhite, "  %s: ", info.key)
+			logger.ColorPrintf(info.color, "%s\n", info.value)
 		}
+
+		fmt.Println()
+		logger.ColorPrintf(logger.ColorHiGreen, "═══════════════════════════════════════\n")
 
 		return
 	}
