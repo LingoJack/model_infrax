@@ -40,9 +40,9 @@ func main() {
 		}{
 			{"版本", Version, logger.ColorHiGreen},
 			{"github", "https://github.com/LingoJack/model_infrax", logger.ColorHiBlue},
-			{"email", "3065225677@qq.com", logger.ColorCyan},
-			{"作者", "达不溜勾勾", logger.ColorHiYellow},
-			{"配置文件路径(优先级逆序)", tool.JsonifyIndent(conf.DefaultConfigPaths), logger.ColorHiMagenta},
+			{"email", "3065225677@qq.com", logger.ColorHiYellow},
+			{"作者", "达不溜勾勾", logger.ColorWhite},
+			{"配置文件路径(优先级逆序)", tool.JsonifyIndent(conf.DefaultConfigPaths), logger.ColorHiCyan},
 		}
 
 		for _, info := range infos {
