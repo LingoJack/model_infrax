@@ -44,9 +44,19 @@ type TemplateData struct {
 func GenerateModels(schemas []model.Schema) (err error) {
 	logger.Infof("[GenerateModelOneByOne]开始生成模型, 共 %d 个表", len(schemas))
 	for i, schema := range schemas {
+
 		fileName := fmt.Sprintf("%s.go", schema.Name)
+
 		logger.Infof("[GenerateModelOneByOne]正在生成第 %d/%d 个模型: %s", i+1, len(schemas), schema.Name)
-		err = GenerateModel([]model.Schema{schema}, filepath.Join(outputPath, poPackage, fileName))
+
+		var tmplContent []byte
+		tmplContent, err = fs.ReadFile(PoTemplatePath())
+		if err != nil {
+			logger.Errorf("[GenerateModel]读取嵌入模板文件失败, 模板路径: %s, 错误: %v", PoTemplatePath(), err)
+			return fmt.Errorf("读取嵌入式模板文件失败: %w", err)
+		}
+
+		err = GenerateModel(schema, string(tmplContent), filepath.Join(outputPath, poPackage, fileName))
 		if err != nil {
 			logger.Errorf("[GenerateModelOneByOne]生成模型失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
 			return err
@@ -56,55 +66,49 @@ func GenerateModels(schemas []model.Schema) (err error) {
 	return nil
 }
 
-func GenerateModel(schemas []model.Schema, outputFilePath string) (err error) {
-	logger.Infof("[GenerateModel]开始生成模型, 文件名: %s, 表数量: %d", outputFilePath, len(schemas))
+func GenerateModel(schema model.Schema, templateContent, outputFilePath string) (err error) {
+	logger.Infof("[GenerateModel]开始生成模型, 文件名: %s", outputFilePath)
 
-	templatePath := PoTemplatePath()
-	logger.Infof("[GenerateModel]读取模板文件: %s", templatePath)
-	tmplContent, err := fs.ReadFile(templatePath)
+	code, err := GenerateModelCode(schema, templateContent)
 	if err != nil {
-		logger.Errorf("[GenerateModel]读取嵌入模板文件失败, 模板路径: %s, 错误: %v", templatePath, err)
-		return fmt.Errorf("读取嵌入式模板文件失败: %w", err)
+		logger.Errorf("[GenerateModel]生成模型代码失败, 错误: %v", err)
+		return fmt.Errorf("生成模型代码失败: %w", err)
 	}
-	logger.Infof("[GenerateModel]模板文件读取成功, 大小: %d 字节", len(tmplContent))
 
-	// 创建模板并注册函数
-	logger.Infof("[GenerateModel]开始解析模板")
-	tmpl, err := template.New("model").Funcs(funcMap).Parse(string(tmplContent))
-	if err != nil {
-		logger.Errorf("[GenerateModel]解析模板失败, 错误: %v", err)
-		return fmt.Errorf("解析模板失败: %w", err)
-	}
-	logger.Infof("[GenerateModel]模板解析成功")
-
-	// 准备模板数据，包含包名和表结构
-	templateData := TemplateData{
-		DaoPackageName: getPackageName(daoPackage),
-		PoPackageName:  getPackageName(poPackage),
-		DtoPackageName: getPackageName(dtoPackage),
-		Schemas:        schemas,
-	}
-	logger.Infof("[GenerateModel]模板数据准备完成, PoPackage: %s, DaoPackage: %s, DtoPackage: %s",
-		templateData.PoPackageName, templateData.DaoPackageName, templateData.DtoPackageName)
-
-	// 先将模板执行结果写入缓冲区
-	logger.Infof("[GenerateModel]开始执行模板")
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, templateData)
-	if err != nil {
-		logger.Errorf("[GenerateModel]执行模板失败, 错误: %v", err)
-		return fmt.Errorf("执行模板失败: %w", err)
-	}
-	logger.Infof("[GenerateModel]模板执行成功, 生成代码大小: %d 字节", buf.Len())
 	logger.Infof("[GenerateModel]开始写入文件: %s", outputFilePath)
-	err = tool.WriteFileWithDir(outputFilePath, []byte(tool.FormatGoCode(buf.String())), 0644)
-	if err != nil {
+	if err = tool.WriteFileWithDir(outputFilePath, []byte(code), 0644); err != nil {
 		logger.Errorf("[GenerateModel]写入输出文件失败, 文件路径: %s, 错误: %v", outputFilePath, err)
 		return fmt.Errorf("写入输出文件失败: %w", err)
 	}
 
 	logger.Infof("[GenerateModel]成功生成模型文件: %s", outputFilePath)
 	return nil
+}
+
+func GenerateModelCode(schema model.Schema, templateContent string) (code string, err error) {
+	tmpl, err := template.New("model").Funcs(funcMap).Parse(templateContent)
+	if err != nil {
+		logger.Errorf("[GenerateModel]解析模板失败, 错误: %v", err)
+		err = fmt.Errorf("解析模板失败: %w", err)
+		return
+	}
+
+	var buf bytes.Buffer
+	if err = tmpl.Execute(&buf, TemplateData{
+		DaoPackageName: getPackageName(daoPackage),
+		PoPackageName:  getPackageName(poPackage),
+		DtoPackageName: getPackageName(dtoPackage),
+		Schemas:        []model.Schema{schema},
+	}); err != nil {
+		logger.Errorf("[GenerateModel]执行模板失败, 错误: %v", err)
+		err = fmt.Errorf("执行模板失败: %w", err)
+		return
+	}
+	code = buf.String()
+
+	code = tool.FormatGoCode(code)
+
+	return
 }
 
 func GenerateDtos(schemas []model.Schema) (err error) {
