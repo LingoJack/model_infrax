@@ -20,24 +20,27 @@ var (
 	generateMode = conf.ValueStr("generate_config.generate_mode")
 )
 
-const Version = "1.2.0"
+const Version = "v1.2.0"
 
 func main() {
 	showVersion := flag.BoolP("version", "v", false, "显示版本号")
 	flag.Parse()
 
 	if *showVersion {
-		infos := map[string]string{
-			"版本":             Version,
-			"默认配置文件路径": tool.JsonifyIndent(conf.DefaultConfigPaths),
-			"作者":             "达不溜勾勾",
-			"email":            "3065225677@qq.com",
-			"github":           "https://github.com/LingoJack/model_infrax",
+		infos := []map[string]string{
+			{"版本": Version},
+			{"github": "https://github.com/LingoJack/model_infrax"},
+			{"email": "3065225677@qq.com"},
+			{"作者": "达不溜勾勾"},
+			{"配置文件路径(优先级逆序)": tool.JsonifyIndent(conf.DefaultConfigPaths)},
 		}
 
-		for k, v := range infos {
-			logger.Infof("%s: %s\n", k, v)
+		for _, i := range infos {
+			for k, v := range i {
+				logger.ColorPrintf(logger.ColorWhite, "%s: %s\n", k, v)
+			}
 		}
+
 		return
 	}
 
