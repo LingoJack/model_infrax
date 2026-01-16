@@ -46,7 +46,7 @@ func main() {
 		}
 
 		for _, info := range infos {
-			logger.ColorPrintf(logger.ColorHiWhite, "  %s: ", info.key)
+			logger.ColorPrintf(logger.ColorHiWhite, "%s: ", info.key)
 			logger.ColorPrintf(info.color, "%s\n", info.value)
 		}
 		logger.ColorPrintf(logger.ColorGreen, "● 当前生效配置文件(%s)\n", conf.ValueStr(constant.ActivateConfigPathKey))
