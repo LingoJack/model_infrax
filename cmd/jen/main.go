@@ -52,6 +52,7 @@ func process(ctx context.Context) (err error) {
 		schemas, err = database_parser.Parse(ctx)
 		if err != nil {
 			logger.Errorf("解析数据库失败: %v", err)
+			err = fmt.Errorf("解析数据库失败: %w", err)
 			return
 		}
 		schemas = database_parser.Filter(schemas)
@@ -78,7 +79,8 @@ func process(ctx context.Context) (err error) {
 
 	if len(schemas) == 0 {
 		logger.Infof("未找到任何表")
-		return nil
+		err = fmt.Errorf("未找到任何表")
+		return
 	}
 
 	logger.Infof("====== 生成 model 代码 ======")
