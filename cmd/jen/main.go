@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/constant"
@@ -12,6 +11,7 @@ import (
 	"github.com/LingoJack/model_infrax/internal/model"
 	"github.com/LingoJack/model_infrax/internal/parser/database_parser"
 	"github.com/LingoJack/model_infrax/internal/parser/statement_parser"
+	"github.com/LingoJack/model_infrax/internal/tool"
 	"github.com/samber/lo"
 	flag "github.com/spf13/pflag"
 )
@@ -28,7 +28,7 @@ func main() {
 
 	if *showVersion {
 		logger.Infof("版本号: %s", Version)
-		logger.Infof("默认配置文件路径: [ \"%s\" ]", strings.Join(conf.DefaultConfigPaths, "\", \""))
+		logger.Infof("默认配置文件路径: [ %s ]", tool.JsonifyIndent(conf.DefaultConfigPaths))
 		return
 	}
 
