@@ -39,11 +39,7 @@ func SqlStatements() (statements []string, err error) {
 	return
 }
 
-func Parse() (schemas []model.Schema, err error) {
-	statements, err := SqlStatements()
-	if err != nil {
-		return
-	}
+func Parse(statements []string) (schemas []model.Schema, err error) {
 	for _, statement := range statements {
 		if len(strings.TrimSpace(statement)) == 0 {
 			continue

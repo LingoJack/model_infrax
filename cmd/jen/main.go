@@ -55,12 +55,17 @@ func process(ctx context.Context) (err error) {
 		}
 		schemas = database_parser.Filter(schemas)
 	case constant.GenerateModeStatement:
-		schemas, err = statement_parser.Parse()
+		var statements []string
+		statements, err = statement_parser.SqlStatements()
+		if err != nil {
+			return
+		}
+		schemas, err = statement_parser.Parse(statements)
 		if err != nil {
 			logger.Errorf("解析语句失败: %v", err)
 			return
 		}
-		logger.Infof("过滤前，找到 %d 张表", len(schemas))
+		logger.Infof("过滤前，找到 %d 张表: %v", len(schemas), schemas)
 		schemas = statement_parser.Filter(schemas)
 	default:
 		err = fmt.Errorf("不支持的生成模式: %s，请使用 '%s' 或 '%s'", generateMode, constant.GenerateModeDatabase, constant.GenerateModeStatement)
@@ -68,14 +73,14 @@ func process(ctx context.Context) (err error) {
 		return
 	}
 
-	logger.Infof("过滤后，找到 %d 张表", len(schemas))
+	logger.Infof("过滤后，找到 %d 张表: %v", len(schemas), schemas)
 
 	if len(schemas) == 0 {
 		logger.Infof("未找到任何表")
 		return nil
 	}
 
-	logger.Infof("生成 model 代码")
+	logger.Infof("====== 生成 model 代码 ======")
 	err = generator.GenerateModels(schemas)
 	if err != nil {
 		logger.Errorf("生成Model代码失败: %v", err)
@@ -83,7 +88,7 @@ func process(ctx context.Context) (err error) {
 		return
 	}
 
-	logger.Infof("生成 dto 代码")
+	logger.Infof("====== 生成 dto 代码 ======")
 	err = generator.GenerateDtos(schemas)
 	if err != nil {
 		logger.Errorf("生成DTO代码失败: %v", err)
@@ -91,7 +96,7 @@ func process(ctx context.Context) (err error) {
 		return
 	}
 
-	logger.Infof("生成 vo 代码")
+	logger.Infof("====== 生成 vo 代码 ======")
 	err = generator.GenerateVos(schemas)
 	if err != nil {
 		logger.Errorf("生成VO代码失败: %v", err)
@@ -99,7 +104,7 @@ func process(ctx context.Context) (err error) {
 		return
 	}
 
-	logger.Infof("生成 dao 代码")
+	logger.Infof("====== 生成 dao 代码 ======")
 	err = generator.GenerateDaos(schemas)
 	if err != nil {
 		err = fmt.Errorf("生成DAO代码失败: %w", err)
@@ -107,7 +112,7 @@ func process(ctx context.Context) (err error) {
 		return
 	}
 
-	logger.Infof("生成 tool 代码")
+	logger.Infof("====== 生成 tool 代码 ======")
 	err = generator.GenerateTools()
 	if err != nil {
 		err = fmt.Errorf("生成工具代码失败: %w", err)
