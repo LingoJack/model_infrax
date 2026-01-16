@@ -47,8 +47,6 @@ func init() {
 	}
 
 	config.data["config_path"] = path
-
-	logger.Infof("当前生效配置文件(%s), 读取到内容:\n%s", path, tool.JsonifyIndent(config.data))
 }
 
 // Load 加载配置文件（只能加载一次）
