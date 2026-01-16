@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/LingoJack/model_infrax/internal/constant"
 	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/tool"
 	"gopkg.in/yaml.v3"
@@ -27,7 +28,6 @@ func init() {
 		}
 	}
 
-	logger.ColorPrintf(logger.ColorGreen, "● 当前生效配置文件(%s)\n", path)
 	if len(path) == 0 {
 		logger.Errorf("未找到有效的配置文件")
 		return
@@ -39,7 +39,10 @@ func init() {
 		return
 	}
 
-	config.data["config_path"] = path
+	if len(ValueStr(constant.ActivateConfigPathKey)) > 0 {
+		panic(errors.New(fmt.Sprintf("配置文件异常，非法key: %s", constant.ActivateConfigPathKey)))
+	}
+	config.data[constant.ActivateConfigPathKey] = path
 }
 
 var (

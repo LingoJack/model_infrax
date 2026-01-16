@@ -49,6 +49,7 @@ func main() {
 			logger.ColorPrintf(logger.ColorHiWhite, "  %s: ", info.key)
 			logger.ColorPrintf(info.color, "%s\n", info.value)
 		}
+		logger.ColorPrintf(logger.ColorGreen, "● 当前生效配置文件(%s)\n", conf.ValueStr(constant.ActivateConfigPathKey))
 
 		fmt.Println()
 		logger.ColorPrintf(logger.ColorHiGreen, "═══════════════════════════════════════\n")
