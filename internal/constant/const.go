@@ -9,3 +9,7 @@ const (
 	GenerateOptionFrameworkIteaGo = "itea-go"
 	GenerateOptionFrameworkGorm   = "gorm"
 )
+
+const (
+	ActivateConfigPathKey = "activate_config"
+)
