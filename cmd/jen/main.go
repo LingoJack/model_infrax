@@ -28,7 +28,7 @@ func main() {
 
 	if *showVersion {
 		logger.Infof("版本号: %s", Version)
-		logger.Infof("默认配置文件路径: [ %s ]", tool.JsonifyIndent(conf.DefaultConfigPaths))
+		logger.Infof("默认配置文件路径: %s", tool.JsonifyIndent(conf.DefaultConfigPaths))
 		return
 	}
 
