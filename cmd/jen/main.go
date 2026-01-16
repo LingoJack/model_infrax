@@ -27,26 +27,27 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		logger.Infof("版本号: %s", Version)
-		logger.Infof("默认配置文件路径: %s", tool.JsonifyIndent(conf.DefaultConfigPaths))
+		infos := map[string]string{
+			"版本":             Version,
+			"默认配置文件路径": tool.JsonifyIndent(conf.DefaultConfigPaths),
+			"作者":             "达不溜勾勾",
+			"email":            "3065225677@qq.com",
+			"github":           "https://github.com/LingoJack/model_infrax",
+		}
+
+		for k, v := range infos {
+			logger.Infof("%s: %s\n", k, v)
+		}
 		return
 	}
 
-	if err := GenerateCode(context.Background()); err != nil {
+	if err := generate(context.Background()); err != nil {
 		logger.Infof("生成代码失败: %v", err)
 		return
 	}
 }
 
-func GenerateCode(ctx context.Context) (err error) {
-	if err = process(ctx); err != nil {
-		logger.Errorf("生成代码失败: %v", err)
-		return
-	}
-	return
-}
-
-func process(ctx context.Context) (err error) {
+func generate(ctx context.Context) (err error) {
 	var schemas []model.Schema
 	logger.Infof("生成模式: %s", generateMode)
 	switch generateMode {
