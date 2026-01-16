@@ -27,7 +27,7 @@ func init() {
 		}
 	}
 
-	logger.Infof("当前生效配置文件(%s)", path)
+	logger.ColorPrintf(logger.ColorGreen, "● 当前生效配置文件(%s)\n", path)
 	if len(path) == 0 {
 		logger.Errorf("未找到有效的配置文件")
 		return
