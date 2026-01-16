@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/constant"
@@ -27,7 +28,7 @@ func main() {
 
 	if *showVersion {
 		logger.Infof("版本号: %s", Version)
-		logger.Infof("默认配置文件路径: %s", conf.DefaultConfigPaths)
+		logger.Infof("默认配置文件路径: [ %s ]", strings.Join(conf.DefaultConfigPaths, ","))
 		return
 	}
 
