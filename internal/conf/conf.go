@@ -19,15 +19,8 @@ var (
 )
 
 func init() {
-	var defaultConfigPaths = []string{
-		"./application.yml",
-		"./assets/application.yml",
-		"/Applications/model_infrax/application.yml",
-		"/Applications/model_infrax/assets/application.yml",
-	}
-
 	path := ""
-	for _, p := range defaultConfigPaths {
+	for _, p := range DefaultConfigPaths {
 		if tool.IsValidFilePath(p) {
 			path = p
 			break
@@ -48,6 +41,15 @@ func init() {
 
 	config.data["config_path"] = path
 }
+
+var (
+	DefaultConfigPaths = []string{
+		"./application.yml",
+		"./assets/application.yml",
+		"/Applications/model_infrax/application.yml",
+		"/Applications/model_infrax/assets/application.yml",
+	}
+)
 
 // Load 加载配置文件（只能加载一次）
 // 使用 sync.Once 确保配置只加载一次，即使多次调用也只会执行一次
