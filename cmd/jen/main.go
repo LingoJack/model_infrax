@@ -11,6 +11,7 @@ import (
 	"github.com/LingoJack/model_infrax/internal/model"
 	"github.com/LingoJack/model_infrax/internal/parser/database_parser"
 	"github.com/LingoJack/model_infrax/internal/parser/statement_parser"
+	"github.com/samber/lo"
 	flag "github.com/spf13/pflag"
 )
 
@@ -65,7 +66,7 @@ func process(ctx context.Context) (err error) {
 			logger.Errorf("解析语句失败: %v", err)
 			return
 		}
-		logger.Infof("过滤前，找到 %d 张表: %v", len(schemas), schemas)
+		logger.Infof("过滤前，找到 %d 张表: %v", len(schemas), lo.Map(schemas, func(schema model.Schema, index int) string { return schema.Name }))
 		schemas = statement_parser.Filter(schemas)
 	default:
 		err = fmt.Errorf("不支持的生成模式: %s，请使用 '%s' 或 '%s'", generateMode, constant.GenerateModeDatabase, constant.GenerateModeStatement)
@@ -73,7 +74,7 @@ func process(ctx context.Context) (err error) {
 		return
 	}
 
-	logger.Infof("过滤后，找到 %d 张表: %v", len(schemas), schemas)
+	logger.Infof("过滤后，找到 %d 张表: %v", len(schemas), lo.Map(schemas, func(schema model.Schema, index int) string { return schema.Name }))
 
 	if len(schemas) == 0 {
 		logger.Infof("未找到任何表")
