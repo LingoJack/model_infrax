@@ -24,7 +24,7 @@ func JsonRepair(input string) (result string, err error) {
 	result = strings.TrimSpace(input)
 
 	// 快速路径：如果已经是有效的 JSON，直接返回
-	if strings.HasPrefix(result, "{") && strings.HasSuffix(result, "}") && json.Valid([]byte(result)) {
+	if strings.HasPrefix(result, "{") && strings.HasSuffix(result, "}") && json.Valid([] byte(result)) {
 		return
 	}
 
@@ -36,7 +36,7 @@ func JsonRepair(input string) (result string, err error) {
 		sub := result[i : j+1]
 		result = sub
 		// 如果提取的子串是有效的 JSON，直接返回
-		if json.Valid([]byte(result)) {
+		if json.Valid([] byte(result)) {
 			return
 		}
 		// 否则继续处理这个子串
@@ -48,7 +48,7 @@ func JsonRepair(input string) (result string, err error) {
 	result = strings.TrimPrefix(result, "<think>")
 
 	// 如果此时已经是有效的 JSON，直接返回
-	if json.Valid([]byte(result)) {
+	if json.Valid([] byte(result)) {
 		return
 	}
 

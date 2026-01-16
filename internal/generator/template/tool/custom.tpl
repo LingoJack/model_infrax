@@ -10,7 +10,7 @@ import (
 func RandomName() string {
 	rand.Seed(time.Now().UnixNano())
 
-	adjectives := []string{
+	adjectives := [] string{
 		// 性格品质类
 		"快乐", "勇敢", "智慧", "温柔", "善良", "热情", "冷静", "勤奋",
 		"乐观", "谦虚", "真诚", "自信", "坚强", "活泼", "可爱", "幽默",
@@ -25,7 +25,7 @@ func RandomName() string {
 		"宁静", "安详", "怡然", "陶醉", "陶醉", "陶醉", "陶醉", "陶醉",
 	}
 
-	nouns := []string{
+	nouns := [] string{
 		// 动物类
 		"小猫", "小狗", "小熊", "小鸟", "小鱼", "小兔", "小鹿", "小马",
 		"老虎", "狮子", "大象", "熊猫", "猴子", "松鼠", "刺猬", "狐狸",
@@ -70,7 +70,7 @@ func RandomName() string {
 }
 
 func RandomSignature() string {
-	signatures := []string{
+	signatures := [] string{
 		"醉后不知天在水，满船清梦压星河",
 		"况怨无小大，生於所爱，物无美恶，过则为灾",
 		"我曾经走过多遥远的路，跨越过多少海洋去看你",

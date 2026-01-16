@@ -63,7 +63,7 @@ func init() {
 // 使用示例:
 //
 //	if err := tool.Load("config.yaml"); err != nil {
-//	    log.Fatalf("[Load] 加载配置失败: %v", err)
+//	    log.Fatalf("[Load]  加载配置失败: %v", err)
 //	}
 //
 // 注意事项:
@@ -102,13 +102,13 @@ func Load(file string) (err error) {
 //
 //	// 测试场景下切换配置
 //	if err := tool.Reload("config_test.yaml"); err != nil {
-//	    log.Printf("[Reload] 重新加载配置失败: %v", err)
+//	    log.Printf("[Reload]  重新加载配置失败: %v", err)
 //	}
 //
 //	// 热加载场景（监听配置文件变化）
 //	watcher.OnChange(func() {
 //	    if err := tool.Reload("config.yaml"); err != nil {
-//	        log.Printf("[Reload] 热加载配置失败: %v", err)
+//	        log.Printf("[Reload]  热加载配置失败: %v", err)
 //	    }
 //	})
 //
@@ -119,7 +119,7 @@ func Load(file string) (err error) {
 func Reload(file string) error {
 	c, err := NewConfig(file)
 	if err != nil {
-		logger.Errorf("[Reload] 重新加载配置失败: %v", err)
+		logger.Errorf("[Reload]  重新加载配置失败: %v", err)
 		return err
 	}
 	configLock.Lock()
@@ -193,7 +193,7 @@ func Value(key string) (value any, exists bool) {
 //	timeout := tool.ValueWithDefault("app.timeout", 30)
 //
 //	// 获取配置对象，不存在时使用默认配置
-//	defaultConfig := map[string]interface{}{"enabled": false}
+//	defaultConfig := map[string] interface{}{"enabled": false}
 //	config := tool.ValueWithDefault("feature.config", defaultConfig)
 //
 // 注意事项:
@@ -544,7 +544,7 @@ func ValueFloatWithDefault(key string, defaultValue float64) float64 {
 //   - key: 配置键，支持点分隔的嵌套访问
 //
 // 返回:
-//   - []interface{}: 切片类型的配置值，不存在或类型不匹配时返回 nil
+//   - [] interface{}: 切片类型的配置值，不存在或类型不匹配时返回 nil
 //
 // 使用示例:
 //
@@ -568,7 +568,7 @@ func ValueFloatWithDefault(key string, defaultValue float64) float64 {
 //	//     - "192.168.1.3"
 //
 // 注意事项:
-//   - 返回的是 []interface{} 类型，元素需要进行类型断言
+//   - 返回的是 [] interface{} 类型，元素需要进行类型断言
 //   - 配置不存在或类型不匹配时返回 nil
 //   - 如果需要特定类型的切片，需要手动转换
 func ValueSlice(key string) []interface{} {
@@ -588,12 +588,12 @@ func ValueStrSlice(key string) (res []string, err error) {
 		return nil, errors.New("配置不存在")
 	}
 
-	// 先尝试直接断言为 []string
+	// 先尝试直接断言为 [] string
 	if slice, ok := val.([]string); ok {
 		return slice, nil
 	}
 
-	// YAML 解析后通常是 []interface{}，需要转换
+	// YAML 解析后通常是 [] interface{}，需要转换
 	slice, ok := val.([]interface{})
 	if !ok {
 		return nil, errors.New("配置不是切片")
@@ -620,7 +620,7 @@ func ValueStrSlice(key string) (res []string, err error) {
 //   - key: 配置键，支持点分隔的嵌套访问
 //
 // 返回:
-//   - map[string]interface{}: map 类型的配置值，不存在或类型不匹配时返回 nil
+//   - map[string] interface{}: map 类型的配置值，不存在或类型不匹配时返回 nil
 //
 // 使用示例:
 //
@@ -648,7 +648,7 @@ func ValueStrSlice(key string) (res []string, err error) {
 //	//   username: "root"
 //
 // 注意事项:
-//   - 返回的是 map[string]interface{} 类型，值需要进行类型断言
+//   - 返回的是 map[string] interface{} 类型，值需要进行类型断言
 //   - 配置不存在或类型不匹配时返回 nil
 //   - 如果需要结构化的配置对象，建议使用 Unmarshal 方法
 func ValueMap(key string) map[string]interface{} {
@@ -677,26 +677,26 @@ func ValueMap(key string) map[string]interface{} {
 //	// 获取字符串配置
 //	var host string
 //	if err := tool.ValueType("database.host", &host); err != nil {
-//	    log.Printf("[ValueType] 获取配置失败: %v", err)
+//	    log.Printf("[ValueType]  获取配置失败: %v", err)
 //	}
 //	fmt.Printf("数据库主机: %s\n", host)
 //
 //	// 获取整数配置
 //	var port int
 //	if err := tool.ValueType("database.port", &port); err != nil {
-//	    log.Printf("[ValueType] 获取配置失败: %v", err)
+//	    log.Printf("[ValueType]  获取配置失败: %v", err)
 //	}
 //
 //	// 获取布尔配置
 //	var debug bool
 //	if err := tool.ValueType("app.debug", &debug); err != nil {
-//	    log.Printf("[ValueType] 获取配置失败: %v", err)
+//	    log.Printf("[ValueType]  获取配置失败: %v", err)
 //	}
 //
 //	// 获取浮点数配置
 //	var timeout float64
 //	if err := tool.ValueType("app.timeout", &timeout); err != nil {
-//	    log.Printf("[ValueType] 获取配置失败: %v", err)
+//	    log.Printf("[ValueType]  获取配置失败: %v", err)
 //	}
 //
 // 注意事项:
@@ -753,7 +753,7 @@ func ValueType(key string, dst any) error {
 //	// 解析数据库配置
 //	var dbConfig DatabaseConfig
 //	if err := tool.Unmarshal("database", &dbConfig); err != nil {
-//	    log.Fatalf("[Unmarshal] 解析数据库配置失败: %v", err)
+//	    log.Fatalf("[Unmarshal]  解析数据库配置失败: %v", err)
 //	}
 //	fmt.Printf("数据库: %s:%d\n", dbConfig.Host, dbConfig.Port)
 //
@@ -765,7 +765,7 @@ func ValueType(key string, dst any) error {
 //	}
 //	var appConfig AppConfig
 //	if err := tool.Unmarshal("app", &appConfig); err != nil {
-//	    log.Fatalf("[Unmarshal] 解析应用配置失败: %v", err)
+//	    log.Fatalf("[Unmarshal]  解析应用配置失败: %v", err)
 //	}
 //
 //	// 配置示例 (YAML):
@@ -841,7 +841,7 @@ func Unmarshal(key string, dst interface{}) error {
 //	// 解析所有配置
 //	var config Config
 //	if err := tool.UnmarshalAll(&config); err != nil {
-//	    log.Fatalf("[UnmarshalAll] 解析配置失败: %v", err)
+//	    log.Fatalf("[UnmarshalAll]  解析配置失败: %v", err)
 //	}
 //	fmt.Printf("应用: %s v%s\n", config.App.Name, config.App.Version)
 //	fmt.Printf("数据库: %s:%d\n", config.Database.Host, config.Database.Port)
@@ -946,24 +946,24 @@ func Exists(key string) bool {
 //	    "database.port",
 //	    "database.username",
 //	); err != nil {
-//	    log.Fatalf("[RequireKeys] 配置验证失败: %v", err)
+//	    log.Fatalf("[RequireKeys]  配置验证失败: %v", err)
 //	}
 //
 //	// 分组验证
 //	// 验证应用配置
 //	if err := tool.RequireKeys("app.name", "app.version"); err != nil {
-//	    log.Fatalf("[RequireKeys] 应用配置不完整: %v", err)
+//	    log.Fatalf("[RequireKeys]  应用配置不完整: %v", err)
 //	}
 //
 //	// 验证数据库配置
 //	if err := tool.RequireKeys("database.host", "database.port"); err != nil {
-//	    log.Fatalf("[RequireKeys] 数据库配置不完整: %v", err)
+//	    log.Fatalf("[RequireKeys]  数据库配置不完整: %v", err)
 //	}
 //
 //	// 条件性验证
 //	if tool.ValueBool("feature.cache_enabled") {
 //	    if err := tool.RequireKeys("cache.redis.host", "cache.redis.port"); err != nil {
-//	        log.Fatalf("[RequireKeys] 缓存配置不完整: %v", err)
+//	        log.Fatalf("[RequireKeys]  缓存配置不完整: %v", err)
 //	    }
 //	}
 //
@@ -988,7 +988,7 @@ func RequireKeys(keys ...string) error {
 // 用于调试、配置导出或配置检查
 //
 // 返回:
-//   - []string: 所有配置键的列表，使用点分隔表示嵌套关系
+//   - [] string: 所有配置键的列表，使用点分隔表示嵌套关系
 //
 // 使用示例:
 //
@@ -1035,7 +1035,7 @@ func AllKeys() []string {
 }
 
 // Config 配置结构，使用 map 存储以支持灵活的键值访问
-// 内部使用 map[string]interface{} 存储配置数据，支持动态键访问和嵌套结构
+// 内部使用 map[string] interface{} 存储配置数据，支持动态键访问和嵌套结构
 //
 // 字段说明:
 //   - data: 存储配置数据的 map，键为字符串，值为任意类型
@@ -1063,7 +1063,7 @@ type Config struct {
 //	// 加载配置文件
 //	config, err := tool.NewConfig("config.yaml")
 //	if err != nil {
-//	    log.Fatalf("[NewConfig] 加载配置失败: %v", err)
+//	    log.Fatalf("[NewConfig]  加载配置失败: %v", err)
 //	}
 //
 //	// 获取配置值
@@ -1074,7 +1074,7 @@ type Config struct {
 //
 //	// 通常不需要直接调用此方法，使用 Load 方法即可
 //	if err := tool.Load("config.yaml"); err != nil {
-//	    log.Fatalf("[Load] 加载配置失败: %v", err)
+//	    log.Fatalf("[Load]  加载配置失败: %v", err)
 //	}
 //
 // 配置文件示例 (config.yaml):
@@ -1141,11 +1141,11 @@ func NewConfig(file string) (*Config, error) {
 //
 //	// 嵌套键访问
 //	val, exists := config.get("app.database.host")
-//	// 访问: data["app"]["database"]["host"]
+//	// 访问: data["app"] ["database"] ["host"]
 //
 //	// 深层嵌套访问
 //	val, exists := config.get("services.payment.api.endpoint")
-//	// 访问: data["services"]["payment"]["api"]["endpoint"]
+//	// 访问: data["services"] ["payment"] ["api"] ["endpoint"]
 //
 // 注意事项:
 //   - 返回 (value, exists) 可以区分"不存在"和"值为 nil"
@@ -1187,7 +1187,7 @@ func (c *Config) get(key string) (interface{}, bool) {
 //   - data: 当前层级的配置数据
 //
 // 返回:
-//   - []string: 所有配置键的列表，使用点分隔表示嵌套关系
+//   - [] string: 所有配置键的列表，使用点分隔表示嵌套关系
 //
 // 工作原理:
 //  1. 遍历当前层级的所有键值对

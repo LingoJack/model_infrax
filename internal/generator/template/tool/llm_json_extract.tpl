@@ -34,7 +34,7 @@ func parseLLMAnswer(data string, fmtType string) string {
 	}
 
 	// 返回```json和```之间的内容
-	return strings.TrimSpace(data[startIdx+prefixLen : endIdx])
+	return strings.TrimSpace(data[startIdx+prefixLen : endIdx] )
 }
 
 func ParseLLMRespJson(data string) string {

@@ -201,15 +201,15 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 //   - ctx: 上下文对象
 //   - queryDto: 查询条件Dto对象，支持分页、排序、多条件查询
 // 返回:
-//   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
+//   - [] *{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
 // 说明:
 //   - IN 查询条件校验规则:
 //     1. List 为 nil: 不添加该查询条件（正常情况，表示不按此字段过滤）
 //     2. List 不为 nil 且长度 > 0: 添加 IN 查询条件
 //     3. List 不为 nil 但长度 = 0: 返回错误，因为空列表的 IN 查询没有意义，应提前发现此问题
-func (dao *{{ $daoName }}) SelectList(ctx context.Context, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
-	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
+func (dao *{{ $daoName }}) SelectList(ctx context.Context, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}) ([] *{{ $.PoPackageName }}.{{ $entityName }}, error) {
+	var resultList [] *{{ $.PoPackageName }}.{{ $entityName }}
 	db := dao.WithContext(ctx).Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
 
 	// 应用查询条件
@@ -270,7 +270,7 @@ func (dao *{{ $daoName }}) SelectCount(ctx context.Context, queryDto *{{ $.DtoPa
 //     - 如果为 nil，则不添加额外条件
 //     - 函数签名: func(ctx context.Context, db *gorm.DB) *gorm.DB
 // 返回:
-//   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
+//   - [] *{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
 // 使用示例:
 //   // 示例1: 添加复杂的自定义条件
@@ -286,8 +286,8 @@ func (dao *{{ $daoName }}) SelectCount(ctx context.Context, queryDto *{{ $.DtoPa
 //   - 自定义条件函数在基础查询条件、排序和分页之后执行
 //   - 适用于需要动态添加复杂查询条件的场景
 //   - IN 查询条件校验规则同 SelectList 方法
-func (dao *{{ $daoName }}) SelectListWithAppendConditionFunc(ctx context.Context, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}, appendConditionFunc func(ctx context.Context, db *gorm.DB) *gorm.DB) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
-	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
+func (dao *{{ $daoName }}) SelectListWithAppendConditionFunc(ctx context.Context, queryDto *{{ $.DtoPackageName }}.{{ $dtoName }}, appendConditionFunc func(ctx context.Context, db *gorm.DB) *gorm.DB) ([] *{{ $.PoPackageName }}.{{ $entityName }}, error) {
+	var resultList [] *{{ $.PoPackageName }}.{{ $entityName }}
 	db := dao.WithContext(ctx).Model(&{{ $.PoPackageName }}.{{ $entityName }}{})
 
 	// 应用查询条件
@@ -388,7 +388,7 @@ func (dao *{{ $daoName }}) Insert(ctx context.Context, poBean *{{ $.PoPackageNam
 // 说明:
 //   - 批量插入所有记录，在一个事务中执行
 //   - 自增主键会在插入后自动填充到各个poBean中
-func (dao *{{ $daoName }}) InsertBatch(ctx context.Context, poBeanList []*{{ $.PoPackageName }}.{{ $entityName }}) error {
+func (dao *{{ $daoName }}) InsertBatch(ctx context.Context, poBeanList [] *{{ $.PoPackageName }}.{{ $entityName }}) error {
 	if len(poBeanList) == 0 {
 		return fmt.Errorf("批量插入列表不能为空")
 	}
@@ -436,7 +436,7 @@ func (dao *{{ $daoName }}) InsertOrUpdateNullable(ctx context.Context, poBean *{
 //   6. 适用场景: 需要完整替换多条记录的场景
 //   7. 性能提示: 批量操作比逐条调用 InsertOrUpdateNullable 效率更高
 //   8. 如果不希望零值覆盖，建议逐条调用 UpdateByXxx 等方法
-func (dao *{{ $daoName }}) InsertOrUpdateBatchNullable(ctx context.Context, poBeanList []*{{ $.PoPackageName }}.{{ $entityName }}) error {
+func (dao *{{ $daoName }}) InsertOrUpdateBatchNullable(ctx context.Context, poBeanList [] *{{ $.PoPackageName }}.{{ $entityName }}) error {
 	if len(poBeanList) == 0 {
 		return fmt.Errorf("批量插入或更新列表不能为空")
 	}
@@ -480,13 +480,13 @@ func (dao *{{ $daoName }}) SelectBy{{ $pkFieldName }}(ctx context.Context, {{ $p
 //   - ctx: 上下文对象
 //   - {{ $pkParamName }}List: 主键值列表
 // 返回:
-//   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
+//   - [] *{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
-func (dao *{{ $daoName }}) SelectBy{{ $pkFieldName }}List(ctx context.Context, {{ $pkParamName }}List []{{ $pkGoType }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
+func (dao *{{ $daoName }}) SelectBy{{ $pkFieldName }}List(ctx context.Context, {{ $pkParamName }}List [] {{ $pkGoType }}) ([] *{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	if len({{ $pkParamName }}List) == 0 {
-		return []*{{ $.PoPackageName }}.{{ $entityName }}{}, nil
+		return [] *{{ $.PoPackageName }}.{{ $entityName }}{}, nil
 	}
-	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
+	var resultList [] *{{ $.PoPackageName }}.{{ $entityName }}
 	err := dao.WithContext(ctx).Where("{{ $pkCol.ColumnName }} IN ?", {{ $pkParamName }}List).Find(&resultList).Error
 	return resultList, err
 }
@@ -529,12 +529,12 @@ func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}(ctx context.Context, poBea
 //   1. 根据指定的 {{ $pkParamName }} 更新记录
 //   2. 使用 map 可以显式指定要更新的字段，包括零值字段
 //   3. **重要**: 与 UpdateBy{{ $pkFieldName }} 不同，使用 map 可以将字段更新为零值
-//      例如: updatedMap["content"] = nil 会将 content 字段更新为 NULL
-//      例如: updatedMap["artifactName"] = "" 会将 artifactName 字段更新为空字符串
+//      例如: updatedMap["content"]  = nil 会将 content 字段更新为 NULL
+//      例如: updatedMap["artifactName"]  = "" 会将 artifactName 字段更新为空字符串
 //   4. 只更新 map 中指定的字段，未指定的字段保持不变
 //   5. 适用场景: 需要精确控制更新哪些字段，包括需要将某些字段设置为零值的场景
 //   6. 使用建议: 字段名必须与数据库列名一致（或使用 GORM 的字段映射名）
-func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithMap(ctx context.Context, {{ $pkParamName }} {{ $pkGoType }}, updatedMap map[string]interface{}) error {
+func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithMap(ctx context.Context, {{ $pkParamName }} {{ $pkGoType }}, updatedMap map[string] interface{}) error {
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -557,8 +557,8 @@ func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithMap(ctx context.Context
 //   1. 根据指定的 {{ $pkParamName }} 和额外的条件更新记录
 //   2. 只更新非零值字段，零值字段会被忽略
 //   3. 适用场景: 需要在主键基础上增加额外的更新条件，如乐观锁、状态检查等
-//   4. 示例: conditionMap["version"] = 1 可以实现乐观锁，只有版本号匹配才更新
-func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithCondition(ctx context.Context, poBean *{{ $.PoPackageName }}.{{ $entityName }}, {{ $pkParamName }} {{ $pkGoType }}, conditionMap map[string]interface{}) error {
+//   4. 示例: conditionMap["version"]  = 1 可以实现乐观锁，只有版本号匹配才更新
+func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithCondition(ctx context.Context, poBean *{{ $.PoPackageName }}.{{ $entityName }}, {{ $pkParamName }} {{ $pkGoType }}, conditionMap map[string] interface{}) error {
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -584,7 +584,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithCondition(ctx context.C
 //   1. 根据指定的 {{ $pkParamName }} 和额外的条件更新记录
 //   2. 使用 map 可以显式指定要更新的字段，包括零值字段
 //   3. 提供最灵活的更新控制方式
-func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithMapAndCondition(ctx context.Context, {{ $pkParamName }} {{ $pkGoType }}, updatedMap map[string]interface{}, conditionMap map[string]interface{}) error {
+func (dao *{{ $daoName }}) UpdateBy{{ $pkFieldName }}WithMapAndCondition(ctx context.Context, {{ $pkParamName }} {{ $pkGoType }}, updatedMap map[string] interface{}, conditionMap map[string] interface{}) error {
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -656,16 +656,16 @@ func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}(ctx context.Context
 //   - ctx: 上下文对象
 //   - {{ $paramName }}List: {{ $col.Comment }}列表
 // 返回:
-//   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
+//   - [] *{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
 // 说明:
 //   - 虽然是唯一索引，但支持批量查询多个唯一键对应的记录
 //   - 适用场景: 根据多个唯一键（如用户名列表）批量查询记录
-func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}List(ctx context.Context, {{ $paramName }}List []{{ $goType }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
+func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}List(ctx context.Context, {{ $paramName }}List [] {{ $goType }}) ([] *{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	if len({{ $paramName }}List) == 0 {
-		return []*{{ $.PoPackageName }}.{{ $entityName }}{}, nil
+		return [] *{{ $.PoPackageName }}.{{ $entityName }}{}, nil
 	}
-	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
+	var resultList [] *{{ $.PoPackageName }}.{{ $entityName }}
 	err := dao.WithContext(ctx).Where("{{ $col.ColumnName }} IN ?", {{ $paramName }}List).Find(&resultList).Error
 	return resultList, err
 }
@@ -704,7 +704,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}(ctx context.Context, poBe
 //   - 使用 map 可以显式指定要更新的字段，包括零值字段
 //   - 只更新 map 中指定的字段，未指定的字段保持不变
 func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMap(ctx context.Context
-{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string]interface{}) error {
+{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string] interface{}) error {
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -726,7 +726,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMap(ctx context.Contex
 //   - 只更新非零值字段，零值字段会被忽略
 //   - 适用场景: 需要在唯一键基础上增加额外的更新条件
 func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithCondition(ctx context.Context, poBean *{{ $.PoPackageName }}.{{ $entityName }}
-{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, conditionMap map[string]interface{}) error {
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, conditionMap map[string] interface{}) error {
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -755,7 +755,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithCondition(ctx context.
 //   - 使用 map 可以显式指定要更新的字段，包括零值字段
 //   - 提供最灵活的更新控制方式
 func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMapAndCondition(ctx context.Context
-{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string]interface{}, conditionMap map[string]interface{}) error {
+{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string] interface{}, conditionMap map[string] interface{}) error {
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -821,13 +821,13 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(ctx context.Context
 //   - {{ $col.ColumnName | ToSafeParamName }}: {{ $col.Comment }}
 {{- end }}
 // 返回:
-//   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
+//   - [] *{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
 // 说明:
 //   - 该索引不是唯一索引，可能返回多条记录
 func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}(ctx context.Context
-{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
-	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
+{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}) ([] *{{ $.PoPackageName }}.{{ $entityName }}, error) {
+	var resultList [] *{{ $.PoPackageName }}.{{ $entityName }}
 	err := dao.WithContext(ctx).Where("{{ range $i, $col := $indexColumns }}{{ if $i }} AND {{ end }}{{ $col.ColumnName }} = ?{{ end }}"
 {{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }}{{ end }}).Find(&resultList).Error
 	return resultList, err
@@ -844,13 +844,13 @@ func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}(ctx context.Context
 //   - ctx: 上下文对象
 //   - {{ $paramName }}List: {{ $col.Comment }}列表
 // 返回:
-//   - []*{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
+//   - [] *{{ $.PoPackageName }}.{{ $entityName }}: 查询结果列表
 //   - error: 错误信息
-func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}List(ctx context.Context, {{ $paramName }}List []{{ $goType }}) ([]*{{ $.PoPackageName }}.{{ $entityName }}, error) {
+func (dao *{{ $daoName }}) SelectBy{{ $methodSuffix }}List(ctx context.Context, {{ $paramName }}List [] {{ $goType }}) ([] *{{ $.PoPackageName }}.{{ $entityName }}, error) {
 	if len({{ $paramName }}List) == 0 {
-		return []*{{ $.PoPackageName }}.{{ $entityName }}{}, nil
+		return [] *{{ $.PoPackageName }}.{{ $entityName }}{}, nil
 	}
-	var resultList []*{{ $.PoPackageName }}.{{ $entityName }}
+	var resultList [] *{{ $.PoPackageName }}.{{ $entityName }}
 	err := dao.WithContext(ctx).Where("{{ $col.ColumnName }} IN ?", {{ $paramName }}List).Find(&resultList).Error
 	return resultList, err
 }
@@ -891,7 +891,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}(ctx context.Context, poBe
 //   - 只更新 map 中指定的字段，未指定的字段保持不变
 //   - 注意: 该索引不是唯一键，可能会更新多条记录
 func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMap(ctx context.Context
-{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string]interface{}) error {
+{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string] interface{}) error {
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -914,7 +914,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMap(ctx context.Contex
 //   - 适用场景: 需要在索引基础上增加额外的更新条件，缩小更新范围
 //   - 注意: 可能会更新多条记录
 func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithCondition(ctx context.Context, poBean *{{ $.PoPackageName }}.{{ $entityName }}
-{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, conditionMap map[string]interface{}) error {
+{{- range $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, conditionMap map[string] interface{}) error {
 	if poBean == nil {
 		return fmt.Errorf("更新对象不能为空")
 	}
@@ -943,7 +943,7 @@ func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithCondition(ctx context.
 //   - 使用 map 可以显式指定要更新的字段，包括零值字段
 //   - 提供最灵活的更新控制方式
 func (dao *{{ $daoName }}) UpdateBy{{ $methodSuffix }}WithMapAndCondition(ctx context.Context
-{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string]interface{}, conditionMap map[string]interface{}) error {
+{{- range $i, $col := $indexColumns }}, {{ $col.ColumnName | ToSafeParamName }} {{ $col | GetGoType }}{{ end }}, updatedMap map[string] interface{}, conditionMap map[string] interface{}) error {
 	if len(updatedMap) == 0 {
 		return fmt.Errorf("更新字段不能为空")
 	}
@@ -985,7 +985,7 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(ctx context.Context
 //   - ctx: 上下文对象
 //   - recvPtr: 接收查询结果的指针（必须是指针类型）
 //     - 查询单条记录时传入结构体指针，如 &entity.TNode{}
-//     - 查询多条记录时传入 slice 指针，如 &[]*entity.TNode{}
+//     - 查询多条记录时传入 slice 指针，如 &[] *entity.TNode{}
 //   - sql: SQL语句，支持占位符 ?
 //   - args: SQL参数，按顺序对应 SQL 中的占位符
 // 返回:
@@ -1000,7 +1000,7 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(ctx context.Context
 //   }
 //
 //   // 示例2: 查询多条记录
-//   var resultList []*entity.{{ $entityName }}
+//   var resultList [] *entity.{{ $entityName }}
 //   err := dao.ExecSql(ctx, &resultList, "SELECT * FROM {{ $schema.Name }} WHERE skill_id = ?", "skill123")
 //   if err != nil {
 //       return err
@@ -1011,7 +1011,7 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(ctx context.Context
 //       SkillId string `gorm:"column:skill_id"`
 //       Count   int64  `gorm:"column:count"`
 //   }
-//   var countList []*CountResult
+//   var countList [] *CountResult
 //   err := dao.ExecSql(ctx, &countList, "SELECT skill_id, COUNT(*) as count FROM {{ $schema.Name }} GROUP BY skill_id")
 //
 // 注意事项:
@@ -1029,9 +1029,9 @@ func (dao *{{ $daoName }}) ExecSql(ctx context.Context, recvPtr any, sql string,
 
 // getValidOrderByFields 获取允许排序的字段白名单
 // 返回:
-//   - map[string]bool: 字段白名单，key为字段名，value为true表示允许排序
-func (dao *{{ $daoName }}) getValidOrderByFields() map[string]bool {
-	return map[string]bool{
+//   - map[string] bool: 字段白名单，key为字段名，value为true表示允许排序
+func (dao *{{ $daoName }}) getValidOrderByFields() map[string] bool {
+	return map[string] bool{
 {{- range $schema.Columns }}
 		"{{ .ColumnName }}": true,
 {{- end }}
@@ -1073,14 +1073,14 @@ func (dao *{{ $daoName }}) isValidOrderBy(orderBy string) bool {
 
 		// 验证字段名是否在白名单中
 		fieldName := tokens[0]
-		if !validFields[fieldName] {
+		if !validFields[fieldName]  {
 			// 字段不在白名单中
 			return false
 		}
 
 		// 如果指定了排序方向，验证是否为 ASC 或 DESC
 		if len(tokens) == 2 {
-			direction := strings.ToUpper(tokens[1])
+			direction := strings.ToUpper(tokens[1] )
 			if direction != "ASC" && direction != "DESC" {
 				// 排序方向无效
 				return false

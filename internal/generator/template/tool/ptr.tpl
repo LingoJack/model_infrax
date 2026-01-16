@@ -210,6 +210,6 @@ func RunePtr(v rune) *rune {
 //   - boolPtr := tool.Of(true)
 //   - structPtr := tool.Of(User{Name: "test"})
 //   - 与特定类型函数对比: tool.StringPtr("test") 等价于 tool.Of("test")
-func Of[T any](v T) *T {
+func Of[T any] (v T) *T {
 	return &v
 }

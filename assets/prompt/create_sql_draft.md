@@ -1,6 +1,6 @@
-参考[规范]，根据[表设计手稿]生成[建表sql]
+参考[规范] ，根据[表设计手稿] 生成[建表sql] 
 
-[sql规范]
+[sql规范] 
 ```sql
 CREATE TABLE IF NOT EXISTS `t_robot_instance`
 (
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `t_robot_instance`
   COLLATE = utf8mb4_unicode_ci COMMENT ='机器人实例表';
 ```
 
-[表设计手稿]
+[表设计手稿] 
 ```
 
 ```

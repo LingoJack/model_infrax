@@ -17,7 +17,7 @@ import (
 func CosUploadPresignedUrl(ctx context.Context, cosKey, cosUrl, ak, sk string, expiration time.Duration) (presignedUrl string, err error) {
 	u, err := url.Parse(cosUrl)
 	if err != nil {
-		err = fmt.Errorf("[PresignedUrl] parse cos url error: %v", err)
+		err = fmt.Errorf("[PresignedUrl]  parse cos url error: %v", err)
 		return
 	}
 	b := &cos.BaseURL{BucketURL: u}
@@ -30,7 +30,7 @@ func CosUploadPresignedUrl(ctx context.Context, cosKey, cosUrl, ak, sk string, e
 
 	presignedURL, err := client.Object.GetPresignedURL(ctx, http.MethodPut, cosKey, ak, sk, expiration, nil)
 	if err != nil {
-		err = fmt.Errorf("[PresignedUrl] get presigned url error: %v", err)
+		err = fmt.Errorf("[PresignedUrl]  get presigned url error: %v", err)
 		return
 	}
 	presignedUrl = presignedURL.String()
@@ -41,7 +41,7 @@ func CosUploadPresignedUrl(ctx context.Context, cosKey, cosUrl, ak, sk string, e
 func CosDownloadPresignedUrl(ctx context.Context, cosKey, cosUrl, ak, sk string, expiration time.Duration) (presignedUrl string, err error) {
 	u, err := url.Parse(cosUrl)
 	if err != nil {
-		err = fmt.Errorf("[PresignedUrl] parse cos url error: %v", err)
+		err = fmt.Errorf("[PresignedUrl]  parse cos url error: %v", err)
 		return
 	}
 	b := &cos.BaseURL{BucketURL: u}
@@ -54,7 +54,7 @@ func CosDownloadPresignedUrl(ctx context.Context, cosKey, cosUrl, ak, sk string,
 
 	presignedURL, err := client.Object.GetPresignedURL(ctx, http.MethodGet, cosKey, ak, sk, expiration, nil)
 	if err != nil {
-		err = fmt.Errorf("[PresignedUrl] get presigned url error: %v", err)
+		err = fmt.Errorf("[PresignedUrl]  get presigned url error: %v", err)
 		return
 	}
 	presignedUrl = presignedURL.String()
@@ -65,7 +65,7 @@ func CosDownloadPresignedUrl(ctx context.Context, cosKey, cosUrl, ak, sk string,
 func CosUpload(ctx context.Context, cosKey, cosUrl, ak, sk string, reader io.Reader) (err error) {
 	u, err := url.Parse(cosUrl)
 	if err != nil {
-		err = fmt.Errorf("[UploadFile] parse cos url error: %v", err)
+		err = fmt.Errorf("[UploadFile]  parse cos url error: %v", err)
 		return
 	}
 	b := &cos.BaseURL{BucketURL: u}
@@ -78,17 +78,17 @@ func CosUpload(ctx context.Context, cosKey, cosUrl, ak, sk string, reader io.Rea
 
 	_, err = client.Object.Put(ctx, cosKey, reader, nil)
 	if err != nil {
-		err = fmt.Errorf("[UploadFile] upload reader error: %v", err)
+		err = fmt.Errorf("[UploadFile]  upload reader error: %v", err)
 		return
 	}
 
 	return
 }
 
-func CosGet(ctx context.Context, cosKey, cosUrl, ak, sk string) (byts []byte, err error) {
+func CosGet(ctx context.Context, cosKey, cosUrl, ak, sk string) (byts [] byte, err error) {
 	u, err := url.Parse(cosUrl)
 	if err != nil {
-		err = fmt.Errorf("[GetFile] parse cos url error: %v", err)
+		err = fmt.Errorf("[GetFile]  parse cos url error: %v", err)
 		return
 	}
 	b := &cos.BaseURL{BucketURL: u}
@@ -101,13 +101,13 @@ func CosGet(ctx context.Context, cosKey, cosUrl, ak, sk string) (byts []byte, er
 
 	rsp, err := client.Object.Get(ctx, cosKey, nil)
 	if err != nil {
-		err = fmt.Errorf("[GetFile] get file error: %v", err)
+		err = fmt.Errorf("[GetFile]  get file error: %v", err)
 		return
 	}
 	defer rsp.Body.Close()
 	byts, err = io.ReadAll(rsp.Body)
 	if err != nil {
-		err = fmt.Errorf("[GetFile] read file error: %v", err)
+		err = fmt.Errorf("[GetFile]  read file error: %v", err)
 		return
 	}
 	return

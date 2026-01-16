@@ -64,7 +64,7 @@ func MustReadText(path string) string {
 //
 // 示例:
 //
-//	err := WriteFileWithDir("/path/to/file.txt", []byte("hello"), 0644)
+//	err := WriteFileWithDir("/path/to/file.txt", [] byte("hello"), 0644)
 func WriteFileWithDir(path string, data []byte, perm os.FileMode) error {
 	path = EscapeHomeDir(path)
 	dir := filepath.Dir(path)

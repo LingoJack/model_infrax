@@ -101,7 +101,7 @@ func ToSafeParamName(s string) string {
 //
 // 示例:
 //   - TrimPrefix("*string", "*") -> "string"
-//   - TrimPrefix("[]byte", "[]") -> "byte"
+//   - TrimPrefix("[] byte", "[] ") -> "byte"
 func TrimPrefix(s, prefix string) string {
 	return strings.TrimPrefix(s, prefix)
 }
