@@ -5,7 +5,6 @@ mv jen ~/dev/model_infrax/target/
 cp -r ~/dev/model_infrax/assets/prompt/ ~/dev/model_infrax/target/assets/
 cp ~/dev/model_infrax/assets/application.yml ~/dev/model_infrax/target/
 cp ~/dev/model_infrax/assets/schema.sql ~/dev/model_infrax/target/
-cp ~/dev/model_infrax/assets/install.sh ~/dev/model_infrax/target/
 cp ~/dev/model_infrax/assets/jcode ~/dev/model_infrax/target/
 mkdir -p ~/dev/model_infrax/target/output/
 mkdir -p ~/dev/model_infrax/release/
