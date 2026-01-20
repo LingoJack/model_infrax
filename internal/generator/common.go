@@ -20,11 +20,14 @@ var (
 
 var (
 	funcMap = template.FuncMap{
-		"ToPascalCase":    ToPascalCase,
-		"ToCamelCase":     ToCamelCase,
-		"ToSafeParamName": ToSafeParamName,
-		"TrimPointer":     TrimPointer,
-		"GetGoType":       GetGoType,
+		"ToPascalCase":     ToPascalCase,
+		"ToCamelCase":      ToCamelCase,
+		"ToSafeParamName":  ToSafeParamName,
+		"TrimPointer":      TrimPointer,
+		"GetGoType":        GetGoType,
+		"ToJsonTag":        ToJsonTag,
+		"contains":         strings.Contains,
+		"IsSnakeCaseStyle": IsSnakeCaseStyle,
 	}
 )
 
