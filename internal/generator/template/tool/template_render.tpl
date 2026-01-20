@@ -212,6 +212,10 @@ func MustRenderWithFuncMap(templateToRender string, data map[string]interface{},
 //   - 变量名必须是有效的标识符（字母、数字、下划线）
 func ExpandTemplate(templateToRender string, data map[string]interface{}) (result string) {
 	t := fasttemplate.New(templateToRender, "${", "}")
-	result = t.ExecuteString(data)
+	vars := make(map[string]interface{}, len(data))
+	for k, v := range data {
+		vars[k] = fmt.Sprintf("%v", v)
+	}
+	result = t.ExecuteString(vars)
 	return
 }
