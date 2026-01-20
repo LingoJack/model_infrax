@@ -202,3 +202,47 @@ func TrimPrefix(s, prefix string) string {
 func TrimPointer(s string) string {
 	return tool.TrimPrefix(s, "*")
 }
+
+// ToJsonTag 根据列定义列表的整体命名风格生成 JSON tag
+// 用于模板中为带后缀的字段生成合适的 JSON tag
+// 参数:
+//   - fieldName: 当前字段名
+//   - suffix: 后缀（如 "List", "Fuzzy", "Start", "End"）
+//   - columns: 列定义列表，用于判断整体命名风格
+//
+// 返回:
+//   - string: 生成的 JSON tag
+//
+// 示例:
+//   - ToJsonTag("user_id", "List", columns) -> "user_id_list" (蛇形风格)
+//   - ToJsonTag("userId", "List", columns) -> "userIdList" (驼峰风格)
+func ToJsonTag(fieldName, suffix string, columns []model.Column) string {
+	// 提取所有字段名
+	fieldNames := make([]string, len(columns))
+	for i, col := range columns {
+		fieldNames[i] = col.ColumnName
+	}
+	// 调用 tool 包的函数生成 JSON tag
+	return tool.ToJsonTag(fieldName, suffix, fieldNames)
+}
+
+// IsSnakeCaseStyle 判断列定义列表的整体命名风格是否为蛇形命名
+// 用于模板中判断应该生成蛇形还是驼峰风格的 JSON tag
+// 参数:
+//   - columns: 列定义列表
+//
+// 返回:
+//   - bool: true 表示蛇形命名风格，false 表示驼峰命名风格
+//
+// 示例:
+//   - IsSnakeCaseStyle(columns) -> true (如果字段包含 user_id, created_at 等)
+//   - IsSnakeCaseStyle(columns) -> false (如果字段包含 userId, createdAt 等)
+func IsSnakeCaseStyle(columns []model.Column) bool {
+	// 提取所有字段名
+	fieldNames := make([]string, len(columns))
+	for i, col := range columns {
+		fieldNames[i] = col.ColumnName
+	}
+	// 调用 tool 包的函数判断命名风格
+	return tool.IsSnakeCaseStyle(fieldNames)
+}

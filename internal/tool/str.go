@@ -105,3 +105,58 @@ func ToSafeParamName(s string) string {
 func TrimPrefix(s, prefix string) string {
 	return strings.TrimPrefix(s, prefix)
 }
+
+// ToJsonTag 根据字段列表的整体命名风格生成 JSON tag
+// 通过判断所有字段的命名风格（而非单个字段）来决定后缀的拼接方式
+// 如果整体是蛇形命名风格，则后缀也转换为蛇形并用下划线连接
+// 如果整体是驼峰命名风格，则后缀直接拼接保持驼峰风格
+// 参数:
+//   - fieldName: 当前字段名
+//   - suffix: 后缀（如 "List", "Fuzzy", "Start", "End"）
+//   - allFieldNames: 所有字段名列表，用于判断整体命名风格
+//
+// 返回:
+//   - string: 生成的 JSON tag
+//
+// 示例:
+//   - ToJsonTag("user_id", "List", []string{"id", "user_id", "created_at"}) -> "user_id_list"
+//   - ToJsonTag("userId", "List", []string{"id", "userId", "createdAt"}) -> "userIdList"
+//   - ToJsonTag("id", "List", []string{"id", "user_id", "created_at"}) -> "id_list"
+//   - ToJsonTag("id", "List", []string{"id", "userId", "createdAt"}) -> "idList"
+func ToJsonTag(fieldName, suffix string, allFieldNames []string) string {
+	// 判断整体命名风格
+	if IsSnakeCaseStyle(allFieldNames) {
+		// 蛇形命名：将后缀转换为蛇形并用下划线连接
+		return fieldName + "_" + strcase.ToSnake(suffix)
+	}
+	// 驼峰命名：直接拼接后缀（保持驼峰风格）
+	return fieldName + suffix
+}
+
+// IsSnakeCaseStyle 判断字段列表的整体命名风格是否为蛇形命名
+// 遍历所有字段名（排除 "id" 这种特殊字段），如果发现有字段包含下划线，则认为是蛇形命名风格
+// 参数:
+//   - fieldNames: 字段名列表
+//
+// 返回:
+//   - bool: true 表示蛇形命名风格，false 表示驼峰命名风格
+//
+// 示例:
+//   - IsSnakeCaseStyle([]string{"id", "user_id", "created_at"}) -> true
+//   - IsSnakeCaseStyle([]string{"id", "userId", "createdAt"}) -> false
+//   - IsSnakeCaseStyle([]string{"id"}) -> false (默认驼峰)
+func IsSnakeCaseStyle(fieldNames []string) bool {
+	// 遍历所有字段名
+	for _, fieldName := range fieldNames {
+		// 排除 id 这种特殊字段，因为它无法判断命名风格
+		if fieldName == "id" {
+			continue
+		}
+		// 如果发现有字段包含下划线，说明是蛇形命名
+		if strings.Contains(fieldName, "_") {
+			return true
+		}
+	}
+	// 如果没有发现下划线，默认为驼峰命名
+	return false
+}

@@ -15,34 +15,40 @@ type {{ $schema.Name | ToPascalCase }}Dto struct {
 {{- end }}
 {{- range $schema.Columns }}
 {{- if eq (. | GetGoType) "time.Time" }}
-	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ .ColumnName }}Start"` // {{ .Comment }} 开始时间
-	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ .ColumnName }}End"` // {{ .Comment }} 结束时间
+	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ ToJsonTag .ColumnName "Start" $schema.Columns }}"` // {{ .Comment }} 开始时间
+	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ ToJsonTag .ColumnName "End" $schema.Columns }}"` // {{ .Comment }} 结束时间
 {{- if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType }} `json:"{{ ToJsonTag .ColumnName "List" $schema.Columns }}"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- else if eq (. | GetGoType) "string" }}
-	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ .ColumnName }}Fuzzy"` // {{ .Comment }} 模糊查询
+	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ ToJsonTag .ColumnName "Fuzzy" $schema.Columns }}"` // {{ .Comment }} 模糊查询
 {{- if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType }} `json:"{{ ToJsonTag .ColumnName "List" $schema.Columns }}"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- else if eq (. | GetGoType) "*time.Time" }}
-	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ .ColumnName }}Start"` // {{ .Comment }} 开始时间
-	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ .ColumnName }}End"` // {{ .Comment }} 结束时间
+	{{ .ColumnName | ToPascalCase }}Start {{ . | GetGoType }} `json:"{{ ToJsonTag .ColumnName "Start" $schema.Columns }}"` // {{ .Comment }} 开始时间
+	{{ .ColumnName | ToPascalCase }}End {{ . | GetGoType }} `json:"{{ ToJsonTag .ColumnName "End" $schema.Columns }}"` // {{ .Comment }} 结束时间
 {{- if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType | TrimPointer }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType | TrimPointer }} `json:"{{ ToJsonTag .ColumnName "List" $schema.Columns }}"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- else if eq (. | GetGoType) "*string" }}
-	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ .ColumnName }}Fuzzy"` // {{ .Comment }} 模糊查询
+	{{ .ColumnName | ToPascalCase }}Fuzzy {{ . | GetGoType }} `json:"{{ ToJsonTag .ColumnName "Fuzzy" $schema.Columns }}"` // {{ .Comment }} 模糊查询
 {{- if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List [] string `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] string `json:"{{ ToJsonTag .ColumnName "List" $schema.Columns }}"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- else if .IsIndexed }}
-	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType }} `json:"{{ .ColumnName }}List"` // {{ .Comment }} IN 查询
+	{{ .ColumnName | ToPascalCase }}List [] {{ . | GetGoType }} `json:"{{ ToJsonTag .ColumnName "List" $schema.Columns }}"` // {{ .Comment }} IN 查询
 {{- end }}
 {{- end }}
+{{- if IsSnakeCaseStyle $schema.Columns }}
+	OrderBy    string `json:"order_by"`    // 排序字段
+	PageOffset int    `json:"page_offset"` // 分页偏移量
+	PageSize   int    `json:"page_size"`   // 每页数量
+{{- else }}
 	OrderBy    string `json:"orderBy"`    // 排序字段
 	PageOffset int    `json:"pageOffset"` // 分页偏移量
 	PageSize   int    `json:"pageSize"`   // 每页数量
+{{- end }}
 }
 
 // Jsonify 将结构体序列化为 JSON 字符串（紧凑格式）
