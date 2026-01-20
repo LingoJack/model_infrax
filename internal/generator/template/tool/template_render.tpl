@@ -188,7 +188,6 @@ func MustRenderWithFuncMap(templateToRender string, data map[string]interface{},
 //
 // 返回值:
 //   - result: 渲染后的字符串结果
-//   - err: 如果变量不存在，返回错误信息
 //
 // 变量格式:
 //   - ${var} - 唯一支持的格式
@@ -201,10 +200,7 @@ func MustRenderWithFuncMap(templateToRender string, data map[string]interface{},
 //	    "City": "北京",
 //	}
 //	tmpl := "你好，我是${Name}，今年${Age}岁，来自${City}，我有$100"
-//	result, err := ExpandTemplate(tmpl, data)
-//	if err != nil {
-//	    log.Fatal(err)
-//	}
+//	result = ExpandTemplate(tmpl, data)
 //	fmt.Println(result) // 输出: 你好，我是张三，今年25岁，来自北京，我有$100
 //
 // 注意事项:
@@ -214,7 +210,7 @@ func MustRenderWithFuncMap(templateToRender string, data map[string]interface{},
 //   - 不支持复杂的模板语法（如条件、循环等）
 //   - 适用于简单的配置文件、环境变量替换等场景
 //   - 变量名必须是有效的标识符（字母、数字、下划线）
-func ExpandTemplate(templateToRender string, data map[string]interface{}) (result string, err error) {
+func ExpandTemplate(templateToRender string, data map[string]interface{}) (result string) {
 	t := fasttemplate.New(templateToRender, "${", "}")
 	result = t.ExecuteString(data)
 	return
