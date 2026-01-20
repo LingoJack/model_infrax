@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
 	"text/template"
+
+	"github.com/valyala/fasttemplate"
 )
 
 // RenderWithName 渲染Go模板并返回渲染后的字符串
@@ -177,22 +178,20 @@ func MustRenderWithFuncMap(templateToRender string, data map[string]interface{},
 	return result
 }
 
-// ExpandTemplate 使用os.Expand渲染模板，支持${var}和$var格式的变量替换
+// ExpandTemplate 使用fasttemplate渲染模板，只支持${var}格式的变量替换
 //
-// 该函数使用Go标准库的os.Expand来进行简单的变量替换，适用于不需要复杂逻辑的场景。
-// 相比text/template，os.Expand更轻量级，但不支持条件判断、循环等高级特性。
+// 该函数使用fasttemplate库进行变量替换，只识别${var}格式的变量，
 //
 // 参数:
-//   - templateToRender: 要渲染的模板字符串，使用${var}或$var格式引用变量
+//   - templateToRender: 要渲染的模板字符串，使用${var}格式引用变量
 //   - data: 用于填充模板的数据，以map形式提供，key为变量名
 //
 // 返回值:
 //   - result: 渲染后的字符串结果
-//   - err: 如果变量不存在且未提供默认值，返回错误信息
+//   - err: 如果变量不存在，返回错误信息
 //
 // 变量格式:
-//   - ${var} - 标准格式，推荐使用
-//   - $var - 简写格式，变量名以非字母数字字符结束
+//   - ${var} - 唯一支持的格式
 //
 // 使用示例:
 //
@@ -201,46 +200,22 @@ func MustRenderWithFuncMap(templateToRender string, data map[string]interface{},
 //	    "Age":  "25",
 //	    "City": "北京",
 //	}
-//	tmpl := "你好，我是${Name}，今年${Age}岁，来自${City}"
+//	tmpl := "你好，我是${Name}，今年${Age}岁，来自${City}，我有$100"
 //	result, err := ExpandTemplate(tmpl, data)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-//	fmt.Println(result) // 输出: 你好，我是张三，今年25岁，来自北京
+//	fmt.Println(result) // 输出: 你好，我是张三，今年25岁，来自北京，我有$100
 //
 // 注意事项:
-//   - os.Expand只支持字符串替换，所有值都会被转换为字符串
-//   - 如果变量不存在，会返回空字符串（可通过返回error来检测）
+//   - 只支持${var}格式，$var格式不会被识别
+//   - 所有值都会被转换为字符串
+//   - 如果变量不存在，会返回错误
 //   - 不支持复杂的模板语法（如条件、循环等）
 //   - 适用于简单的配置文件、环境变量替换等场景
 //   - 变量名必须是有效的标识符（字母、数字、下划线）
 func ExpandTemplate(templateToRender string, data map[string]interface{}) (result string, err error) {
-	// 记录未找到的变量
-	missingVars := make([]string, 0)
-
-	mapping := func(varName string) string {
-		if value, ok := data[varName]; ok {
-			return fmt.Sprintf("%v", value)
-		}
-		missingVars = append(missingVars, varName)
-		return ""
-	}
-
-	result = os.Expand(templateToRender, mapping)
-
-	if len(missingVars) > 0 {
-		err = fmt.Errorf("template expand error: missing variables: %v", missingVars)
-		return
-	}
-
+	t := fasttemplate.New(templateToRender, "${", "}")
+	result = t.ExecuteString(data)
 	return
-}
-
-// MustExpandTemplate 使用os.Expand渲染模板，如果失败则panic
-func MustExpandTemplate(templateToRender string, data map[string]interface{}) (result string) {
-	result, err := ExpandTemplate(templateToRender, data)
-	if err != nil {
-		panic(err)
-	}
-	return result
 }
