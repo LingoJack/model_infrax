@@ -193,7 +193,6 @@ func MustRenderWithFuncMap(templateToRender string, data map[string]interface{},
 // 变量格式:
 //   - ${var} - 标准格式，推荐使用
 //   - $var - 简写格式，变量名以非字母数字字符结束
-//   - ${var:-default} - 带默认值（需要自行实现，os.Expand不直接支持）
 //
 // 使用示例:
 //
