@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/LingoJack/model_infrax/internal/logger"
-	"github.com/LingoJack/model_infrax/internal/tool"
+	"github.com/LingoJack/model_infrax/pkg/tool"
 )
 
 func GenerateTools() (err error) {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/model"
-	"github.com/LingoJack/model_infrax/internal/tool"
+	"github.com/LingoJack/model_infrax/pkg/tool"
 )
 
 func GenerateVos(schemas []model.Schema) (err error) {

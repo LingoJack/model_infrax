@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/LingoJack/model_infrax/internal/conf"
-	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/model"
-	"github.com/LingoJack/model_infrax/internal/tool"
+	"github.com/LingoJack/model_infrax/pkg/conf"
+	"github.com/LingoJack/model_infrax/pkg/logger"
+	"github.com/LingoJack/model_infrax/pkg/tool"
 	"github.com/pingcap/tidb/pkg/parser"
 	"github.com/pingcap/tidb/pkg/parser/ast"
 	"github.com/pingcap/tidb/pkg/parser/test_driver"

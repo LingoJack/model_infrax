@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/constant"
+	"github.com/LingoJack/model_infrax/pkg/conf"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

@@ -6,10 +6,10 @@ import (
 
 	"strings"
 
-	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/infra/db_infra"
 	"github.com/LingoJack/model_infrax/internal/model"
-	"github.com/LingoJack/model_infrax/internal/tool"
+	"github.com/LingoJack/model_infrax/pkg/conf"
+	"github.com/LingoJack/model_infrax/pkg/tool"
 	"github.com/samber/lo"
 )
 

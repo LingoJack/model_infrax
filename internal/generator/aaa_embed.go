@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/constant"
+	"github.com/LingoJack/model_infrax/pkg/conf"
 )
 
 //go:embed template/*
