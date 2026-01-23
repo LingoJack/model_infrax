@@ -26,8 +26,8 @@ func GenerateDtos(schemas []model.Schema) (err error) {
 			return fmt.Errorf("读取嵌入式模板文件失败: %w", err)
 		}
 
-		path := filepath.Join(outputPath, dtoPackage, fileName)
-		err = GenerateDto(schema, string(tmplContent), path)
+	path := filepath.Join(getOutputPath(), getDtoPackage(), fileName)
+	err = GenerateDto(schema, string(tmplContent), path)
 		if err != nil {
 			logger.Errorf("[GenerateDtoOneByOne] 生成 DTO 失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
 			return err
@@ -66,9 +66,9 @@ func GenerateDtoCode(schema model.Schema, templateContent string) (code string, 
 
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, TemplateData{
-		DaoPackageName: getPackageName(daoPackage),
-		PoPackageName:  getPackageName(poPackage),
-		DtoPackageName: getPackageName(dtoPackage),
+		DaoPackageName: getPackageName(getDaoPackage()),
+		PoPackageName:  getPackageName(getPoPackage()),
+		DtoPackageName: getPackageName(getDtoPackage()),
 		Schemas:        []model.Schema{schema},
 	}); err != nil {
 		logger.Errorf("[GenerateDTO] 执行 DTO 模板失败, 错误: %v", err)

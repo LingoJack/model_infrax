@@ -26,8 +26,8 @@ func GenerateModels(schemas []model.Schema) (err error) {
 			return fmt.Errorf("读取嵌入式模板文件失败: %w", err)
 		}
 
-		path := filepath.Join(outputPath, poPackage, fileName)
-		err = GenerateModel(schema, string(tmplContent), path)
+	path := filepath.Join(getOutputPath(), getPoPackage(), fileName)
+	err = GenerateModel(schema, string(tmplContent), path)
 		if err != nil {
 			logger.Errorf("[GenerateModelOneByOne] 生成模型失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
 			return err
@@ -65,9 +65,9 @@ func GenerateModelCode(schema model.Schema, templateContent string) (code string
 
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, TemplateData{
-		DaoPackageName: getPackageName(daoPackage),
-		PoPackageName:  getPackageName(poPackage),
-		DtoPackageName: getPackageName(dtoPackage),
+		DaoPackageName: getPackageName(getDaoPackage()),
+		PoPackageName:  getPackageName(getPoPackage()),
+		DtoPackageName: getPackageName(getDtoPackage()),
 		Schemas:        []model.Schema{schema},
 	}); err != nil {
 		logger.Errorf("[GenerateModel] 执行模板失败, 错误: %v", err)

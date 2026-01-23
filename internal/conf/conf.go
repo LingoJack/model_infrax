@@ -19,32 +19,6 @@ var (
 	loadOnce   sync.Once
 )
 
-func init() {
-	path := ""
-	for _, p := range DefaultConfigPaths {
-		if tool.IsValidFilePath(p) {
-			path = p
-			break
-		}
-	}
-
-	if len(path) == 0 {
-		logger.Errorf("未找到有效的配置文件")
-		return
-	}
-
-	err := Load(path)
-	if err != nil {
-		logger.Errorf("加载配置文件失败: %v", err)
-		return
-	}
-
-	if len(ValueStr(constant.ActivateConfigPathKey)) > 0 {
-		panic(errors.New(fmt.Sprintf("配置文件异常，非法key: %s", constant.ActivateConfigPathKey)))
-	}
-	config.data[constant.ActivateConfigPathKey] = path
-}
-
 var (
 	DefaultConfigPaths = []string{
 		"./application.yml",
@@ -53,6 +27,64 @@ var (
 		"/Applications/model_infrax/assets/application.yml",
 	}
 )
+
+// InitWithPath 初始化配置文件
+// 支持自定义配置文件路径或使用默认路径
+//
+// 参数:
+//   - customPath: 自定义配置文件路径，为空则使用默认路径
+//
+// 返回:
+//   - error: 初始化失败时返回错误，成功返回 nil
+//
+// 使用示例:
+//
+//	// 使用自定义路径
+//	if err := conf.InitWithPath("/path/to/config.yml"); err != nil {
+//	    log.Fatalf("[InitWithPath] 初始化配置失败: %v", err)
+//	}
+//
+//	// 使用默认路径
+//	if err := conf.InitWithPath(""); err != nil {
+//	    log.Fatalf("[InitWithPath] 初始化配置失败: %v", err)
+//	}
+func InitWithPath(customPath string) error {
+	var configPath string
+
+	// 优先使用自定义路径
+	if customPath != "" {
+		if !tool.IsValidFilePath(customPath) {
+			return fmt.Errorf("指定的配置文件不存在: %s", customPath)
+		}
+		configPath = customPath
+	} else {
+		// 使用默认路径
+		for _, p := range DefaultConfigPaths {
+			if tool.IsValidFilePath(p) {
+				configPath = p
+				break
+			}
+		}
+	}
+
+	if configPath == "" {
+		return fmt.Errorf("未找到有效的配置文件，请使用 -c 参数指定配置文件路径")
+	}
+
+	logger.Infof("[InitWithPath] 加载配置文件: %s", configPath)
+
+	err := Load(configPath)
+	if err != nil {
+		return fmt.Errorf("加载配置文件失败: %w", err)
+	}
+
+	if len(ValueStr(constant.ActivateConfigPathKey)) > 0 {
+		return fmt.Errorf("配置文件异常，非法key: %s", constant.ActivateConfigPathKey)
+	}
+	config.data[constant.ActivateConfigPathKey] = configPath
+
+	return nil
+}
 
 // Load 加载配置文件（只能加载一次）
 // 使用 sync.Once 确保配置只加载一次，即使多次调用也只会执行一次

@@ -9,14 +9,41 @@ import (
 	"github.com/LingoJack/model_infrax/internal/model"
 )
 
-var (
-	poPackage   = conf.ValueStr("generate_option.package.po")
-	daoPackage  = conf.ValueStr("generate_option.package.dao")
-	dtoPackage  = conf.ValueStr("generate_option.package.dto")
-	voPackage   = conf.ValueStr("generate_option.package.vo")
-	toolPackage = conf.ValueStr("generate_option.package.tool")
-	outputPath  = conf.ValueStr("generate_option.output_path")
-)
+// getPoPackage 获取 PO 包路径配置
+// 必须在 conf.InitWithPath 之后调用
+func getPoPackage() string {
+	return conf.ValueStr("generate_option.package.po")
+}
+
+// getDaoPackage 获取 DAO 包路径配置
+// 必须在 conf.InitWithPath 之后调用
+func getDaoPackage() string {
+	return conf.ValueStr("generate_option.package.dao")
+}
+
+// getDtoPackage 获取 DTO 包路径配置
+// 必须在 conf.InitWithPath 之后调用
+func getDtoPackage() string {
+	return conf.ValueStr("generate_option.package.dto")
+}
+
+// getVoPackage 获取 VO 包路径配置
+// 必须在 conf.InitWithPath 之后调用
+func getVoPackage() string {
+	return conf.ValueStr("generate_option.package.vo")
+}
+
+// getToolPackage 获取 Tool 包路径配置
+// 必须在 conf.InitWithPath 之后调用
+func getToolPackage() string {
+	return conf.ValueStr("generate_option.package.tool")
+}
+
+// getOutputPath 获取输出路径配置
+// 必须在 conf.InitWithPath 之后调用
+func getOutputPath() string {
+	return conf.ValueStr("generate_option.output_path")
+}
 
 var (
 	funcMap = template.FuncMap{
