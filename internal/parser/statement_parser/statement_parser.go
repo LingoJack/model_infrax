@@ -21,13 +21,17 @@ var (
 	all        bool
 )
 
-func init() {
+// Init 初始化 statement parser 配置
+// 必须在 conf.InitWithPath 之后调用
+func Init() error {
 	all = conf.ValueBool("generate_config.all_tables")
 	sqlPath = tool.EscapeHomeDir(conf.ValueStr("generate_config.sql_file_path"))
 	tableNames, err = conf.ValueStrSlice("generate_config.table_names")
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("[Init] 读取表名配置失败: %w", err)
 	}
+	logger.Infof("[Init] statement_parser 初始化完成, sqlPath=%s, all=%v, tableNames=%v", sqlPath, all, tableNames)
+	return nil
 }
 
 func SqlStatements() (statements []string, err error) {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/infra/db_infra"
+	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/model"
 	"github.com/LingoJack/model_infrax/pkg/tool"
 	"github.com/samber/lo"
@@ -19,12 +20,16 @@ var (
 	tableNames []string
 )
 
-func init() {
+// Init 初始化 database parser 配置
+// 必须在 conf.InitWithPath 之后调用
+func Init() error {
 	all = conf.ValueBool("generate_config.all_tables")
 	tableNames, err = conf.ValueStrSlice("generate_config.table_names")
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("[Init] 读取表名配置失败: %w", err)
 	}
+	logger.Infof("[Init] database_parser 初始化完成, all=%v, tableNames=%v", all, tableNames)
+	return nil
 }
 
 // Parse 获取所有表名

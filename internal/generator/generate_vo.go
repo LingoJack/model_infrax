@@ -27,8 +27,8 @@ func GenerateVos(schemas []model.Schema) (err error) {
 			return fmt.Errorf("读取嵌入式 VO 模板文件失败: %w", err)
 		}
 
-		path := filepath.Join(outputPath, voPackage, fileName)
-		err = GenerateVO(schema, string(tmplContent), path)
+	path := filepath.Join(getOutputPath(), getVoPackage(), fileName)
+	err = GenerateVO(schema, string(tmplContent), path)
 		if err != nil {
 			logger.Errorf("[GenerateVoOneByOne] 生成 VO 失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
 			return err
@@ -68,10 +68,10 @@ func GenerateVoCode(schema model.Schema, templateContent string) (code string, e
 	var buf bytes.Buffer
 
 	if err = tmpl.Execute(&buf, TemplateData{
-		DaoPackageName: getPackageName(daoPackage),
-		PoPackageName:  getPackageName(poPackage),
-		DtoPackageName: getPackageName(dtoPackage),
-		VoPackageName:  getPackageName(voPackage),
+		DaoPackageName: getPackageName(getDaoPackage()),
+		PoPackageName:  getPackageName(getPoPackage()),
+		DtoPackageName: getPackageName(getDtoPackage()),
+		VoPackageName:  getPackageName(getVoPackage()),
 		Schemas:        []model.Schema{schema},
 	}); err != nil {
 		logger.Errorf("[GenerateVO] 执行 VO 模板失败, 错误: %v", err)

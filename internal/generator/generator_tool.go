@@ -43,7 +43,7 @@ func GenerateTools() (err error) {
 
 		logger.Infof("[GenerateAllTools] 正在生成工具文件: %s", goFileName)
 
-		path := filepath.Join(outputPath, toolPackage, goFileName)
+		path := filepath.Join(getOutputPath(), getToolPackage(), goFileName)
 		err = GenerateTool(string(byts), path)
 		if err != nil {
 			logger.Errorf("[GenerateAllTools] 生成工具文件失败, 模板: %s, 输出: %s, 错误: %v", tplName, goFileName, err)
