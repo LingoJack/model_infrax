@@ -20,7 +20,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-const Version = "v1.2.0"
+const Version = "v1.3.0"
 
 // initModules 初始化各个模块
 // 必须在 conf.InitWithPath 之后调用
