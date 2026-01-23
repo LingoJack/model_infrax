@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/LingoJack/model_infrax/internal/constant"
-	"github.com/LingoJack/model_infrax/pkg/logger"
+	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/pkg/tool"
 	"gopkg.in/yaml.v3"
 )
