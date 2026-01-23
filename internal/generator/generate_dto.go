@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/model"
+	"github.com/LingoJack/model_infrax/pkg/logger"
 	"github.com/LingoJack/model_infrax/pkg/tool"
 )
 
