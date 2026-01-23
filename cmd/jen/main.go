@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/LingoJack/model_infrax/assets"
 	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/constant"
 	"github.com/LingoJack/model_infrax/internal/generator"
@@ -51,23 +52,26 @@ func initModules() error {
 
 func main() {
 	showVersion := flag.BoolP("version", "v", false, "显示版本号")
+	initConfig := flag.Bool("init", false, "在当前目录生成配置文件模板 model_infrax.yml")
 	configPath := flag.StringP("config", "c", "", "指定配置文件路径")
 	flag.Parse()
 
-	// 初始化配置（version 命令除外）
-	if !*showVersion {
-		if err := conf.InitWithPath(*configPath); err != nil {
-			logger.Errorf("[main] 初始化配置失败: %v", err)
+	// 处理 --init 命令
+	if *initConfig {
+		if err := generateConfigTemplate(); err != nil {
+			logger.Errorf("[main] 生成配置文件模板失败: %v", err)
 			os.Exit(1)
 		}
-
-		// 初始化各个模块（必须在配置加载后）
-		if err := initModules(); err != nil {
-			logger.Errorf("[main] 初始化模块失败: %v", err)
-			os.Exit(1)
-		}
+		return
 	}
 
+	// 初始化配置（init 命令除外，version 命令也需要加载配置以显示当前生效的配置文件）
+	if err := conf.InitWithPath(*configPath); err != nil {
+		logger.Errorf("[main] 初始化配置失败: %v", err)
+		os.Exit(1)
+	}
+
+	// 处理 --version 命令
 	if *showVersion {
 		logger.ColorPrintf(logger.ColorHiGreen, "═══════════════════════════════════════\n")
 		logger.ColorPrintf(logger.ColorHiGreen, "        Model Infrax 代码生成器\n")
@@ -98,6 +102,12 @@ func main() {
 		return
 	}
 
+	// 初始化各个模块（必须在配置加载后，且非 version 命令）
+	if err := initModules(); err != nil {
+		logger.Errorf("[main] 初始化模块失败: %v", err)
+		os.Exit(1)
+	}
+
 	if err := generate(context.Background()); err != nil {
 		logger.Errorf("[main] 生成代码失败: %v", err)
 		os.Exit(1)
@@ -108,7 +118,7 @@ func generate(ctx context.Context) (err error) {
 	generateMode := conf.ValueStr("generate_config.generate_mode")
 	var schemas []model.Schema
 	logger.Infof("[generate] 生成模式: %s", generateMode)
-	
+
 	switch generateMode {
 	case constant.GenerateModeDatabase:
 		schemas, err = database_parser.Parse(ctx)
@@ -185,6 +195,33 @@ func generate(ctx context.Context) (err error) {
 		logger.Errorf("[generate] 生成工具代码失败: %v", err)
 		return
 	}
+
+	return nil
+}
+
+// generateConfigTemplate 在当前目录生成配置文件模板
+func generateConfigTemplate() error {
+	const configFileName = "model_infrax.yml"
+
+	logger.Infof("[generateConfigTemplate] 开始生成配置文件模板...")
+
+	// 检查文件是否已存在
+	if _, err := os.Stat(configFileName); err == nil {
+		logger.Errorf("[generateConfigTemplate] 配置文件已存在: %s", configFileName)
+		return fmt.Errorf("配置文件已存在: %s，请先删除或重命名现有文件", configFileName)
+	}
+
+	// 写入文件
+	if err := os.WriteFile(configFileName, []byte(assets.ApplicationYml), 0644); err != nil {
+		logger.Errorf("[generateConfigTemplate] 写入配置文件失败: %v, 文件路径: %s", err, configFileName)
+		return fmt.Errorf("写入配置文件失败: %w", err)
+	}
+
+	logger.ColorPrintf(logger.ColorHiGreen, "✓ 配置文件模板生成成功: %s\n", configFileName)
+	logger.ColorPrintf(logger.ColorHiCyan, "\n使用说明:\n")
+	logger.ColorPrintf(logger.ColorWhite, "1. 编辑 %s 文件，配置数据库连接或SQL文件路径\n", configFileName)
+	logger.ColorPrintf(logger.ColorWhite, "2. 运行 jen 命令开始生成代码\n")
+	logger.ColorPrintf(logger.ColorWhite, "3. 使用 jen -c <path> 可以指定其他配置文件路径\n")
 
 	return nil
 }

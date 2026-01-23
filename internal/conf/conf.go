@@ -21,10 +21,10 @@ var (
 
 var (
 	DefaultConfigPaths = []string{
-		"./application.yml",
-		"./assets/application.yml",
-		"/Applications/model_infrax/application.yml",
-		"/Applications/model_infrax/assets/application.yml",
+		"./model_infrax.yml",
+		"./assets/model_infrax.yml",
+		"/Applications/model_infrax/model_infrax.yml",
+		"/Applications/model_infrax/assets/model_infrax.yml",
 	}
 )
 
