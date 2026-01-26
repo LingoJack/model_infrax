@@ -51,10 +51,6 @@ const (
 	// SchemaOptionAllowNullValues 允许字段为null值
 	// 适用于需要支持null的场景
 	SchemaOptionAllowNullValues
-
-	// SchemaOptionPreferYAMLSchema 优先使用YAML Schema标签
-	// 适用于同时支持JSON和YAML的场景
-	SchemaOptionPreferYAMLSchema
 )
 
 // Has 检查是否包含指定选项
@@ -214,10 +210,6 @@ func applyOptions(reflector *jsonschema.Reflector, opt SchemaOption) {
 
 	if opt.Has(SchemaOptionAllowNullValues) {
 		reflector.AllowAdditionalProperties = true
-	}
-
-	if opt.Has(SchemaOptionPreferYAMLSchema) {
-		reflector.PreferYAMLSchema = true
 	}
 }
 
