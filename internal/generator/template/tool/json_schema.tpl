@@ -26,31 +26,31 @@ const (
 
 	// SchemaOptionAnonymous 不生成$id字段
 	// 适用于不需要Schema标识符的场景
-	SchemaOptionAnonymous SchemaOption = 1 << iota
+	SchemaOptionAnonymous SchemaOption = 1 << 0 // 1
 
 	// SchemaOptionExpandStruct 展开嵌套结构体而不是使用$ref引用
 	// 适用于需要完整Schema定义的场景
-	SchemaOptionExpandStruct
+	SchemaOptionExpandStruct SchemaOption = 1 << 1 // 2
 
 	// SchemaOptionNoReference 不使用$ref引用
 	// 适用于需要内联所有定义的场景
-	SchemaOptionNoReference
+	SchemaOptionNoReference SchemaOption = 1 << 2 // 4
 
 	// SchemaOptionNoAdditionalProperties 不允许额外属性
 	// 适用于需要严格验证的场景
-	SchemaOptionNoAdditionalProperties
+	SchemaOptionNoAdditionalProperties SchemaOption = 1 << 3 // 8
 
 	// SchemaOptionRequiredFromTags 从jsonschema标签读取required信息
 	// 适用于通过标签定义必填字段的场景
-	SchemaOptionRequiredFromTags
+	SchemaOptionRequiredFromTags SchemaOption = 1 << 4 // 16
 
 	// SchemaOptionCompact 生成紧凑格式的JSON（不带缩进）
 	// 适用于网络传输或存储场景
-	SchemaOptionCompact
+	SchemaOptionCompact SchemaOption = 1 << 5 // 32
 
 	// SchemaOptionAllowNullValues 允许字段为null值
 	// 适用于需要支持null的场景
-	SchemaOptionAllowNullValues
+	SchemaOptionAllowNullValues SchemaOption = 1 << 6 // 64
 )
 
 // Has 检查是否包含指定选项
