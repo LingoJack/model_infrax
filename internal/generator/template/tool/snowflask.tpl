@@ -93,9 +93,9 @@ func ParseID(idStr string) (snowflake.ID, error) {
 
 // 全局默认实例相关变量
 var (
-	defaultSnowflake *Snowflake  // 全局默认雪花算法实例
-	once             sync.Once   // 确保只初始化一次
-	initErr          error       // 初始化错误
+	defaultSnowflake *Snowflake // 全局默认雪花算法实例
+	once             sync.Once  // 确保只初始化一次
+	initErr          error      // 初始化错误
 )
 
 // getDefaultNodeID 获取默认的节点 ID
@@ -128,7 +128,7 @@ func getDefaultNodeID() int64 {
 //   - 初始化失败时会打印错误日志，但不会 panic
 //
 // 注意:
-//   - 此方法会在首次调用 GenerateID 等方法时自动执行
+//   - 此方法会在首次调用 SnowflakeID 等方法时自动执行
 //   - 初始化失败后，后续调用会返回错误或 panic
 func ensureInitialized() {
 	once.Do(func() {
@@ -150,7 +150,7 @@ func ensureInitialized() {
 //   - error: 设置失败时返回错误
 //
 // 注意:
-//   - 必须在首次调用 GenerateID 等方法之前调用
+//   - 必须在首次调用 SnowflakeID 等方法之前调用
 //   - 如果已经初始化过，此方法不会重复初始化
 //   - 如果不调用此方法，将使用环境变量或默认值 1
 //
@@ -167,7 +167,7 @@ func SetNodeID(nodeID int64) error {
 	return initErr
 }
 
-// GenerateID 生成唯一 ID（int64 格式）
+// SnowflakeID 生成唯一 ID（int64 格式）
 //
 // 返回:
 //   - int64: 唯一的 64 位整数 ID
@@ -179,17 +179,17 @@ func SetNodeID(nodeID int64) error {
 //
 // 示例:
 //
-//	id := tool.GenerateID()
+//	id := tool.SnowflakeID()
 //	fmt.Println(id) // 输出: 1234567890123456789
-func GenerateID() int64 {
+func SnowflakeID() int64 {
 	ensureInitialized()
 	if defaultSnowflake == nil {
-		panic(fmt.Sprintf("[GenerateID] 默认雪花算法实例初始化失败: %v", initErr))
+		panic(fmt.Sprintf("[SnowflakeID] 默认雪花算法实例初始化失败: %v", initErr))
 	}
 	return defaultSnowflake.NextID()
 }
 
-// GenerateIDString 生成唯一 ID（字符串格式）
+// SnowflakeIDString 生成唯一 ID（字符串格式）
 //
 // 返回:
 //   - string: 唯一 ID 的字符串表示
@@ -202,12 +202,12 @@ func GenerateID() int64 {
 //
 // 示例:
 //
-//	idStr := tool.GenerateIDString()
+//	idStr := tool.SnowflakeIDString()
 //	fmt.Println(idStr) // 输出: "1234567890123456789"
-func GenerateIDString() string {
+func SnowflakeIDString() string {
 	ensureInitialized()
 	if defaultSnowflake == nil {
-		panic(fmt.Sprintf("[GenerateIDString] 默认雪花算法实例初始化失败: %v", initErr))
+		panic(fmt.Sprintf("[SnowflakeIDString] 默认雪花算法实例初始化失败: %v", initErr))
 	}
 	return defaultSnowflake.NextIDString()
 }
