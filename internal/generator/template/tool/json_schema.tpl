@@ -40,9 +40,9 @@ const (
 	// 适用于需要严格验证的场景
 	SchemaOptionNoAdditionalProperties SchemaOption = 1 << 3 // 8
 
-	// SchemaOptionRequiredFromTags 从jsonschema标签读取required信息
-	// 适用于通过标签定义必填字段的场景
-	SchemaOptionRequiredFromTags SchemaOption = 1 << 4 // 16
+	// SchemaOptionAllRequired 忽略jsonschema标签中的required信息
+	// 默认会从标签读取required，只有在不需要从标签读取时才使用此选项，使用此标签时，所有字段为requeired
+	SchemaOptionAllRequired SchemaOption = 1 << 4 // 16
 
 	// SchemaOptionCompact 生成紧凑格式的JSON（不带缩进）
 	// 适用于网络传输或存储场景
@@ -149,7 +149,7 @@ func (o SchemaOption) Has(option SchemaOption) bool {
 //   - 生成的Schema符合JSON Schema Draft 2020-12标准
 func StructToJSONSchema(structInstance interface{}, options ...SchemaOption) (schemaJSON string, err error) {
 	// 合并所有选项
-	var opt SchemaOption = SchemaOptionNone
+	var opt = SchemaOptionNone
 	if len(options) > 0 {
 		for _, o := range options {
 			opt |= o
@@ -188,6 +188,9 @@ func StructToJSONSchema(structInstance interface{}, options ...SchemaOption) (sc
 //   - reflector: jsonschema.Reflector实例
 //   - opt: 位运算组合的选项
 func applyOptions(reflector *jsonschema.Reflector, opt SchemaOption) {
+	// 默认从标签读取required信息，除非显式声明忽略
+	reflector.RequiredFromJSONSchemaTags = !opt.Has(SchemaOptionAllRequired)
+
 	if opt.Has(SchemaOptionAnonymous) {
 		reflector.Anonymous = true
 	}
@@ -202,10 +205,6 @@ func applyOptions(reflector *jsonschema.Reflector, opt SchemaOption) {
 
 	if opt.Has(SchemaOptionNoAdditionalProperties) {
 		reflector.AllowAdditionalProperties = false
-	}
-
-	if opt.Has(SchemaOptionRequiredFromTags) {
-		reflector.RequiredFromJSONSchemaTags = true
 	}
 
 	if opt.Has(SchemaOptionAllowNullValues) {
@@ -335,7 +334,7 @@ func MustStructToJSONSchema(structInstance interface{}, options ...SchemaOption)
 //
 //	// 使用自定义选项
 //	valid, schema, err := ValidateJSONAgainstStruct(&User{}, jsonData,
-//	    SchemaOptionRequiredFromTags | SchemaOptionNoAdditionalProperties)
+//	    SchemaOptionNoAdditionalProperties)
 //
 // 注意事项:
 //   - 当前实现仅生成Schema，不执行实际验证
@@ -398,5 +397,5 @@ func GetCompactOptions() SchemaOption {
 //	opts := GetStrictOptions()
 //	schema, err := StructToJSONSchema(&User{}, opts)
 func GetStrictOptions() SchemaOption {
-	return SchemaOptionNoAdditionalProperties | SchemaOptionRequiredFromTags
+	return SchemaOptionNoAdditionalProperties
 }
