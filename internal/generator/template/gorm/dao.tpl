@@ -166,11 +166,18 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 {{- range $schema.Columns }}
 {{- $fieldName := .ColumnName | ToPascalCase }}
 {{- $goType := . | GetGoType }}
-{{- if or (eq $goType "time.Time") (eq $goType "*time.Time") }}
+{{- if eq $goType "time.Time" }}
 	if !queryDto.{{ $fieldName }}Start.IsZero() {
 		db = db.Where("{{ .ColumnName }} >= ?", queryDto.{{ $fieldName }}Start)
 	}
 	if !queryDto.{{ $fieldName }}End.IsZero() {
+		db = db.Where("{{ .ColumnName }} < DATE_ADD(?, INTERVAL 1 DAY)", queryDto.{{ $fieldName }}End)
+	}
+{{- else if eq $goType "*time.Time" }}
+	if queryDto.{{ $fieldName }}Start != nil && !queryDto.{{ $fieldName }}Start.IsZero() {
+		db = db.Where("{{ .ColumnName }} >= ?", queryDto.{{ $fieldName }}Start)
+	}
+	if queryDto.{{ $fieldName }}End != nil && !queryDto.{{ $fieldName }}End.IsZero() {
 		db = db.Where("{{ .ColumnName }} < DATE_ADD(?, INTERVAL 1 DAY)", queryDto.{{ $fieldName }}End)
 	}
 {{- end }}
