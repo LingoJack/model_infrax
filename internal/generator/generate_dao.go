@@ -26,8 +26,8 @@ func GenerateDaos(schemas []model.Schema) (err error) {
 			return fmt.Errorf("读取嵌入式 DAO 模板文件失败: %w", err)
 		}
 
-	path := filepath.Join(getOutputPath(), getDaoPackage(), fileName)
-	err = GenerateDao(schema, string(tmplContent), path)
+		path := filepath.Join(getOutputPath(), getDaoPackage(), fileName)
+		err = GenerateDao(schema, string(tmplContent), path)
 		if err != nil {
 			logger.Errorf("[GenerateDaoOneByOne] 生成 DAO 失败, 表名: %s, 文件名: %s, 错误: %v", schema.Name, fileName, err)
 			return err
