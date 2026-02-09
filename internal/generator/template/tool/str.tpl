@@ -1,6 +1,8 @@
 package tool
 
 import (
+	"fmt"
+
 	"github.com/iancoleman/strcase"
 )
 
@@ -52,4 +54,29 @@ func ToCamelCase(s string) string {
 //   - "user-name" -> "user_name"
 func ToSnakeCase(s string) string {
 	return strcase.ToSnake(s)
+}
+
+// InterfaceToString 将 interface{} 类型安全地转换为 string
+// 参数:
+//   - v: 任意类型的值
+//
+// 返回:
+//   - string: 转换后的字符串，如果是 nil 则返回空字符串
+//
+// 示例:
+//   - "hello" -> "hello"
+//   - 123 -> "123"
+//   - nil -> ""
+func InterfaceToString(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	switch val := v.(type) {
+	case string:
+		return val
+	case []byte:
+		return string(val)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }
