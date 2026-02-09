@@ -1,82 +1,71 @@
 package tool
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"strings"
 )
 
+// marshalNoEscapeHTML 序列化时不转义 HTML 特殊字符（如 &、<、>），避免 URL 等内容被破坏
+func marshalNoEscapeHTML(v interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(v); err != nil {
+		return nil, err
+	}
+	// Encode 会在末尾追加换行符，需要去掉
+	b := buf.Bytes()
+	if len(b) > 0 && b[len(b)-1] == '\n' {
+		b = b[:len(b)-1]
+	}
+	return b, nil
+}
+
+// marshalIndentNoEscapeHTML 带缩进的序列化，不转义 HTML 特殊字符
+func marshalIndentNoEscapeHTML(v interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(v); err != nil {
+		return nil, err
+	}
+	b := buf.Bytes()
+	if len(b) > 0 && b[len(b)-1] == '\n' {
+		b = b[:len(b)-1]
+	}
+	return b, nil
+}
+
 func Jsonify(v interface{}) string {
-	byts, err := json.Marshal(v)
+	byts, err := marshalNoEscapeHTML(v)
 	if err != nil {
 		return fmt.Sprintf(`{"error": "%s"}`, err.Error())
 	}
 	return string(byts)
 }
 
-func JsonifyBytes(v interface{}) [] byte {
-	byts, err := json.Marshal(v)
+func JsonifyBytes(v interface{}) []byte {
+	byts, err := marshalNoEscapeHTML(v)
 	if err != nil {
-		return [] byte(fmt.Sprintf(`{"error": "%s"}`, err.Error()))
+		return []byte(fmt.Sprintf(`{"error": "%s"}`, err.Error()))
 	}
 	return byts
 }
 
 func JsonifyIndent(v interface{}) string {
-	byts, err := json.MarshalIndent(v, "", "  ")
+	byts, err := marshalIndentNoEscapeHTML(v)
 	if err != nil {
 		return fmt.Sprintf(`{"error": "%s"}`, err.Error())
 	}
 	return string(byts)
 }
 
-func JsonifyIndentBytes(v interface{}) [] byte {
-	byts, err := json.MarshalIndent(v, "", "  ")
+func JsonifyIndentBytes(v interface{}) []byte {
+	byts, err := marshalIndentNoEscapeHTML(v)
 	if err != nil {
-		return [] byte(fmt.Sprintf(`{"error": "%s"}`, err.Error()))
+		return []byte(fmt.Sprintf(`{"error": "%s"}`, err.Error()))
 	}
 	return byts
-}
-
-func parseLLMAnswer(data string, fmtType string) string {
-	// 去除首尾空白字符
-	data = strings.TrimSpace(data)
-
-	// 如果字符串为空，直接返回
-	if len(data) == 0 {
-		return data
-	}
-
-	splitter := "```"
-	startIdx := strings.Index(data, splitter+fmtType)
-	prefixLen := 3 + len(fmtType)
-	if startIdx == -1 {
-		startIdx = strings.Index(data, splitter)
-		prefixLen = 3
-		if startIdx == -1 {
-			return data
-		}
-	}
-
-	// 查找```的结束位置
-	endIdx := strings.LastIndex(data, splitter)
-	if endIdx == -1 {
-		return data
-	}
-
-	// 如果起始和结束位置相同，返回```json之后的内容
-	if endIdx == startIdx {
-		return data[startIdx+prefixLen:]
-	}
-
-	// 返回```json和```之间的内容
-	return strings.TrimSpace(data[startIdx+prefixLen : endIdx] )
-}
-
-func ParseLLMRespJson(data string) string {
-	return parseLLMAnswer(data, "json")
-}
-
-func ParseLLMRespYaml(data string) string {
-	return parseLLMAnswer(data, "yaml")
 }
