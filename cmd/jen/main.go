@@ -281,12 +281,71 @@ func generateConfigTemplate() error {
 		logger.ColorPrintf(logger.ColorWhite, "  ⏭ 跳过 %s\n", schemaFilePath)
 	}
 
+	// 处理 .gitignore
+	gitignorePath := ".gitignore"
+	gitignoreEntries := []string{".model_infrax/", "/target/jen"}
+	if _, err := os.Stat(gitignorePath); os.IsNotExist(err) {
+		// .gitignore 不存在，创建并写入
+		content := strings.Join(gitignoreEntries, "\n") + "\n"
+		if err := os.WriteFile(gitignorePath, []byte(content), 0644); err != nil {
+			logger.Errorf("[generateConfigTemplate] 创建 .gitignore 失败: %v", err)
+			return fmt.Errorf("创建 .gitignore 失败: %w", err)
+		}
+		logger.ColorPrintf(logger.ColorHiGreen, "  ✓ 已创建 %s\n", gitignorePath)
+	} else {
+		// .gitignore 已存在，检查并追加缺失的条目
+		existingBytes, err := os.ReadFile(gitignorePath)
+		if err != nil {
+			logger.Errorf("[generateConfigTemplate] 读取 .gitignore 失败: %v", err)
+			return fmt.Errorf("读取 .gitignore 失败: %w", err)
+		}
+		existingContent := string(existingBytes)
+		existingLines := strings.Split(existingContent, "\n")
+
+		var toAppend []string
+		for _, entry := range gitignoreEntries {
+			found := false
+			for _, line := range existingLines {
+				if strings.TrimSpace(line) == entry {
+					found = true
+					break
+				}
+			}
+			if !found {
+				toAppend = append(toAppend, entry)
+			}
+		}
+
+		if len(toAppend) > 0 {
+			appendContent := ""
+			// 确保已有内容末尾有换行
+			if len(existingContent) > 0 && !strings.HasSuffix(existingContent, "\n") {
+				appendContent += "\n"
+			}
+			appendContent += strings.Join(toAppend, "\n") + "\n"
+			f, err := os.OpenFile(gitignorePath, os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				logger.Errorf("[generateConfigTemplate] 打开 .gitignore 失败: %v", err)
+				return fmt.Errorf("打开 .gitignore 失败: %w", err)
+			}
+			defer f.Close()
+			if _, err := f.WriteString(appendContent); err != nil {
+				logger.Errorf("[generateConfigTemplate] 写入 .gitignore 失败: %v", err)
+				return fmt.Errorf("写入 .gitignore 失败: %w", err)
+			}
+			logger.ColorPrintf(logger.ColorHiGreen, "  ✓ 已向 %s 追加: %s\n", gitignorePath, strings.Join(toAppend, ", "))
+		} else {
+			logger.ColorPrintf(logger.ColorWhite, "  ⏭ %s 已包含所需条目，跳过\n", gitignorePath)
+		}
+	}
+
 	fmt.Println()
 	logger.ColorPrintf(logger.ColorHiGreen, "✓ 初始化完成！\n")
 	fmt.Println()
 	logger.ColorPrintf(logger.ColorHiCyan, "文件列表:\n")
 	logger.ColorPrintf(logger.ColorWhite, "  📄 %s  — 配置文件\n", configFilePath)
 	logger.ColorPrintf(logger.ColorWhite, "  📄 %s  — SQL 建表语句\n", schemaFilePath)
+	logger.ColorPrintf(logger.ColorWhite, "  📄 %s  — Git 忽略规则\n", gitignorePath)
 	fmt.Println()
 	logger.ColorPrintf(logger.ColorHiCyan, "使用说明:\n")
 	logger.ColorPrintf(logger.ColorWhite, "  1. 在 %s 中编写你的 CREATE TABLE 语句\n", schemaFilePath)
