@@ -1,23 +1,22 @@
-go build -o jen cmd/jen/main.go
-mkdir -p ~/dev_custom/model_infrax/target/
-mkdir -p ~/dev_custom/model_infrax/target/assets/
-mv jen ~/dev_custom/model_infrax/target/
-cp -r ~/dev_custom/model_infrax/assets/prompt/ ~/dev_custom/model_infrax/target/assets/
-cp ~/dev_custom/model_infrax/assets/model_infrax.yml ~/dev_custom/model_infrax/target/
-cp ~/dev_custom/model_infrax/assets/schema.sql ~/dev_custom/model_infrax/target/
-cp ~/dev_custom/model_infrax/assets/jcode ~/dev_custom/model_infrax/target/
-mkdir -p ~/dev_custom/model_infrax/target/output/
-mkdir -p ~/dev_custom/model_infrax/release/
+#!/bin/bash
+set -e
 
-# 创建压缩包，如果文件存在则覆盖
-PACKAGE_NAME="model_infrax.tar.gz"
-PACKAGE_PATH="$HOME/dev/model_infrax/release/$PACKAGE_NAME"
+# 项目根目录
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+OUTPUT_DIR="${PROJECT_DIR}/target"
+BINARY_NAME="jen"
 
-# 切换到目标目录并创建压缩包
-cd ~/dev_custom/model_infrax/target && tar -czf "$PACKAGE_PATH" .
+# 清理旧的构建产物
+rm -rf "${OUTPUT_DIR}/${BINARY_NAME}"
+mkdir -p "${OUTPUT_DIR}"
 
-# 输出打包结果信息
-echo "📦 打包完成: $PACKAGE_NAME"
-echo "📍 保存路径: $PACKAGE_PATH"
-echo "📊 包大小: $(du -h "$PACKAGE_PATH" | cut -f1)"
-echo "✅ 打包成功"
+# 构建二进制（模板和配置已通过 go:embed 嵌入，无需额外复制资源文件）
+echo "🔨 正在构建 ${BINARY_NAME}..."
+cd "${PROJECT_DIR}"
+go build -o "${OUTPUT_DIR}/${BINARY_NAME}" ./cmd/jen
+
+echo "✅ 构建成功: ${OUTPUT_DIR}/${BINARY_NAME}"
+echo ""
+echo "使用方式:"
+echo "  直接运行:  ${OUTPUT_DIR}/${BINARY_NAME}"
+echo "  全局安装:  go install github.com/LingoJack/model_infrax/cmd/jen@latest"
