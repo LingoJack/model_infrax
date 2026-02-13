@@ -103,7 +103,7 @@ jen -c /path/to/your/config.yml
 
 | 命令 | 说明 |
 |------|------|
-| `jen init` | 在当前目录初始化 `.model_infrax` 配置目录 |
+| `jen init` | 初始化 `.model_infrax` 配置目录（已有配置会被覆盖） |
 | `jen` | 加载 `.model_infrax/config.yml` 并生成代码 |
 | `jen -c <path>` | 指定配置文件路径生成代码 |
 | `jen -v` | 显示版本信息 |
