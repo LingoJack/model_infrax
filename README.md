@@ -15,7 +15,7 @@ go install github.com/LingoJack/model_infrax/cmd/jen@latest
 在你的项目根目录执行：
 
 ```bash
-jen --init
+jen init
 ```
 
 这会在当前目录创建 `.model_infrax/` 目录，包含：
