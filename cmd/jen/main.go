@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/LingoJack/model_infrax/assets"
 	"github.com/LingoJack/model_infrax/internal/conf"
@@ -20,7 +21,14 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-const Version = "v1.3.0"
+const Version = "v2.0.0"
+
+const (
+	// .model_infrax 目录及其下的文件
+	modelInfraxDir    = ".model_infrax"
+	configFileName    = "config.yml"
+	schemaFileName    = "schema.sql"
+)
 
 // initModules 初始化各个模块
 // 必须在 conf.InitWithPath 之后调用
@@ -52,14 +60,14 @@ func initModules() error {
 
 func main() {
 	showVersion := flag.BoolP("version", "v", false, "显示版本号")
-	initConfig := flag.Bool("init", false, "在当前目录生成配置文件模板 model_infrax.yml")
+	initConfig := flag.Bool("init", false, "在当前目录初始化 .model_infrax 配置目录")
 	configPath := flag.StringP("config", "c", "", "指定配置文件路径")
 	flag.Parse()
 
 	// 处理 --init 命令
 	if *initConfig {
 		if err := generateConfigTemplate(); err != nil {
-			logger.Errorf("[main] 生成配置文件模板失败: %v", err)
+			logger.Errorf("[main] 初始化配置失败: %v", err)
 			os.Exit(1)
 		}
 		return
@@ -199,29 +207,54 @@ func generate(ctx context.Context) (err error) {
 	return nil
 }
 
-// generateConfigTemplate 在当前目录生成配置文件模板
+// generateConfigTemplate 在当前目录初始化 .model_infrax 配置目录
+// 生成 config.yml 和 schema.sql 模板文件
 func generateConfigTemplate() error {
-	const configFileName = "model_infrax.yml"
+	logger.Infof("[generateConfigTemplate] 开始初始化 .model_infrax 配置目录...")
 
-	logger.Infof("[generateConfigTemplate] 开始生成配置文件模板...")
+	configFilePath := filepath.Join(modelInfraxDir, configFileName)
+	schemaFilePath := filepath.Join(modelInfraxDir, schemaFileName)
 
-	// 检查文件是否已存在
-	if _, err := os.Stat(configFileName); err == nil {
-		logger.Errorf("[generateConfigTemplate] 配置文件已存在: %s", configFileName)
-		return fmt.Errorf("配置文件已存在: %s，请先删除或重命名现有文件", configFileName)
+	// 检查 .model_infrax 目录是否已存在
+	if _, err := os.Stat(modelInfraxDir); err == nil {
+		// 目录已存在，检查配置文件是否已存在
+		if _, err := os.Stat(configFilePath); err == nil {
+			logger.Errorf("[generateConfigTemplate] 配置文件已存在: %s", configFilePath)
+			return fmt.Errorf("配置文件已存在: %s，请先删除或重命名现有文件", configFilePath)
+		}
 	}
 
-	// 写入文件
-	if err := os.WriteFile(configFileName, []byte(assets.ApplicationYml), 0644); err != nil {
-		logger.Errorf("[generateConfigTemplate] 写入配置文件失败: %v, 文件路径: %s", err, configFileName)
+	// 创建 .model_infrax 目录
+	if err := os.MkdirAll(modelInfraxDir, 0755); err != nil {
+		logger.Errorf("[generateConfigTemplate] 创建目录失败: %v, 目录路径: %s", err, modelInfraxDir)
+		return fmt.Errorf("创建目录失败: %w", err)
+	}
+
+	// 写入 config.yml
+	if err := os.WriteFile(configFilePath, []byte(assets.DefaultConfigYml), 0644); err != nil {
+		logger.Errorf("[generateConfigTemplate] 写入配置文件失败: %v, 文件路径: %s", err, configFilePath)
 		return fmt.Errorf("写入配置文件失败: %w", err)
 	}
 
-	logger.ColorPrintf(logger.ColorHiGreen, "✓ 配置文件模板生成成功: %s\n", configFileName)
-	logger.ColorPrintf(logger.ColorHiCyan, "\n使用说明:\n")
-	logger.ColorPrintf(logger.ColorWhite, "1. 编辑 %s 文件，配置数据库连接或SQL文件路径\n", configFileName)
-	logger.ColorPrintf(logger.ColorWhite, "2. 运行 jen 命令开始生成代码\n")
-	logger.ColorPrintf(logger.ColorWhite, "3. 使用 jen -c <path> 可以指定其他配置文件路径\n")
+	// 写入空的 schema.sql（如果不存在）
+	if _, err := os.Stat(schemaFilePath); os.IsNotExist(err) {
+		schemaTemplate := "-- 在此编写你的 CREATE TABLE 语句\n-- 示例:\n-- CREATE TABLE IF NOT EXISTS `t_example`\n-- (\n--     `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',\n--     `name`       varchar(128)        NOT NULL COMMENT '名称',\n--     `createTime` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',\n--     `updateTime` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',\n--     PRIMARY KEY (`id`)\n-- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '示例表';\n"
+		if err := os.WriteFile(schemaFilePath, []byte(schemaTemplate), 0644); err != nil {
+			logger.Errorf("[generateConfigTemplate] 写入 schema 文件失败: %v, 文件路径: %s", err, schemaFilePath)
+			return fmt.Errorf("写入 schema 文件失败: %w", err)
+		}
+	}
+
+	logger.ColorPrintf(logger.ColorHiGreen, "✓ 初始化成功！已创建 %s 目录\n", modelInfraxDir)
+	fmt.Println()
+	logger.ColorPrintf(logger.ColorHiCyan, "生成的文件:\n")
+	logger.ColorPrintf(logger.ColorWhite, "  📄 %s  — 配置文件\n", configFilePath)
+	logger.ColorPrintf(logger.ColorWhite, "  📄 %s  — SQL 建表语句\n", schemaFilePath)
+	fmt.Println()
+	logger.ColorPrintf(logger.ColorHiCyan, "使用说明:\n")
+	logger.ColorPrintf(logger.ColorWhite, "  1. 在 %s 中编写你的 CREATE TABLE 语句\n", schemaFilePath)
+	logger.ColorPrintf(logger.ColorWhite, "  2. 编辑 %s 调整生成选项（可选）\n", configFilePath)
+	logger.ColorPrintf(logger.ColorWhite, "  3. 运行 jen 命令生成代码，结果输出到 target/jen/ 目录\n")
 
 	return nil
 }
