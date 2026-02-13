@@ -58,7 +58,26 @@ func initModules() error {
 	return nil
 }
 
+func printUsage() {
+	logger.ColorPrintf(logger.ColorHiGreen, "Model Infrax %s — Go 代码生成器 CLI\n\n", Version)
+	logger.ColorPrintf(logger.ColorHiCyan, "用法:\n")
+	logger.ColorPrintf(logger.ColorWhite, "  jen init          初始化 .model_infrax 配置目录（已有配置会被覆盖）\n")
+	logger.ColorPrintf(logger.ColorWhite, "  jen               加载 .model_infrax/config.yml 生成代码\n")
+	logger.ColorPrintf(logger.ColorWhite, "  jen -c <path>     指定配置文件路径生成代码\n")
+	logger.ColorPrintf(logger.ColorWhite, "  jen -v            显示版本信息\n")
+	logger.ColorPrintf(logger.ColorWhite, "  jen -h            显示帮助信息\n")
+	fmt.Println()
+	logger.ColorPrintf(logger.ColorHiCyan, "快速上手:\n")
+	logger.ColorPrintf(logger.ColorWhite, "  1. jen init                            初始化配置\n")
+	logger.ColorPrintf(logger.ColorWhite, "  2. 编辑 .model_infrax/schema.sql       编写建表语句\n")
+	logger.ColorPrintf(logger.ColorWhite, "  3. jen                                 生成代码到 target/jen/\n")
+	fmt.Println()
+	logger.ColorPrintf(logger.ColorHiCyan, "更多信息:\n")
+	logger.ColorPrintf(logger.ColorWhite, "  https://github.com/LingoJack/model_infrax\n")
+}
+
 func main() {
+	flag.Usage = printUsage
 	showVersion := flag.BoolP("version", "v", false, "显示版本号")
 	configPath := flag.StringP("config", "c", "", "指定配置文件路径")
 	flag.Parse()
@@ -213,15 +232,6 @@ func generateConfigTemplate() error {
 
 	configFilePath := filepath.Join(modelInfraxDir, configFileName)
 	schemaFilePath := filepath.Join(modelInfraxDir, schemaFileName)
-
-	// 检查 .model_infrax 目录是否已存在
-	if _, err := os.Stat(modelInfraxDir); err == nil {
-		// 目录已存在，检查配置文件是否已存在
-		if _, err := os.Stat(configFilePath); err == nil {
-			logger.Errorf("[generateConfigTemplate] 配置文件已存在: %s", configFilePath)
-			return fmt.Errorf("配置文件已存在: %s，请先删除或重命名现有文件", configFilePath)
-		}
-	}
 
 	// 创建 .model_infrax 目录
 	if err := os.MkdirAll(modelInfraxDir, 0755); err != nil {
