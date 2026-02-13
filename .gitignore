@@ -57,3 +57,5 @@ Thumbs.db
 # Project specific
 # 如果你不想提交生成的 wire_gen.go，可以取消下面的注释
 # wire_gen.go
+.model_infrax/
+/target/jen
