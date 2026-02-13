@@ -60,12 +60,11 @@ func initModules() error {
 
 func main() {
 	showVersion := flag.BoolP("version", "v", false, "显示版本号")
-	initConfig := flag.Bool("init", false, "在当前目录初始化 .model_infrax 配置目录")
 	configPath := flag.StringP("config", "c", "", "指定配置文件路径")
 	flag.Parse()
 
-	// 处理 --init 命令
-	if *initConfig {
+	// 处理 jen init 子命令
+	if len(flag.Args()) > 0 && flag.Args()[0] == "init" {
 		if err := generateConfigTemplate(); err != nil {
 			logger.Errorf("[main] 初始化配置失败: %v", err)
 			os.Exit(1)
