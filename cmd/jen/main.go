@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/LingoJack/model_infrax/assets"
 	"github.com/LingoJack/model_infrax/internal/conf"
@@ -61,7 +63,7 @@ func initModules() error {
 func printUsage() {
 	logger.ColorPrintf(logger.ColorHiGreen, "Model Infrax %s — Go 代码生成器 CLI\n\n", Version)
 	logger.ColorPrintf(logger.ColorHiCyan, "用法:\n")
-	logger.ColorPrintf(logger.ColorWhite, "  jen init          初始化 .model_infrax 配置目录（已有配置会被覆盖）\n")
+	logger.ColorPrintf(logger.ColorWhite, "  jen init          初始化 .model_infrax 配置目录（已有配置会询问是否覆盖）\n")
 	logger.ColorPrintf(logger.ColorWhite, "  jen               加载 .model_infrax/config.yml 生成代码\n")
 	logger.ColorPrintf(logger.ColorWhite, "  jen -c <path>     指定配置文件路径生成代码\n")
 	logger.ColorPrintf(logger.ColorWhite, "  jen -v            显示版本信息\n")
@@ -225,11 +227,20 @@ func generate(ctx context.Context) (err error) {
 	return nil
 }
 
+// confirmOverwrite 询问用户是否覆盖已有文件，返回 true 表示覆盖
+func confirmOverwrite(reader *bufio.Reader, filePath string) bool {
+	logger.ColorPrintf(logger.ColorHiYellow, "⚠ 文件已存在: %s，是否覆盖？[y/N] ", filePath)
+	input, _ := reader.ReadString('\n')
+	input = strings.TrimSpace(strings.ToLower(input))
+	return input == "y" || input == "yes"
+}
+
 // generateConfigTemplate 在当前目录初始化 .model_infrax 配置目录
 // 生成 config.yml 和 schema.sql 模板文件
 func generateConfigTemplate() error {
 	logger.Infof("[generateConfigTemplate] 开始初始化 .model_infrax 配置目录...")
 
+	stdinReader := bufio.NewReader(os.Stdin)
 	configFilePath := filepath.Join(modelInfraxDir, configFileName)
 	schemaFilePath := filepath.Join(modelInfraxDir, schemaFileName)
 
@@ -239,24 +250,41 @@ func generateConfigTemplate() error {
 		return fmt.Errorf("创建目录失败: %w", err)
 	}
 
-	// 写入 config.yml
-	if err := os.WriteFile(configFilePath, []byte(assets.DefaultConfigYml), 0644); err != nil {
-		logger.Errorf("[generateConfigTemplate] 写入配置文件失败: %v, 文件路径: %s", err, configFilePath)
-		return fmt.Errorf("写入配置文件失败: %w", err)
+	// 写入 config.yml（已存在则询问是否覆盖）
+	writeConfig := true
+	if _, err := os.Stat(configFilePath); err == nil {
+		writeConfig = confirmOverwrite(stdinReader, configFilePath)
+	}
+	if writeConfig {
+		if err := os.WriteFile(configFilePath, []byte(assets.DefaultConfigYml), 0644); err != nil {
+			logger.Errorf("[generateConfigTemplate] 写入配置文件失败: %v, 文件路径: %s", err, configFilePath)
+			return fmt.Errorf("写入配置文件失败: %w", err)
+		}
+		logger.ColorPrintf(logger.ColorHiGreen, "  ✓ 已写入 %s\n", configFilePath)
+	} else {
+		logger.ColorPrintf(logger.ColorWhite, "  ⏭ 跳过 %s\n", configFilePath)
 	}
 
-	// 写入空的 schema.sql（如果不存在）
-	if _, err := os.Stat(schemaFilePath); os.IsNotExist(err) {
+	// 写入 schema.sql（已存在则询问是否覆盖）
+	writeSchema := true
+	if _, err := os.Stat(schemaFilePath); err == nil {
+		writeSchema = confirmOverwrite(stdinReader, schemaFilePath)
+	}
+	if writeSchema {
 		schemaTemplate := "-- 在此编写你的 CREATE TABLE 语句\n-- 示例:\n-- CREATE TABLE IF NOT EXISTS `t_example`\n-- (\n--     `id`         bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',\n--     `name`       varchar(128)        NOT NULL COMMENT '名称',\n--     `createTime` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',\n--     `updateTime` datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',\n--     PRIMARY KEY (`id`)\n-- ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '示例表';\n"
 		if err := os.WriteFile(schemaFilePath, []byte(schemaTemplate), 0644); err != nil {
 			logger.Errorf("[generateConfigTemplate] 写入 schema 文件失败: %v, 文件路径: %s", err, schemaFilePath)
 			return fmt.Errorf("写入 schema 文件失败: %w", err)
 		}
+		logger.ColorPrintf(logger.ColorHiGreen, "  ✓ 已写入 %s\n", schemaFilePath)
+	} else {
+		logger.ColorPrintf(logger.ColorWhite, "  ⏭ 跳过 %s\n", schemaFilePath)
 	}
 
-	logger.ColorPrintf(logger.ColorHiGreen, "✓ 初始化成功！已创建 %s 目录\n", modelInfraxDir)
 	fmt.Println()
-	logger.ColorPrintf(logger.ColorHiCyan, "生成的文件:\n")
+	logger.ColorPrintf(logger.ColorHiGreen, "✓ 初始化完成！\n")
+	fmt.Println()
+	logger.ColorPrintf(logger.ColorHiCyan, "文件列表:\n")
 	logger.ColorPrintf(logger.ColorWhite, "  📄 %s  — 配置文件\n", configFilePath)
 	logger.ColorPrintf(logger.ColorWhite, "  📄 %s  — SQL 建表语句\n", schemaFilePath)
 	fmt.Println()
