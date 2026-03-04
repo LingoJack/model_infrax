@@ -466,9 +466,81 @@ type SchemaBuilder struct {
 // 返回值:
 //   - *SchemaBuilder: 构建器实例，支持链式调用
 //
-// 使用示例:
+
+//	// 1. 定义结构体（使用 json 标签定义字段名，jsonschema 标签定义验证规则）
+//	type User struct {
+//	    Name  string `json:"name" jsonschema:"required"`
+//	    Age   int    `json:"age"`
+//	    Email string `json:"email,omitempty"`
+//	}
 //
-//	builder := NewSchemaBuilder(&User{})
+//	// 2. 创建 Builder 并链式配置
+//	schema, err := NewSchemaBuilder(&User{}).
+//	    WithOptions(SchemaOptionAnonymous | SchemaOptionExpandStruct | SchemaOptionNoReference).
+//	    SetTitle("用户信息").
+//	    SetDescription("用户的基本信息结构").
+//	    SetFieldMeta("name", FieldMeta{
+//	        Title:       "用户名",
+//	        Description: "用户的姓名，长度 1-50 个字符",
+//	    }).
+//	    SetFieldMeta("age", FieldMeta{
+//	        Title:       "年龄",
+//	        Description: "用户年龄，范围 0-150",
+//	        Example:     25,
+//	        Default:     0,
+//	    }).
+//	    SetFieldMeta("email", FieldMeta{
+//	        Title:       "邮箱",
+//	        Description: "用户邮箱地址",
+//	        Example:     "user@example.com",
+//	    }).
+//	    Build()
+//
+// 快捷设置字段描述（不需要构造 FieldMeta）:
+//
+//	schema, err := NewSchemaBuilder(&User{}).
+//	    WithOptions(SchemaOptionAnonymous | SchemaOptionExpandStruct).
+//	    SetFieldTitle("name", "用户名").
+//	    SetFieldDescription("name", "用户的姓名").
+//	    SetFieldExample("name", "张三").
+//	    SetFieldDefault("age", 18).
+//	    SetFieldEnum("status", []string{"active", "inactive"}).
+//	    SetFieldDeprecated("old_field").
+//	    Build()
+//
+// 获取 Schema 对象（而非 JSON 字符串，可进一步修改）:
+//
+//	schemaObj := NewSchemaBuilder(&User{}).
+//	    WithOptions(SchemaOptionAnonymous | SchemaOptionExpandStruct).
+//	    BuildObject()
+//
+// 使用 MustBuild（失败时 panic，适合初始化阶段）:
+//
+//	schema := NewSchemaBuilder(&User{}).
+//	    WithOptions(SchemaOptionAnonymous | SchemaOptionExpandStruct).
+//	    MustBuild()
+//
+// 使用全局注册表共享字段描述:
+//
+//	registry := NewFieldDescRegistry()
+//	registry.Register("User", "name", FieldMeta{Title: "用户名", Description: "..."})
+//	registry.Register("User", "age", FieldMeta{Title: "年龄", Description: "..."})
+//
+//	schema, err := NewSchemaBuilder(&User{}).
+//	    WithOptions(GetDefaultOptions()).
+//	    ApplyRegistry(registry, "User").
+//	    Build()
+//
+// 常用选项组合:
+//   - GetDefaultOptions()  → SchemaOptionAnonymous | SchemaOptionExpandStruct（推荐默认使用）
+//   - GetCompactOptions()  → SchemaOptionCompact | SchemaOptionAnonymous | SchemaOptionNoReference（适合网络传输）
+//   - GetStrictOptions()   → SchemaOptionNoAdditionalProperties（严格验证，不允许额外属性）
+//
+// 也可使用快捷函数 QuickSchema / QuickSchemaCompact 来简化调用:
+//
+//	schema, err := QuickSchema(&User{}, map[string]FieldMeta{
+//	    "name": {Title: "用户名", Description: "用户的姓名"},
+//	})
 func NewSchemaBuilder(structInstance interface{}) *SchemaBuilder {
 	return &SchemaBuilder{
 		instance:   structInstance,
