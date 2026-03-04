@@ -23,13 +23,13 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-const Version = "v2.0.0"
+const Version = "v2.0.1"
 
 const (
 	// .model_infrax 目录及其下的文件
-	modelInfraxDir    = ".model_infrax"
-	configFileName    = "config.yml"
-	schemaFileName    = "schema.sql"
+	modelInfraxDir = ".model_infrax"
+	configFileName = "config.yml"
+	schemaFileName = "schema.sql"
 )
 
 // initModules 初始化各个模块
