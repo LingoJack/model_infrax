@@ -6,7 +6,9 @@ import (
 	"text/template"
 
 	"github.com/LingoJack/model_infrax/internal/conf"
+	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/model"
+	"github.com/LingoJack/model_infrax/pkg/tool"
 )
 
 // getPoPackage 获取 PO 包路径配置
@@ -47,14 +49,15 @@ func getOutputPath() string {
 
 var (
 	funcMap = template.FuncMap{
-		"ToPascalCase":     ToPascalCase,
-		"ToCamelCase":      ToCamelCase,
-		"ToSafeParamName":  ToSafeParamName,
-		"TrimPointer":      TrimPointer,
-		"GetGoType":        GetGoType,
-		"ToJsonTag":        ToJsonTag,
-		"contains":         strings.Contains,
-		"IsSnakeCaseStyle": IsSnakeCaseStyle,
+		"ToPascalCase":            ToPascalCase,
+		"ToCamelCase":             ToCamelCase,
+		"ToSafeParamName":         ToSafeParamName,
+		"TrimPointer":             TrimPointer,
+		"GetGoType":               GetGoType,
+		"ToJsonTag":               ToJsonTag,
+		"contains":                strings.Contains,
+		"IsSnakeCaseStyle":        IsSnakeCaseStyle,
+		"HasTimeColumnInSchemas":  HasTimeColumnInSchemas,
 	}
 )
 
@@ -65,6 +68,43 @@ type TemplateData struct {
 	VoPackageName  string         // vo 包名（从路径最后一段提取）
 	DaoPackageName string         // dao 包名（从路径最后一段提取）
 	Schemas        []model.Schema // 表结构列表
+
+	// 完整 import 路径，用于跨包引用（如 dao 引用 po/dto）
+	// 格式: {module}/{output_path}/{package}，例如 github.com/foo/app/target/jen/model/entity
+	// 若 go.mod 读取失败则为空字符串，模板应对其做 nil 判断
+	PoImportPath  string
+	DtoImportPath string
+	VoImportPath  string
+	DaoImportPath string
+}
+
+// newTemplateData 构建 TemplateData，自动从 go.mod 推导完整 import 路径
+func newTemplateData(schemas []model.Schema) TemplateData {
+	modulePath, err := tool.ReadModulePath()
+	if err != nil {
+		logger.Infof("[newTemplateData] 读取 go.mod 失败，跨包 import path 将为空: %v", err)
+	}
+
+	buildImportPath := func(pkg string) string {
+		if modulePath == "" || pkg == "" {
+			return ""
+		}
+		outputPath := filepath.ToSlash(getOutputPath())
+		pkg = filepath.ToSlash(pkg)
+		return modulePath + "/" + outputPath + "/" + pkg
+	}
+
+	return TemplateData{
+		DaoPackageName: getPackageName(getDaoPackage()),
+		PoPackageName:  getPackageName(getPoPackage()),
+		DtoPackageName: getPackageName(getDtoPackage()),
+		VoPackageName:  getPackageName(getVoPackage()),
+		Schemas:        schemas,
+		PoImportPath:   buildImportPath(getPoPackage()),
+		DtoImportPath:  buildImportPath(getDtoPackage()),
+		VoImportPath:   buildImportPath(getVoPackage()),
+		DaoImportPath:  buildImportPath(getDaoPackage()),
+	}
 }
 
 // getPackageName 从路径中提取包名（取路径的最后一段）

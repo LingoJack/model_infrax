@@ -4,10 +4,15 @@ package {{ .DaoPackageName }}
 import (
 	"context"
 	"fmt"
-
 	"strings"
 
 	"gorm.io/gorm"
+{{- if .PoImportPath }}
+	"{{ .PoImportPath }}"
+{{- end }}
+{{- if .DtoImportPath }}
+	"{{ .DtoImportPath }}"
+{{- end }}
 )
 
 {{- range $schema := .Schemas }}

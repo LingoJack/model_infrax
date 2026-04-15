@@ -3,7 +3,9 @@ package {{ .DtoPackageName }}
 
 import (
 	"encoding/json"
+{{- if HasTimeColumnInSchemas .Schemas }}
 	"time"
+{{- end }}
 )
 
 {{- range $schema := .Schemas }}
