@@ -23,7 +23,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-const Version = "v2.0.1"
+const Version = "v2.0.2"
 
 const (
 	// .model_infrax 目录及其下的文件
