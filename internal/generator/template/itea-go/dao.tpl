@@ -4,11 +4,16 @@ package {{ .DaoPackageName }}
 import (
 	"context"
 	"fmt"
-
 	"strings"
 
 	"gorm.io/gorm"
-	igorm "git.woa.com/tencent-cloud-platform/go-module/itea-gorm"	// itea-go 框架提供的 db 注入
+	igorm "git.woa.com/tencent-cloud-platform/go-module/itea-gorm" // itea-go 框架提供的 db 注入
+{{- if .PoImportPath }}
+	"{{ .PoImportPath }}"
+{{- end }}
+{{- if .DtoImportPath }}
+	"{{ .DtoImportPath }}"
+{{- end }}
 )
 
 {{- range $schema := .Schemas }}

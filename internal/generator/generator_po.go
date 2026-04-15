@@ -64,12 +64,7 @@ func GenerateModelCode(schema model.Schema, templateContent string) (code string
 	}
 
 	var buf bytes.Buffer
-	if err = tmpl.Execute(&buf, TemplateData{
-		DaoPackageName: getPackageName(getDaoPackage()),
-		PoPackageName:  getPackageName(getPoPackage()),
-		DtoPackageName: getPackageName(getDtoPackage()),
-		Schemas:        []model.Schema{schema},
-	}); err != nil {
+	if err = tmpl.Execute(&buf, newTemplateData([]model.Schema{schema})); err != nil {
 		logger.Errorf("[GenerateModel] 执行模板失败, 错误: %v", err)
 		err = fmt.Errorf("执行模板失败: %w", err)
 		return

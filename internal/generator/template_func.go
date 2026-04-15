@@ -226,6 +226,20 @@ func ToJsonTag(fieldName, suffix string, columns []model.Column) string {
 	return tool.ToJsonTag(fieldName, suffix, fieldNames)
 }
 
+// HasTimeColumnInSchemas 判断 schemas 中是否存在 time.Time / *time.Time 类型的列
+// 用于模板中决定是否需要 import "time"
+func HasTimeColumnInSchemas(schemas []model.Schema) bool {
+	for _, schema := range schemas {
+		for _, col := range schema.Columns {
+			goType := GetGoType(col)
+			if strings.Contains(goType, "time.Time") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // IsSnakeCaseStyle 判断列定义列表的整体命名风格是否为蛇形命名
 // 用于模板中判断应该生成蛇形还是驼峰风格的 JSON tag
 // 参数:
