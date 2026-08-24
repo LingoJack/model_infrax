@@ -40,7 +40,9 @@ func New{{ $daoName }}(db *gorm.DB) *{{ $daoName }} {
 	return &{{ $daoName }}{DB: db}
 }
 
+{{ if and (ne $.CommentStyle "none") (or $.Methods.WithTx $.Methods.Transaction) }}
 // ==================== 事务支持方法 ====================
+{{ end }}
 
 {{ if $.Methods.WithTx }}
 {{ if ne $.CommentStyle "none" }}// WithTx 使用指定的事务对象创建新的 DAO 实例
@@ -93,7 +95,9 @@ func (dao *{{ $daoName }}) Transaction(ctx context.Context, fn func(*{{ $daoName
 }
 {{ end }}
 
+{{ if and (ne $.CommentStyle "none") ($.Methods.BuildQueryCondition) }}
 // ==================== 查询条件构建 ====================
+{{ end }}
 
 {{ if $.Methods.BuildQueryCondition }}
 {{ if ne $.CommentStyle "none" }}// build{{ $entityName }}QueryCondition 构建查询条件
@@ -221,7 +225,9 @@ func (dao *{{ $daoName }}) build{{ $entityName }}QueryCondition(db *gorm.DB, que
 }
 {{ end }}
 
+{{ if and (ne $.CommentStyle "none") (or $.Methods.SelectList $.Methods.SelectCount $.Methods.SelectListWithAppendConditionFunc $.Methods.SelectCountWithAppendConditionFunc) }}
 // ==================== 基础查询方法 ====================
+{{ end }}
 
 {{ if $.Methods.SelectList }}
 {{ if ne $.CommentStyle "none" }}// SelectList 查询列表
@@ -408,7 +414,9 @@ func (dao *{{ $daoName }}) SelectCountWithAppendConditionFunc(ctx context.Contex
 }
 {{ end }}
 
+{{ if and (ne $.CommentStyle "none") (or $.Methods.Insert $.Methods.InsertBatch $.Methods.InsertOrUpdateNullable $.Methods.InsertOrUpdateBatchNullable) }}
 // ==================== 基础插入方法 ====================
+{{ end }}
 
 {{ if $.Methods.Insert }}
 {{ if ne $.CommentStyle "none" }}// Insert 单行插入
@@ -523,7 +531,9 @@ func (dao *{{ $daoName }}) InsertOrUpdateBatchNullable(ctx context.Context, poBe
 {{- $pkGoType := $pkCol | GetGoType }}
 {{- $pkParamName := $pkCol.ColumnName | ToSafeParamName }}
 
+{{ if and (ne $.CommentStyle "none") (or $.Methods.SelectByPk $.Methods.SelectByPkList $.Methods.UpdateByPk $.Methods.UpdateByPkWithMap $.Methods.UpdateByPkWithCondition $.Methods.UpdateByPkWithMapAndCondition $.Methods.DeleteByPk) }}
 // ==================== 主键索引方法 ====================
+{{ end }}
 
 {{ if $.Methods.SelectByPk }}
 {{ if ne $.CommentStyle "none" }}// SelectBy{{ $pkFieldName }} 根据主键{{ $pkFieldName }}查询单条记录
@@ -722,7 +732,9 @@ func (dao *{{ $daoName }}) DeleteBy{{ $pkFieldName }}(ctx context.Context, {{ $p
 {{- /* 跳过主键索引，避免重复生成 */ -}}
 {{- if ne $index.IndexName "PRIMARY" }}
 
+{{ if and (ne $.CommentStyle "none") (or $.Methods.SelectByIndex $.Methods.SelectByIndexList $.Methods.UpdateByIndex $.Methods.UpdateByIndexWithMap $.Methods.UpdateByIndexWithCondition $.Methods.UpdateByIndexWithMapAndCondition $.Methods.DeleteByIndex) }}
 // ==================== 唯一索引 {{ $index.IndexName }} 方法 ====================
+{{ end }}
 
 {{ if $.Methods.SelectByIndex }}
 {{ if ne $.CommentStyle "none" }}// SelectBy{{ $methodSuffix }} 根据唯一索引{{ $index.IndexName }}查询单条记录
@@ -945,7 +957,9 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(ctx context.Context
 {{- end }}
 {{- if not $isUnique }}
 
+{{ if and (ne $.CommentStyle "none") (or $.Methods.SelectByIndex $.Methods.SelectByIndexList $.Methods.UpdateByIndex $.Methods.UpdateByIndexWithMap $.Methods.UpdateByIndexWithCondition $.Methods.UpdateByIndexWithMapAndCondition $.Methods.DeleteByIndex) }}
 // ==================== 普通索引 {{ $index.IndexName }} 方法 ====================
+{{ end }}
 
 {{ if $.Methods.SelectByIndex }}
 {{ if ne $.CommentStyle "none" }}// SelectBy{{ $methodSuffix }} 根据索引{{ $index.IndexName }}查询列表
@@ -1144,7 +1158,9 @@ func (dao *{{ $daoName }}) DeleteBy{{ $methodSuffix }}(ctx context.Context
 {{- end }}
 {{- end }}
 
+{{ if and (ne $.CommentStyle "none") ($.Methods.ExecSql) }}
 // ==================== 原生SQL执行方法 ====================
+{{ end }}
 
 {{ if $.Methods.ExecSql }}
 {{ if ne $.CommentStyle "none" }}// ExecSql 执行原生SQL查询
@@ -1196,7 +1212,9 @@ func (dao *{{ $daoName }}) ExecSql(ctx context.Context, recvPtr any, sql string,
 }
 {{ end }}
 
+{{ if and (ne $.CommentStyle "none") ($.Methods.ValidOrderBy) }}
 // ==================== 辅助方法 ====================
+{{ end }}
 
 {{ if $.Methods.ValidOrderBy }}
 {{ if ne $.CommentStyle "none" }}// getValidOrderByFields 获取允许排序的字段白名单

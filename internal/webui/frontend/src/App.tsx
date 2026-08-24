@@ -107,7 +107,7 @@ export default function App() {
   return (
     <>
       {msg && <div id="msg" className={msg.ok ? 'ok' : 'err'}>{msg.text}</div>}
-      <div className="wrap">
+      <div className={tab === 'output' ? 'wrap wide' : 'wrap'}>
         <header>
           <h1>jen 生成配置</h1>
           <span className="path">{snap.config_path}</span>
