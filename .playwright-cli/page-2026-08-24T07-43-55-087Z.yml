@@ -1,0 +1,243 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - heading "jen 生成配置" [level=1] [ref=e5]
+      - generic [ref=e6]: /tmp/ui_s5.yml
+    - generic [ref=e7]:
+      - heading "生成模式" [level=2] [ref=e8]
+      - generic [ref=e9]:
+        - generic [ref=e10]: 生成模式
+        - button "statement" [ref=e12] [cursor=pointer]:
+          - generic [ref=e13]: statement
+          - img [ref=e14]
+        - generic [ref=e16]: statement=解析 SQL 文件, database=连库解析
+      - generic [ref=e17]:
+        - generic [ref=e18]: SQL 文件路径
+        - textbox [ref=e19]: .model_infrax/schema.sql
+    - generic [ref=e20]:
+      - heading "表范围" [level=2] [ref=e21]
+      - generic [ref=e22]:
+        - generic [ref=e23]: 处理全部表
+        - checkbox [checked] [ref=e24] [cursor=pointer]
+        - generic [ref=e25]: 关闭后仅处理下方表名列表
+      - generic [ref=e26]:
+        - generic [ref=e27]: 表名列表
+        - textbox "逗号分隔" [ref=e28]: t_example
+    - generic [ref=e29]:
+      - heading "输出与框架" [level=2] [ref=e30]
+      - generic [ref=e31]:
+        - generic [ref=e32]: 使用框架
+        - button "itea-go" [ref=e34] [cursor=pointer]:
+          - generic [ref=e35]: itea-go
+          - img [ref=e36]
+      - generic [ref=e38]:
+        - generic [ref=e39]: 输出路径
+        - textbox [ref=e40]: target/jen
+      - generic [ref=e41]:
+        - generic [ref=e42]: gorm tag 风格
+        - button "full" [ref=e44] [cursor=pointer]:
+          - generic [ref=e45]: full
+          - img [ref=e46]
+        - generic [ref=e48]: full=全量属性 / standard=column+type+主键 / minimal=仅 column+主键
+      - generic [ref=e49]:
+        - generic [ref=e50]: 注释风格
+        - button "full" [ref=e52] [cursor=pointer]:
+          - generic [ref=e53]: full
+          - img [ref=e54]
+        - generic [ref=e56]: full=详细 godoc / brief=一句话 / none=无注释
+    - generic [ref=e57]:
+      - heading "包路径" [level=2] [ref=e58]
+      - generic [ref=e59]:
+        - generic [ref=e60]: PO 包路径
+        - textbox [ref=e61]: model/entity
+      - generic [ref=e62]:
+        - generic [ref=e63]: DTO 包路径
+        - textbox [ref=e64]: model/query
+      - generic [ref=e65]:
+        - generic [ref=e66]: VO 包路径
+        - textbox [ref=e67]: model/view
+      - generic [ref=e68]:
+        - generic [ref=e69]: DAO 包路径
+        - textbox [ref=e70]: dao
+      - generic [ref=e71]:
+        - generic [ref=e72]: Tool 包路径
+        - textbox [ref=e73]: tool
+    - generic [ref=e74]:
+      - heading "DAO 方法生成矩阵 （全部勾选 = 全部生成） 方法全选" [level=2] [ref=e75]:
+        - text: DAO 方法生成矩阵
+        - generic [ref=e76]:
+          - text: （全部勾选 = 全部生成）
+          - button "方法全选" [ref=e77] [cursor=pointer]
+      - generic [ref=e78]:
+        - generic [ref=e79]:
+          - generic [ref=e80]:
+            - text: 事务
+            - generic [ref=e81] [cursor=pointer]: 组内切换
+          - generic [ref=e82]:
+            - generic [ref=e83] [cursor=pointer]:
+              - checkbox "WithTx 事务副本（开启新事务连接）" [checked] [ref=e84]
+              - generic [ref=e85]:
+                - generic [ref=e86]: WithTx
+                - generic [ref=e87]: 事务副本（开启新事务连接）
+            - generic [ref=e88] [cursor=pointer]:
+              - checkbox "Transaction 嵌套事务回调" [checked] [ref=e89]
+              - generic [ref=e90]:
+                - generic [ref=e91]: Transaction
+                - generic [ref=e92]: 嵌套事务回调
+        - generic [ref=e93]:
+          - generic [ref=e94]:
+            - text: 列表查询
+            - generic [ref=e95] [cursor=pointer]: 组内切换
+          - generic [ref=e96]:
+            - generic [ref=e97] [cursor=pointer]:
+              - checkbox "SelectList 分页查询列表" [checked] [ref=e98]
+              - generic [ref=e99]:
+                - generic [ref=e100]: SelectList
+                - generic [ref=e101]: 分页查询列表
+            - generic [ref=e102] [cursor=pointer]:
+              - checkbox "SelectCount 查询总数" [checked] [ref=e103]
+              - generic [ref=e104]:
+                - generic [ref=e105]: SelectCount
+                - generic [ref=e106]: 查询总数
+            - generic [ref=e107] [cursor=pointer]:
+              - checkbox "SelectListWithAppendConditionFunc 追加自定义条件的分页查询" [checked] [ref=e108]
+              - generic [ref=e109]:
+                - generic [ref=e110]: SelectListWithAppendConditionFunc
+                - generic [ref=e111]: 追加自定义条件的分页查询
+            - generic [ref=e112] [cursor=pointer]:
+              - checkbox "SelectCountWithAppendConditionFunc 追加自定义条件的计数" [checked] [ref=e113]
+              - generic [ref=e114]:
+                - generic [ref=e115]: SelectCountWithAppendConditionFunc
+                - generic [ref=e116]: 追加自定义条件的计数
+        - generic [ref=e117]:
+          - generic [ref=e118]:
+            - text: 写入
+            - generic [ref=e119] [cursor=pointer]: 组内切换
+          - generic [ref=e120]:
+            - generic [ref=e121] [cursor=pointer]:
+              - checkbox "Insert 插入单条" [checked] [ref=e122]
+              - generic [ref=e123]:
+                - generic [ref=e124]: Insert
+                - generic [ref=e125]: 插入单条
+            - generic [ref=e126] [cursor=pointer]:
+              - checkbox "InsertBatch 批量插入" [checked] [ref=e127]
+              - generic [ref=e128]:
+                - generic [ref=e129]: InsertBatch
+                - generic [ref=e130]: 批量插入
+            - generic [ref=e131] [cursor=pointer]:
+              - checkbox "InsertOrUpdateNullable 插入或更新（零值覆盖）" [checked] [ref=e132]
+              - generic [ref=e133]:
+                - generic [ref=e134]: InsertOrUpdateNullable
+                - generic [ref=e135]: 插入或更新（零值覆盖）
+            - generic [ref=e136] [cursor=pointer]:
+              - checkbox "InsertOrUpdateBatchNullable 批量插入或更新（零值覆盖）" [checked] [ref=e137]
+              - generic [ref=e138]:
+                - generic [ref=e139]: InsertOrUpdateBatchNullable
+                - generic [ref=e140]: 批量插入或更新（零值覆盖）
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - text: 原生 SQL
+            - generic [ref=e143] [cursor=pointer]: 组内切换
+          - generic [ref=e145] [cursor=pointer]:
+            - checkbox "ExecSql 原生 SQL 查询" [checked] [ref=e146]
+            - generic [ref=e147]:
+              - generic [ref=e148]: ExecSql
+              - generic [ref=e149]: 原生 SQL 查询
+        - generic [ref=e150]:
+          - generic [ref=e151]:
+            - text: 主键方法
+            - generic [ref=e152] [cursor=pointer]: 组内切换
+          - generic [ref=e153]:
+            - generic [ref=e154] [cursor=pointer]:
+              - checkbox "SelectByPk 按主键查单条（如 SelectById）" [checked] [ref=e155]
+              - generic [ref=e156]:
+                - generic [ref=e157]: SelectByPk
+                - generic [ref=e158]: 按主键查单条（如 SelectById）
+            - generic [ref=e159] [cursor=pointer]:
+              - checkbox "SelectByPkList 按主键列表批量查询" [checked] [ref=e160]
+              - generic [ref=e161]:
+                - generic [ref=e162]: SelectByPkList
+                - generic [ref=e163]: 按主键列表批量查询
+            - generic [ref=e164] [cursor=pointer]:
+              - checkbox "UpdateByPk 按主键更新（非零值）" [checked] [ref=e165]
+              - generic [ref=e166]:
+                - generic [ref=e167]: UpdateByPk
+                - generic [ref=e168]: 按主键更新（非零值）
+            - generic [ref=e169] [cursor=pointer]:
+              - checkbox "UpdateByPkWithMap 按主键 Map 更新（可零值覆盖）" [checked] [ref=e170]
+              - generic [ref=e171]:
+                - generic [ref=e172]: UpdateByPkWithMap
+                - generic [ref=e173]: 按主键 Map 更新（可零值覆盖）
+            - generic [ref=e174] [cursor=pointer]:
+              - checkbox "UpdateByPkWithCondition 按主键+条件更新" [checked] [ref=e175]
+              - generic [ref=e176]:
+                - generic [ref=e177]: UpdateByPkWithCondition
+                - generic [ref=e178]: 按主键+条件更新
+            - generic [ref=e179] [cursor=pointer]:
+              - checkbox "UpdateByPkWithMapAndCondition 按主键 Map+条件更新" [checked] [ref=e180]
+              - generic [ref=e181]:
+                - generic [ref=e182]: UpdateByPkWithMapAndCondition
+                - generic [ref=e183]: 按主键 Map+条件更新
+            - generic [ref=e184] [cursor=pointer]:
+              - checkbox "DeleteByPk 按主键删除" [checked] [ref=e185]
+              - generic [ref=e186]:
+                - generic [ref=e187]: DeleteByPk
+                - generic [ref=e188]: 按主键删除
+        - generic [ref=e189]:
+          - generic [ref=e190]:
+            - text: 索引方法
+            - generic [ref=e191] [cursor=pointer]: 组内切换
+          - generic [ref=e192]:
+            - generic [ref=e193] [cursor=pointer]:
+              - checkbox "SelectByIndex 按唯一/普通索引查单条（如 SelectByUserId）" [checked] [ref=e194]
+              - generic [ref=e195]:
+                - generic [ref=e196]: SelectByIndex
+                - generic [ref=e197]: 按唯一/普通索引查单条（如 SelectByUserId）
+            - generic [ref=e198] [cursor=pointer]:
+              - checkbox "SelectByIndexList 按索引批量查询（仅单列索引）" [checked] [ref=e199]
+              - generic [ref=e200]:
+                - generic [ref=e201]: SelectByIndexList
+                - generic [ref=e202]: 按索引批量查询（仅单列索引）
+            - generic [ref=e203] [cursor=pointer]:
+              - checkbox "UpdateByIndex 按索引更新（非零值）" [checked] [ref=e204]
+              - generic [ref=e205]:
+                - generic [ref=e206]: UpdateByIndex
+                - generic [ref=e207]: 按索引更新（非零值）
+            - generic [ref=e208] [cursor=pointer]:
+              - checkbox "UpdateByIndexWithMap 按索引 Map 更新" [checked] [ref=e209]
+              - generic [ref=e210]:
+                - generic [ref=e211]: UpdateByIndexWithMap
+                - generic [ref=e212]: 按索引 Map 更新
+            - generic [ref=e213] [cursor=pointer]:
+              - checkbox "UpdateByIndexWithCondition 按索引+条件更新" [checked] [ref=e214]
+              - generic [ref=e215]:
+                - generic [ref=e216]: UpdateByIndexWithCondition
+                - generic [ref=e217]: 按索引+条件更新
+            - generic [ref=e218] [cursor=pointer]:
+              - checkbox "UpdateByIndexWithMapAndCondition 按索引 Map+条件更新" [checked] [ref=e219]
+              - generic [ref=e220]:
+                - generic [ref=e221]: UpdateByIndexWithMapAndCondition
+                - generic [ref=e222]: 按索引 Map+条件更新
+            - generic [ref=e223] [cursor=pointer]:
+              - checkbox "DeleteByIndex 按索引删除" [checked] [ref=e224]
+              - generic [ref=e225]:
+                - generic [ref=e226]: DeleteByIndex
+                - generic [ref=e227]: 按索引删除
+        - generic [ref=e228]:
+          - generic [ref=e229]:
+            - text: PO 附加
+            - generic [ref=e230] [cursor=pointer]: 组内切换
+          - generic [ref=e231]:
+            - generic [ref=e232] [cursor=pointer]:
+              - checkbox "PoBuilder 的 Builder 链式 setter（WithXxx 系列）" [checked] [ref=e233]
+              - generic [ref=e234]:
+                - generic [ref=e235]: PoBuilder
+                - generic [ref=e236]: 的 Builder 链式 setter（WithXxx 系列）
+            - generic [ref=e237] [cursor=pointer]:
+              - checkbox "PoJsonify 的 Jsonify/JsonifyIndent 序列化方法" [checked] [ref=e238]
+              - generic [ref=e239]:
+                - generic [ref=e240]: PoJsonify
+                - generic [ref=e241]: 的 Jsonify/JsonifyIndent 序列化方法
+  - generic [ref=e242]:
+    - button "保存" [ref=e243] [cursor=pointer]
+    - button "保存并生成" [ref=e244] [cursor=pointer]

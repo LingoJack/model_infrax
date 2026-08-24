@@ -98,8 +98,14 @@ func renderArtifactCode(schema model.Schema, templateContent, name string) (code
 		return "", fmt.Errorf("解析模板失败: %w", err)
 	}
 
+	data, err := newTemplateData([]model.Schema{schema})
+	if err != nil {
+		logger.Errorf("[renderArtifactCode] 构建模板数据失败, 错误: %v", err)
+		return "", err
+	}
+
 	var buf bytes.Buffer
-	if err = tmpl.Execute(&buf, newTemplateData([]model.Schema{schema})); err != nil {
+	if err = tmpl.Execute(&buf, data); err != nil {
 		logger.Errorf("[renderArtifactCode] 执行模板失败, 错误: %v", err)
 		return "", fmt.Errorf("执行模板失败: %w", err)
 	}

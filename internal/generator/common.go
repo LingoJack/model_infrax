@@ -58,6 +58,7 @@ var (
 		"contains":               strings.Contains,
 		"IsSnakeCaseStyle":       IsSnakeCaseStyle,
 		"HasTimeColumnInSchemas": HasTimeColumnInSchemas,
+		"BuildGormTag":           BuildGormTag,
 	}
 )
 
@@ -76,10 +77,14 @@ type TemplateData struct {
 	DtoImportPath string
 	VoImportPath  string
 	DaoImportPath string
+
+	GormTagStyle string         // gorm tag 风格: full|standard|minimal
+	CommentStyle string         // 注释风格: full|brief|none
+	Methods      MethodSwitches // DAO/PO 方法生成开关（含联动推导）
 }
 
 // newTemplateData 构建 TemplateData，自动从 go.mod 推导完整 import 路径
-func newTemplateData(schemas []model.Schema) TemplateData {
+func newTemplateData(schemas []model.Schema) (TemplateData, error) {
 	modulePath, err := tool.ReadModulePath()
 	if err != nil {
 		logger.Infof("[newTemplateData] 读取 go.mod 失败，跨包 import path 将为空: %v", err)
@@ -94,6 +99,11 @@ func newTemplateData(schemas []model.Schema) TemplateData {
 		return modulePath + "/" + outputPath + "/" + pkg
 	}
 
+	methods, err := NewMethodSwitches()
+	if err != nil {
+		return TemplateData{}, err
+	}
+
 	return TemplateData{
 		DaoPackageName: getPackageName(getDaoPackage()),
 		PoPackageName:  getPackageName(getPoPackage()),
@@ -104,7 +114,10 @@ func newTemplateData(schemas []model.Schema) TemplateData {
 		DtoImportPath:  buildImportPath(getDtoPackage()),
 		VoImportPath:   buildImportPath(getVoPackage()),
 		DaoImportPath:  buildImportPath(getDaoPackage()),
-	}
+		GormTagStyle:   GormTagStyle(),
+		CommentStyle:   CommentStyle(),
+		Methods:        methods,
+	}, nil
 }
 
 // getPackageName 从路径中提取包名（取路径的最后一段）

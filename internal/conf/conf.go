@@ -14,7 +14,10 @@ import (
 var (
 	config     *appConfig
 	configLock sync.RWMutex
-	loadOnce   sync.Once
+
+	// override 保存 CLI flag 等来源的运行时覆盖值，读取优先级高于配置文件
+	override     = map[string]any{}
+	overrideLock sync.RWMutex
 )
 
 // DefaultConfigPaths 默认配置文件查找路径（按顺序探测）
@@ -22,9 +25,14 @@ var DefaultConfigPaths = []string{
 	"./.model_infrax/config.yml",
 }
 
+// ActivateConfigPath 返回当前生效的配置文件路径（未加载时为空）
+func ActivateConfigPath() string {
+	return ValueStr(constant.ActivateConfigPathKey)
+}
+
 // InitWithPath 初始化配置文件
 // customPath 非空时优先使用，否则按 DefaultConfigPaths 顺序探测
-// 必须在其他 conf.Value* 调用之前执行
+// 可重复调用（如 UI 保存配置后重载），每次整体替换已加载的配置
 func InitWithPath(customPath string) error {
 	var configPath string
 
@@ -56,27 +64,34 @@ func InitWithPath(customPath string) error {
 	if len(ValueStr(constant.ActivateConfigPathKey)) > 0 {
 		return fmt.Errorf("配置文件异常，非法key: %s", constant.ActivateConfigPathKey)
 	}
+	configLock.Lock()
 	config.data[constant.ActivateConfigPathKey] = configPath
+	configLock.Unlock()
 
 	return nil
 }
 
-// load 加载配置文件（通过 sync.Once 保证只加载一次）
-func load(file string) (err error) {
-	loadOnce.Do(func() {
-		var c *appConfig
-		c, err = newConfig(file)
-		if err != nil {
-			return
-		}
-		configLock.Lock()
-		config = c
-		configLock.Unlock()
-	})
-	return
+// SetOverride 设置运行时覆盖值（如 CLI flag）
+// 覆盖值优先于配置文件被 Value* 系列读取到
+func SetOverride(key string, val any) {
+	overrideLock.Lock()
+	defer overrideLock.Unlock()
+	override[key] = val
 }
 
-// config 保存 YAML 解析后的配置数据
+// load 加载配置文件并整体替换当前配置（支持重载）
+func load(file string) error {
+	c, err := newConfig(file)
+	if err != nil {
+		return err
+	}
+	configLock.Lock()
+	config = c
+	configLock.Unlock()
+	return nil
+}
+
+// appConfig 保存 YAML 解析后的配置数据
 type appConfig struct {
 	data map[string]interface{}
 }

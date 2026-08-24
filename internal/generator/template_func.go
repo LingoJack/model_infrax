@@ -260,3 +260,42 @@ func IsSnakeCaseStyle(columns []model.Column) bool {
 	// 调用 tool 包的函数判断命名风格
 	return tool.IsSnakeCaseStyle(fieldNames)
 }
+
+// BuildGormTag 按风格生成列的 gorm tag 内容（不含反引号与 json tag）
+// 三档风格:
+//   - full:     column;type;primaryKey;autoIncrement;default;comment;not null（注释为空时跳过 comment）
+//   - standard: column;type;primaryKey(+autoIncrement)
+//   - minimal:  column;primaryKey(+autoIncrement)（保留自增主键信息）
+func BuildGormTag(col model.Column, style string) string {
+	var parts []string
+
+	parts = append(parts, "column:"+col.ColumnName)
+
+	switch style {
+	case "minimal":
+		if col.IsAutoIncrement {
+			parts = append(parts, "primaryKey", "autoIncrement")
+		}
+	case "standard":
+		parts = append(parts, "type:"+col.Type)
+		if col.IsAutoIncrement {
+			parts = append(parts, "primaryKey", "autoIncrement")
+		}
+	default: // full
+		parts = append(parts, "type:"+col.Type)
+		if col.IsAutoIncrement {
+			parts = append(parts, "primaryKey", "autoIncrement")
+		}
+		if col.Default != nil {
+			parts = append(parts, "default:"+*col.Default)
+		}
+		if col.Comment != "" {
+			parts = append(parts, "comment:"+col.Comment)
+		}
+		if !col.IsNullable {
+			parts = append(parts, "not null")
+		}
+	}
+
+	return strings.Join(parts, ";")
+}

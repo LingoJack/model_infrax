@@ -2,6 +2,7 @@ SHELL := /bin/bash
 
 .PHONY: \
 	build \
+	ui \
 	install \
 	push \
 	checkpoint \
@@ -21,6 +22,10 @@ push: build
 
 build:
 	@scripts/build.sh
+
+# 构建Web UI 前端（产物输出到 internal/webui/dist/ 并随 Go embed 打包）
+ui:
+	@cd internal/webui/frontend && npm install && npm run build
 
 install:
 	@echo "🔨 正在安装 jen 到 GOPATH/bin..."

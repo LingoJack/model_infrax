@@ -1,7 +1,7 @@
 generate_config:
   # 生成模式: database(从数据库解析) 或 statement(从SQL文件解析)
   generate_mode: statement
-  
+
   # database 模式配置
   # database_name: test_db
   # host: localhost
@@ -11,7 +11,7 @@ generate_config:
 
   # statement 模式配置（相对于项目根目录）
   sql_file_path: .model_infrax/schema.sql
-  
+
   # 通用配置
   all_tables: true
   table_names:
@@ -21,14 +21,34 @@ generate_option:
   # 输出路径（相对于项目根目录）
   output_path: target/jen
 
-  # 是否将所有模型放在一个文件中
-  all_model_in_one_file: false
+  # gorm tag 风格:
+  #   full     - 全量属性（column/type/主键/default/comment/not null）
+  #   standard - column + type + 主键
+  #   minimal  - 仅 column + 主键（自增主键保留 primaryKey;autoIncrement）
+  gorm_tag_style: full
 
-  # 所有模型放在一个文件中的文件名
-  all_model_in_one_file_name: model.go
+  # 注释风格:
+  #   full  - 详细 godoc（参数/返回/行为说明/使用示例）
+  #   brief - 每个方法仅一句话注释
+  #   none  - 不生成方法注释
+  comment_style: full
 
-  # 只为有索引的字段生成 infrax 方法
-  crud_only_idx: false
+  # 仅生成指定的 DAO/PO 方法（白名单，不配置此键 = 全部生成）
+  # 可用值（Pk 系列按主键实例化如 SelectById，Index 系列按索引列实例化）:
+  #   事务:       WithTx, Transaction
+  #   列表查询:   SelectList, SelectCount, SelectListWithAppendConditionFunc, SelectCountWithAppendConditionFunc
+  #   写入:       Insert, InsertBatch, InsertOrUpdateNullable, InsertOrUpdateBatchNullable
+  #   原生 SQL:   ExecSql
+  #   主键方法:   SelectByPk, SelectByPkList, UpdateByPk, UpdateByPkWithMap, UpdateByPkWithCondition, UpdateByPkWithMapAndCondition, DeleteByPk
+  #   索引方法:   SelectByIndex, SelectByIndexList, UpdateByIndex, UpdateByIndexWithMap, UpdateByIndexWithCondition, UpdateByIndexWithMapAndCondition, DeleteByIndex
+  #   PO 附加:    PoBuilder, PoJsonify
+  # 示例:
+  # dao_methods:
+  #   - SelectList
+  #   - SelectByPk
+  #   - Insert
+  #   - UpdateByPk
+  #   - DeleteByPk
 
   # go 的 package 映射
   package:

@@ -30,7 +30,7 @@ vendor/
 
 # Build output
 target/
-dist/
+/dist/
 build/
 bin/
 
@@ -54,9 +54,12 @@ temp/
 # OS specific
 Thumbs.db
 
+# Frontend (webui)
+internal/webui/frontend/node_modules/
+
 # Project specific
 # 如果你不想提交生成的 wire_gen.go，可以取消下面的注释
 # wire_gen.go
 .model_infrax/
 /target/jen/
-jen
+/jen

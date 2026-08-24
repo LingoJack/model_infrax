@@ -11,9 +11,17 @@ func splitKey(key string) []string {
 	return strings.Split(key, ".")
 }
 
-// value 读取指定键的原始配置值（线程安全）
+// rawValue 读取指定键的原始配置值（线程安全）
+// 优先返回 override（CLI flag 等运行时覆盖），其次返回配置文件值
 // 返回 (值, 是否存在)
 func rawValue(key string) (any, bool) {
+	overrideLock.RLock()
+	val, exists := override[key]
+	overrideLock.RUnlock()
+	if exists {
+		return val, true
+	}
+
 	configLock.RLock()
 	defer configLock.RUnlock()
 
