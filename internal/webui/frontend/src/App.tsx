@@ -3,6 +3,7 @@ import { fetchConfig, saveConfig, generate } from './api'
 import type { Snapshot } from './types'
 import { FieldGroup } from './components/FieldGroup'
 import { MethodMatrix } from './components/MethodMatrix'
+import { OutputView } from './components/OutputView'
 import { Toolbar } from './components/Toolbar'
 
 export default function App() {
@@ -11,6 +12,8 @@ export default function App() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null)
+  const [tab, setTab] = useState<'config' | 'output'>('config')
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     fetchConfig()
@@ -81,9 +84,11 @@ export default function App() {
         setMsg({ text: '已保存', ok: true })
         return
       }
-      setMsg({ text: '已保存，正在生成…（日志请看终端）', ok: true })
+      setMsg({ text: '已保存，正在生成…', ok: true })
       await generate()
-      setMsg({ text: '生成完成，输出目录见终端日志', ok: true })
+      setReloadKey((k) => k + 1)
+      setTab('output')
+      setMsg({ text: '生成完成', ok: true })
     } catch (e) {
       setMsg({ text: '失败: ' + (e instanceof Error ? e.message : String(e)), ok: false })
     } finally {
@@ -106,19 +111,46 @@ export default function App() {
         <header>
           <h1>jen 生成配置</h1>
           <span className="path">{snap.config_path}</span>
+          <nav className="tabs">
+            <button
+              type="button"
+              className={tab === 'config' ? 'active' : ''}
+              onClick={() => setTab('config')}
+            >
+              配置
+            </button>
+            <button
+              type="button"
+              className={tab === 'output' ? 'active' : ''}
+              onClick={() => {
+                setTab('output')
+                setReloadKey((k) => k + 1)
+              }}
+            >
+              生成产物
+            </button>
+          </nav>
         </header>
-        {groups.map(([title, fields]) => (
-          <FieldGroup key={title} title={title} fields={fields} values={values} onChange={setValue} />
-        ))}
-        <MethodMatrix
-          methods={snap.dao_methods}
-          selected={selected}
-          onToggle={toggleMethod}
-          onToggleGroup={toggleGroup}
-          onSelectAll={selectAll}
-        />
+        {tab === 'config' ? (
+          <>
+            {groups.map(([title, fields]) => (
+              <FieldGroup key={title} title={title} fields={fields} values={values} onChange={setValue} />
+            ))}
+            <MethodMatrix
+              methods={snap.dao_methods}
+              selected={selected}
+              onToggle={toggleMethod}
+              onToggleGroup={toggleGroup}
+              onSelectAll={selectAll}
+            />
+          </>
+        ) : (
+          <OutputView reloadKey={reloadKey} onError={(t) => setMsg({ text: t, ok: false })} />
+        )}
       </div>
-      <Toolbar busy={busy} onSave={() => doSave(false)} onSaveAndGenerate={() => doSave(true)} />
+      {tab === 'config' && (
+        <Toolbar busy={busy} onSave={() => doSave(false)} onSaveAndGenerate={() => doSave(true)} />
+      )}
     </>
   )
 }

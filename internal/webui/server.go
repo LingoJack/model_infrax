@@ -54,6 +54,8 @@ func Start(port int) error {
 	mux.HandleFunc("/", pageHandler)
 	mux.HandleFunc("/api/config", configHandler)
 	mux.HandleFunc("/api/generate", generateHandler)
+	mux.HandleFunc("/api/files", filesHandler)
+	mux.HandleFunc("/api/file", fileContentHandler)
 
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 	ln, err := net.Listen("tcp", addr)
