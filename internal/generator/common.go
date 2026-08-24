@@ -8,7 +8,7 @@ import (
 	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/model"
-	"github.com/LingoJack/model_infrax/pkg/tool"
+	"github.com/LingoJack/model_infrax/internal/tool"
 )
 
 // getPoPackage 获取 PO 包路径配置
@@ -49,15 +49,15 @@ func getOutputPath() string {
 
 var (
 	funcMap = template.FuncMap{
-		"ToPascalCase":            ToPascalCase,
-		"ToCamelCase":             ToCamelCase,
-		"ToSafeParamName":         ToSafeParamName,
-		"TrimPointer":             TrimPointer,
-		"GetGoType":               GetGoType,
-		"ToJsonTag":               ToJsonTag,
-		"contains":                strings.Contains,
-		"IsSnakeCaseStyle":        IsSnakeCaseStyle,
-		"HasTimeColumnInSchemas":  HasTimeColumnInSchemas,
+		"ToPascalCase":           ToPascalCase,
+		"ToCamelCase":            ToCamelCase,
+		"ToSafeParamName":        ToSafeParamName,
+		"TrimPointer":            TrimPointer,
+		"GetGoType":              GetGoType,
+		"ToJsonTag":              ToJsonTag,
+		"contains":               strings.Contains,
+		"IsSnakeCaseStyle":       IsSnakeCaseStyle,
+		"HasTimeColumnInSchemas": HasTimeColumnInSchemas,
 	}
 )
 

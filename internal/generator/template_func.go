@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/LingoJack/model_infrax/internal/model"
-	"github.com/LingoJack/model_infrax/pkg/tool"
+	"github.com/LingoJack/model_infrax/internal/tool"
 )
 
 // typeMapping 定义了数据库类型到 Go 类型的映射规则

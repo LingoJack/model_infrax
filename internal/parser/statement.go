@@ -1,4 +1,4 @@
-package statement_parser
+package parser
 
 import (
 	"fmt"
@@ -7,33 +7,29 @@ import (
 	"github.com/LingoJack/model_infrax/internal/conf"
 	"github.com/LingoJack/model_infrax/internal/logger"
 	"github.com/LingoJack/model_infrax/internal/model"
-	"github.com/LingoJack/model_infrax/pkg/tool"
-	"github.com/pingcap/tidb/pkg/parser"
+	"github.com/LingoJack/model_infrax/internal/tool"
+	tidbparser "github.com/pingcap/tidb/pkg/parser"
 	"github.com/pingcap/tidb/pkg/parser/ast"
 	"github.com/pingcap/tidb/pkg/parser/test_driver"
 	"github.com/samber/lo"
 )
 
 var (
-	err        error
-	sqlPath    string
-	tableNames []string
-	all        bool
+	sqlPath string
 )
 
-// Init 初始化 statement parser 配置
+// InitStatement 初始化 statement 模式配置
 // 必须在 conf.InitWithPath 之后调用
-func Init() error {
-	all = conf.ValueBool("generate_config.all_tables")
-	sqlPath = tool.EscapeHomeDir(conf.ValueStr("generate_config.sql_file_path"))
-	tableNames, err = conf.ValueStrSlice("generate_config.table_names")
-	if err != nil {
-		return fmt.Errorf("[Init] 读取表名配置失败: %w", err)
+func InitStatement() error {
+	if err := loadFilterConfig(); err != nil {
+		return err
 	}
-	logger.Infof("[Init] statement_parser 初始化完成, sqlPath=%s, all=%v, tableNames=%v", sqlPath, all, tableNames)
+	sqlPath = tool.EscapeHomeDir(conf.ValueStr("generate_config.sql_file_path"))
+	logger.Infof("[InitStatement] statement 模式初始化完成, sqlPath=%s, all=%v, tableNames=%v", sqlPath, filterAll, filterTableNames)
 	return nil
 }
 
+// SqlStatements 读取并拆分 SQL 文件中的建表语句
 func SqlStatements() (statements []string, err error) {
 	if !tool.IsValidFilePath(sqlPath) {
 		err = fmt.Errorf("SQL文件路径无效: %s", sqlPath)
@@ -43,7 +39,8 @@ func SqlStatements() (statements []string, err error) {
 	return
 }
 
-func Parse(statements []string) (schemas []model.Schema, err error) {
+// ParseStatements 解析多条 CREATE TABLE 语句
+func ParseStatements(statements []string) (schemas []model.Schema, err error) {
 	for _, statement := range statements {
 		if len(strings.TrimSpace(statement)) == 0 {
 			continue
@@ -58,22 +55,10 @@ func Parse(statements []string) (schemas []model.Schema, err error) {
 	return
 }
 
-func Filter(schemas []model.Schema) (filtered []model.Schema) {
-	if all {
-		filtered = schemas
-		return
-	}
-	logger.Infof("neededTableNames: %v", tableNames)
-	filtered = lo.Filter(schemas, func(schema model.Schema, index int) bool {
-		return lo.Contains(tableNames, schema.Name)
-	})
-	return
-}
-
 // ParseSqlStatement 解析单个CREATE TABLE语句，提取表结构信息
 func ParseSqlStatement(statement string) (schema model.Schema, err error) {
 	// 创建TiDB parser实例
-	tidbParser := parser.New()
+	tidbParser := tidbparser.New()
 
 	// 解析 SQL 语句
 	stmtNodes, _, err := tidbParser.ParseSQL(statement)
