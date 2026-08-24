@@ -7,10 +7,11 @@ interface Props {
   onToggle: (id: string, checked: boolean) => void
   onToggleGroup: (group: string) => void
   onSelectAll: () => void
+  onClearAll: () => void
 }
 
-// DAO 方法生成矩阵：按分组勾选；全部勾选 = 全部生成（提交空列表）
-export function MethodMatrix({ methods, selected, onToggle, onToggleGroup, onSelectAll }: Props) {
+// DAO 方法生成矩阵：按分组勾选；全部勾选 = 全部生成（提交时删除配置键）
+export function MethodMatrix({ methods, selected, onToggle, onToggleGroup, onSelectAll, onClearAll }: Props) {
   const groups = useMemo(() => {
     const m = new Map<string, MethodMeta[]>()
     for (const item of methods) {
@@ -28,7 +29,10 @@ export function MethodMatrix({ methods, selected, onToggle, onToggleGroup, onSel
         <span className="sub">
           （全部勾选 = 全部生成）
           <button type="button" className="link" onClick={onSelectAll}>
-            方法全选
+            全选
+          </button>
+          <button type="button" className="link" onClick={onClearAll}>
+            全不选
           </button>
         </span>
       </h2>

@@ -20,10 +20,10 @@ export default function App() {
       .then((s) => {
         setSnap(s)
         setValues(s.values)
+        const dm = s.values['generate_option.dao_methods']
+        // null/undefined（键不存在）= 全部生成 → 全选；数组 = 白名单 → 按数组勾选
         const methods: string[] =
-          Array.isArray(s.values['generate_option.dao_methods']) && s.values['generate_option.dao_methods'].length
-            ? (s.values['generate_option.dao_methods'] as string[])
-            : s.dao_methods.map((m) => m.id)
+          dm == null ? s.dao_methods.map((m) => m.id) : (dm as string[])
         setSelected(new Set(methods))
       })
       .catch((e) => setMsg({ text: String(e.message ?? e), ok: false }))
@@ -68,11 +68,13 @@ export default function App() {
 
   const selectAll = () => setSelected(new Set((snap?.dao_methods ?? []).map((m) => m.id)))
 
+  const clearAll = () => setSelected(new Set())
+
   const collect = (): Record<string, unknown> => {
     const all = snap?.dao_methods.map((m) => m.id) ?? []
     const ms = all.filter((id) => selected.has(id))
-    // 全选 = 提交空列表（后端语义：全部生成）
-    return { ...values, 'generate_option.dao_methods': ms.length === all.length ? [] : ms }
+    // 全选 → 提交 null（后端删除配置键 = 全部生成）；否则提交勾选数组（空数组 = 不生成任何方法）
+    return { ...values, 'generate_option.dao_methods': ms.length === all.length ? null : ms }
   }
 
   const doSave = async (withGenerate: boolean) => {
@@ -142,6 +144,7 @@ export default function App() {
               onToggle={toggleMethod}
               onToggleGroup={toggleGroup}
               onSelectAll={selectAll}
+              onClearAll={clearAll}
             />
           </>
         ) : (

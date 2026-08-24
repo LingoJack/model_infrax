@@ -111,12 +111,13 @@ func NewMethodSwitches() (MethodSwitches, error) {
 	sw := MethodSwitches{}
 
 	names, err := conf.ValueStrSlice(cfgDaoMethods)
-	if err != nil || len(names) == 0 {
-		// 未配置或空列表 = 全部生成
+	if err != nil {
+		// 未配置此键 = 全部生成
 		sw = allOn()
 		sw.derive()
 		return sw, nil
 	}
+	// 已配置（含显式空列表 [] = 不生成任何方法），按白名单开启
 
 	valid := map[string]bool{}
 	for _, m := range AllDaoMethods {

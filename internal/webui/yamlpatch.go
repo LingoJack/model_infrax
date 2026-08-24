@@ -32,6 +32,13 @@ func PatchYAMLFile(path string, sets map[string]any) error {
 
 	// 排序保证写回稳定（按插入时的确定性顺序无要求，map 迭代顺序不影响单个键的正确性）
 	for key, val := range sets {
+		if val == nil {
+			// nil 表示删除该键
+			if err := deletePath(root, key); err != nil {
+				return err
+			}
+			continue
+		}
 		if err := setPath(root, key, val); err != nil {
 			return err
 		}
@@ -69,6 +76,27 @@ func setPath(m *yaml.Node, key string, val any) error {
 		return fmt.Errorf("配置键 %s 的值非法: %w", key, err)
 	}
 	mappingSet(cur, leaf, valueNode)
+	return nil
+}
+
+// deletePath 删除点分键对应的节点；键不存在时视为已删除（不报错）
+func deletePath(m *yaml.Node, key string) error {
+	parts := splitKey(key)
+	cur := m
+	for _, part := range parts[:len(parts)-1] {
+		next := mappingGet(cur, part)
+		if next == nil || next.Kind != yaml.MappingNode {
+			return nil
+		}
+		cur = next
+	}
+	leaf := parts[len(parts)-1]
+	for i := 0; i+1 < len(cur.Content); i += 2 {
+		if cur.Content[i].Value == leaf {
+			cur.Content = append(cur.Content[:i], cur.Content[i+2:]...)
+			return nil
+		}
+	}
 	return nil
 }
 

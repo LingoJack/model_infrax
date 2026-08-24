@@ -148,6 +148,14 @@ func buildConfigSnapshot() map[string]any {
 		}
 	}
 
+	// dao_methods 特殊处理：键不存在返回 nil（语义=全部生成，前端显示全选）；
+	// 显式空列表返回 []（语义=不生成任何方法，前端显示全不选）
+	if v, err := conf.ValueStrSlice("generate_option.dao_methods"); err != nil {
+		values["generate_option.dao_methods"] = nil
+	} else {
+		values["generate_option.dao_methods"] = v
+	}
+
 	return map[string]any{
 		"config_path": conf.ActivateConfigPath(),
 		"values":      values,
@@ -201,6 +209,10 @@ func validateValues(values map[string]any) error {
 				return fmt.Errorf("%s 非法值: %s，可选: %v", key, s, generator.ValidCommentStyles)
 			}
 		case "generate_option.dao_methods":
+			if val == nil {
+				// nil = 删除该键（=全部生成），跳过校验
+				continue
+			}
 			list, err := toStringSlice(val)
 			if err != nil {
 				return fmt.Errorf("%s 类型错误: %w", key, err)
@@ -225,8 +237,13 @@ func normalizeValues(values map[string]any) map[string]any {
 	for key, val := range values {
 		switch key {
 		case "generate_option.dao_methods":
-			list, _ := toStringSlice(val)
-			out[key] = list
+			if val == nil {
+				// nil = 删除该键（PatchYAMLFile 的删除语义）
+				out[key] = nil
+			} else {
+				list, _ := toStringSlice(val)
+				out[key] = list
+			}
 		case "generate_config.port":
 			if f, ok := val.(float64); ok {
 				out[key] = int(f)

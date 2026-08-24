@@ -33,7 +33,8 @@ generate_option:
   #   none  - 不生成方法注释
   comment_style: full
 
-  # 仅生成指定的 DAO/PO 方法（白名单，不配置此键 = 全部生成）
+  # 仅生成指定的 DAO/PO 方法（白名单）
+  # 不配置此键 = 全部生成；配置为空列表 [] = 不生成任何方法
   # 可用值（Pk 系列按主键实例化如 SelectById，Index 系列按索引列实例化）:
   #   事务:       WithTx, Transaction
   #   列表查询:   SelectList, SelectCount, SelectListWithAppendConditionFunc, SelectCountWithAppendConditionFunc
