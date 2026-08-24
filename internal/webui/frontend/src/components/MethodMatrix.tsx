@@ -22,17 +22,20 @@ export function MethodMatrix({ methods, selected, onToggle, onToggleGroup, onSel
     return [...m.entries()]
   }, [methods])
 
+  const allSelected = methods.length > 0 && methods.every((m) => selected.has(m.id))
+
   return (
     <div className="card">
       <h2>
         DAO 方法生成矩阵
         <span className="sub">
           （全部勾选 = 全部生成）
-          <button type="button" className="link" onClick={onSelectAll}>
-            全选
-          </button>
-          <button type="button" className="link" onClick={onClearAll}>
-            全不选
+          <button
+            type="button"
+            className="link"
+            onClick={() => (allSelected ? onClearAll() : onSelectAll())}
+          >
+            全部切换
           </button>
         </span>
       </h2>
